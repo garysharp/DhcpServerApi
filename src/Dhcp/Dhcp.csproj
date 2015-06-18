@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3F2E7427-2ADC-43D4-A92B-1F6ABAE23BED}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dhcp</RootNamespace>
+    <AssemblyName>DhcpServerApi</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DhcpServer.cs" />
+    <Compile Include="DhcpServerApiProtocol.cs" />
+    <Compile Include="DhcpServerBindingElement.cs" />
+    <Compile Include="DhcpServerClass.cs" />
+    <Compile Include="DhcpServerClient.cs" />
+    <Compile Include="DhcpServerClientAddressStates.cs" />
+    <Compile Include="DhcpServerClientQuarantineStatuses.cs" />
+    <Compile Include="DhcpServerClientTypes.cs" />
+    <Compile Include="DhcpServerConfiguration.cs" />
+    <Compile Include="DhcpServerException.cs" />
+    <Compile Include="DhcpServerHost.cs" />
+    <Compile Include="DhcpServerIpRange.cs" />
+    <Compile Include="DhcpServerOption.cs" />
+    <Compile Include="DhcpServerOptionElement.cs" />
+    <Compile Include="DhcpServerOptionElementType.cs" />
+    <Compile Include="DhcpServerOptionValue.cs" />
+    <Compile Include="DhcpServerScope.cs" />
+    <Compile Include="DhcpServerScopeReservation.cs" />
+    <Compile Include="DhcpServerScopeState.cs" />
+    <Compile Include="DhcpServerVersions.cs" />
+    <Compile Include="Native\AddressStates.cs" />
+    <Compile Include="Native\Api.cs" />
+    <Compile Include="Native\ClientTypes.cs" />
+    <Compile Include="Native\Constants.cs" />
+    <Compile Include="Native\DATE_TIME.cs" />
+    <Compile Include="Native\DHCPDS_SERVER.cs" />
+    <Compile Include="Native\DHCPDS_SERVERS.cs" />
+    <Compile Include="Native\DhcpErrorDescriptionAttribute.cs" />
+    <Compile Include="Native\DhcpErrors.cs" />
+    <Compile Include="Native\DHCP_BINARY_DATA.cs" />
+    <Compile Include="Native\DHCP_BIND_ELEMENT.cs" />
+    <Compile Include="Native\DHCP_BIND_ELEMENT_ARRAY.cs" />
+    <Compile Include="Native\DHCP_BOOTP_IP_RANGE.cs" />
+    <Compile Include="Native\DHCP_CLASS_INFO.cs" />
+    <Compile Include="Native\DHCP_CLASS_INFO_ARRAY.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_ARRAY.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_ARRAY_V4.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_ARRAY_V5.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_ARRAY_VQ.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_V4.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_V5.cs" />
+    <Compile Include="Native\DHCP_CLIENT_INFO_VQ.cs" />
+    <Compile Include="Native\DHCP_CLIENT_UID.cs" />
+    <Compile Include="Native\DHCP_HOST_INFO.cs" />
+    <Compile Include="Native\DHCP_IP_ADDRESS.cs" />
+    <Compile Include="Native\DHCP_IP_ARRAY.cs" />
+    <Compile Include="Native\DHCP_IP_CLUSTER.cs" />
+    <Compile Include="Native\DHCP_IP_MASK.cs" />
+    <Compile Include="Native\DHCP_IP_RANGE.cs" />
+    <Compile Include="Native\DHCP_IP_RESERVATION.cs" />
+    <Compile Include="Native\DHCP_IP_RESERVATION_V4.cs" />
+    <Compile Include="Native\DHCP_OPTION.cs" />
+    <Compile Include="Native\DHCP_OPTION_ARRAY.cs" />
+    <Compile Include="Native\DHCP_OPTION_DATA.cs" />
+    <Compile Include="Native\DHCP_OPTION_DATA_ELEMENT.cs" />
+    <Compile Include="Native\DHCP_OPTION_DATA_TYPE.cs" />
+    <Compile Include="Native\DHCP_OPTION_SCOPE_INFO.cs" />
+    <Compile Include="Native\DHCP_OPTION_SCOPE_TYPE.cs" />
+    <Compile Include="Native\DHCP_OPTION_TYPE.cs" />
+    <Compile Include="Native\DHCP_OPTION_VALUE.cs" />
+    <Compile Include="Native\DHCP_OPTION_VALUE_ARRAY.cs" />
+    <Compile Include="Native\DHCP_SEARCH_INFO.cs" />
+    <Compile Include="Native\DHCP_SEARCH_INFO_TYPE.cs" />
+    <Compile Include="Native\DHCP_SERVER_CONFIG_INFO.cs" />
+    <Compile Include="Native\DHCP_SERVER_SPECIFIC_STRINGS.cs" />
+    <Compile Include="Native\DHCP_SUBNET_ELEMENT_DATA.cs" />
+    <Compile Include="Native\DHCP_SUBNET_ELEMENT_DATA_V5.cs" />
+    <Compile Include="Native\DHCP_SUBNET_ELEMENT_INFO_ARRAY_V5.cs" />
+    <Compile Include="Native\DHCP_SUBNET_ELEMENT_TYPE_V5.cs" />
+    <Compile Include="Native\DHCP_SUBNET_INFO.cs" />
+    <Compile Include="Native\QuarantineStatus.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Dhcp.nuspec" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

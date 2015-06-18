@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>DhcpServerApi</id>
+    <version>$version$</version>
+    <title>Dhcp Server API</title>
+    <authors>Gary Sharp</authors>
+    <owners>Gary Sharp</owners>
+    <licenseUrl>https://github.com/garysharp/DhcpServerApi/blob/master/COPYING</licenseUrl>
+    <projectUrl>https://github.com/garysharp/DhcpServerApi</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Query and Manage Microsoft DHCP Server</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2015 Gary Sharp</copyright>
+    <tags>DHCP Win32 Windows</tags>
+  </metadata>
+</package>

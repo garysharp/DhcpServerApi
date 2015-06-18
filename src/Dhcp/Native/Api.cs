@@ -1,0 +1,271 @@
+﻿using System;
+using System.Runtime.InteropServices;
+
+namespace Dhcp.Native
+{
+    internal static class Api
+    {
+        /// <summary>
+        /// The DhcpEnumServers function returns an enumerated list of DHCP servers found in the directory service. 
+        /// </summary>
+        /// <param name="Flags">Reserved for future use. This field should be set to 0.</param>
+        /// <param name="IdInfo">Pointer to an address containing the server's ID block. This field should be set to null.</param>
+        /// <param name="Servers">Pointer to a <see cref="DHCPDS_SERVERS"/> structure that contains the output list of DHCP servers.</param>
+        /// <param name="CallbackFn">Pointer to the callback function that will be called when the server add operation completes. This field should be null.</param>
+        /// <param name="CallbackData">Pointer to a data block containing the formatted structure for callback information. This field should be null.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true)]
+        public static extern DhcpErrors DhcpEnumServers(uint Flags, IntPtr IdInfo, out IntPtr Servers, IntPtr CallbackFn, IntPtr CallbackData);
+
+        /// <summary>
+        /// The DhcpGetVersion function returns the major and minor version numbers of the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="MajorVersion">Specifies the major version number of the DHCP server.</param>
+        /// <param name="MinorVersion">Specifies the minor version number of the DHCP server.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetVersion(string ServerIpAddress, out int MajorVersion, out int MinorVersion);
+
+        /// <summary>
+        /// The DhcpServerGetConfig function returns the specific configuration settings of a DHCP server. Configuration information includes information on the JET database used to store subnet and client lease information, and the supported protocols.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ConfigInfo">Pointer to a <see cref="DHCP_SERVER_CONFIG_INFO"/> structure that contains the specific configuration information for the DHCP server. Note: The memory for this parameter must be free using <see cref="DhcpRpcFreeMemory"/>.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpServerGetConfig(string ServerIpAddress, out IntPtr ConfigInfo);
+
+        /// <summary>
+        /// The DhcpGetServerSpecificStrings function retrieves the names of the default vendor class and user class.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IPv4 address of the DHCPv4 server.</param>
+        /// <param name="ServerSpecificStrings">Pointer to a DHCP_SERVER_SPECIFIC_STRINGS structure that receives the information for the default vendor class and user class name strings. Note: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetServerSpecificStrings(string ServerIpAddress, out IntPtr ServerSpecificStrings);
+
+        /// <summary>
+        /// The DhcpGetServerBindingInfo function returns endpoint bindings set on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a set of flags describing the endpoints to return.
+        /// DHCP_ENDPOINT_FLAG_CANT_MODIFY (0x01) = Returns unmodifiable endpoints only.
+        /// </param>
+        /// <param name="BindElementsInfo">Pointer to a DHCP_BIND_ELEMENT_ARRAY structure that contains the server network endpoint bindings. Note: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>This function requires network byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetServerBindingInfo(string ServerIpAddress, uint Flags, out IntPtr BindElementsInfo);
+
+        /// <summary>
+        /// The DhcpGetSubnetDelayOffer function obtains the delay period for DHCP OFFER messages after a DISCOVER message is received.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that contains the IP address of the subnet gateway.</param>
+        /// <param name="TimeDelayInMilliseconds">Unsigned 16-bit integer value that receive the time to delay an OFFER message after receiving a DISCOVER message as configured on the DHCP server, in milliseconds.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out UInt16 TimeDelayInMilliseconds);
+
+        /// <summary>
+        /// The DhcpEnumOptions function returns an enumerated set of options stored on the DHCPv4 server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IPv4 address of the DHCP server.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes worth of options are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth. 
+        /// The presence of additional enumerable data is indicated when this function returns ERROR_MORE_DATA. If no additional enumerable data is available on the DHCPv4 server, ERROR_NO_MORE_ITEMS is returned.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of options to return. If the number of remaining unenumerated options (in bytes) is less than this value, then that amount will be returned.
+        /// To retrieve all the option definitions for the default user and vendor class, set this parameter to 0xFFFFFFFF.</param>
+        /// <param name="Options">Pointer to a <see cref="DHCP_OPTION_ARRAY"/> structure containing the returned options. If there are no options available on the DHCPv4 server, this parameter will return null.</param>
+        /// <param name="OptionsRead">Pointer to a DWORD value that specifies the number of options returned in Options.</param>
+        /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of remaining options stored on the DHCPv4 server.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumOptions(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
+        
+        /// <summary>
+        /// The DhcpEnumOptionValues function returns an enumerated list of option values (just the option data and the associated ID number) for a given scope.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains the level (specifically: default, server, scope, or IPv4 reservation level) for which the option values are defined and should be enumerated. </param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes worth of option values are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth.
+        /// The presence of additional enumerable data is indicated when this function returns ERROR_MORE_DATA. If no additional enumerable data is available on the DHCPv4 server, ERROR_NO_MORE_ITEMS is returned.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of option values to return. If the number of remaining unenumerated options (in bytes) is less than this value, then that amount will be returned.
+        /// To retrieve all the option values for the default user and vendor class at the specified level, set this parameter to 0xFFFFFFFF.</param>
+        /// <param name="OptionValues">Pointer to a <see cref="DHCP_OPTION_VALUE_ARRAY"/> structure that contains the enumerated option values returned for the specified scope. If there are no option values available for this scope on the DHCP server, this parameter will return null.</param>
+        /// <param name="OptionsRead">Pointer to a DWORD value that specifies the number of option values returned in OptionValues.</param>
+        /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of remaining option values for this scope stored on the DHCP server.</param>
+        /// <returns></returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumOptionValues(string ServerIpAddress, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
+
+        /// <summary>
+        /// The DhcpEnumClasses function enumerates the user or vendor classes configured for the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ReservedMustBeZero">Reserved. This field must be set to zero.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 100 classes, and 200 classes are stored on the server, the resume handle can be used after the first 100 classes are retrieved to obtain the next 100 on a subsequent call, and so forth.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of classes to return. If the number of remaining unenumerated classes is less than this value, then that amount will be returned. To retrieve all classes available on the DHCP server, set this parameter to 0xFFFFFFFF.</param>
+        /// <param name="ClassInfoArray">Pointer to a DHCP_CLASS_INFO_ARRAY structure that contains the returned classes. If there are no classes available on the DHCP server, this parameter will return null.</param>
+        /// <param name="nRead">Pointer to a DWORD value that specifies the number of classes returned in ClassInfoArray.</param>
+        /// <param name="nTotal">Pointer to a DWORD value that specifies the total number of classes stored on the DHCP server.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumClasses(string ServerIpAddress, uint ReservedMustBeZero, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClassInfoArray, out int nRead, out int nTotal);
+
+        /// <summary>
+        /// The DhcpEnumSubnets function returns an enumerated list of subnets defined on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 100, and 200 subnet addresses are stored on the server, the resume handle can be used after the first 100 subnets are retrieved to obtain the next 100 on a subsequent call, and so forth.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of subnet addresses to return. If the number of remaining unenumerated options is less than this value, then that amount will be returned.</param>
+        /// <param name="EnumInfo">Pointer to a <see cref="DHCP_IP_ARRAY"/> structure that contains the subnet IDs available on the DHCP server. If no subnets are defined, this value will be null.</param>
+        /// <param name="ElementsRead">Pointer to a DWORD value that specifies the number of subnet addresses returned in EnumInfo.</param>
+        /// <param name="ElementsTotal">Pointer to a DWORD value that specifies the number of subnets defined on the DHCP server that have not yet been enumerated.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. If a call is made with the same ResumeHandle value and all items on the server have been enumerated, this method returns ERROR_NO_MORE_ITEMS with ElementsRead and ElementsTotal set to 0. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>When no longer needed, the resources consumed for the enumerated data, and all pointers containted within, should be released with DhcpRpcFreeMemory. This function requires host byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumSubnets(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumInfo, out int ElementsRead, out int ElementsTotal);
+
+        /// <summary>
+        /// The DhcpGetSubnetInfo function returns information on a specific subnet.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that specifies the subnet ID.</param>
+        /// <param name="SubnetInfo"><see cref="DHCP_SUBNET_INFO"/> structure that contains the returned information for the subnet matching the ID specified by SubnetAddress. Note: The memory for this parameter must be free using <see cref="DhcpRpcFreeMemory"/>.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>This function uses host byte ordering for all DHCP_IP_ADDRESS values in the <see cref="DHCP_SUBNET_INFO"/> structure passed back to the caller in the SubnetInfo parameter. However, this function uses network byte order for the IpAddress member of the DHCP_HOST_INFO structure within the <see cref="DHCP_SUBNET_INFO"/> structure.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out IntPtr SubnetInfo);
+
+        /// <summary>
+        /// The DhcpGetAllOptions function returns an array that contains all options defined on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a bit flag that indicates whether or not the options are vendor-specific. If the qualification of vendor options is not necessary, this parameter should be 0. DHCP_FLAGS_OPTION_IS_VENDOR = This flag should be set if vendor-specific options are desired.</param>
+        /// <param name="OptionStruct">Pointer to a DHCP_ALL_OPTIONS structure containing every option defined for a vendor or default class. If there are no options available on the server, this value will be null. Note: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>There will be one option element in the array specified by OptionStruct for each vendor/class pair defined on the DHCP server.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetAllOptions(string ServerIpAddress, uint Flags, out IntPtr OptionStruct);
+
+        /// <summary>
+        /// The DhcpGetOptionInfo function returns information on a specific DHCP option for the default user and vendor class.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IPv4 address of the DHCP server.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that specifies the code for the option to retrieve information on.</param>
+        /// <param name="OptionInfo">Pointer to a DHCP_OPTION structure that contains the returned information on the option specified by OptionID. Note: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.
+        /// ERROR_DHCP_OPTION_NOT_PRESENT = The specified option definition could not be found in the DHCP server database.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetOptionInfo(string ServerIpAddress, int OptionID, out IntPtr OptionInfo);
+
+        /// <summary>
+        /// The DhcpEnumSubnetClients function returns an enumerated list of clients with served IP addresses in the specified subnet.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that contains the subnet ID. See RFC 950 for more information about subnet ID.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes worth of subnet client information structures are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of subnet client information structures to return. If the number of remaining unenumerated options (in bytes) is less than this value, then that amount will be returned.  The minimum value is 1024 bytes (1KB), and the maximum value is 65536 bytes (64KB); if the input value is greater or less than this range, it will be set to the maximum or minimum value, respectively.</param>
+        /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO_ARRAY structure that contains information on the clients served under this specific subnet. If no clients are available, this field will be null.</param>
+        /// <param name="ClientsRead">Pointer to a DWORD value that specifies the number of clients returned in ClientInfo.</param>
+        /// <param name="ClientsTotal">Pointer to a DWORD value that specifies the number of clients for the specified subnet that have not yet been enumerated. Note  This value is set to the correct value during the final enumeration call; however, prior calls to this function set the value as "0x7FFFFFFF".</param>
+        /// <returns>This function returns ERROR_MORE_DATA upon a successful call. The final call to this method with the last set of subnet clients returns ERROR_SUCCESS. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>This function requires host byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumSubnetClients(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+
+        /// <summary>
+        /// The DhcpEnumSubnetClientsV4 function returns an enumerated list of client lease records with served IP addresses in the specified subnet. This function extends the functionality provided in DhcpEnumSubnetClients by returning a list of DHCP_CLIENT_INFO_V4 structures that contain the specific client type (DHCP and/or BOOTP).
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value containing the IP address of the subnet gateway.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. This parameter contains the last last IPv4 address retrieved from the DHCPv4 client. The presence of additional enumerable data is indicated when this function returns ERROR_MORE_DATA. If no additional enumerable data is available on the DHCPv4 server, ERROR_NO_MORE_ITEMS is returned.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of subnet client elements to return. If the number of remaining unenumerated elements (in bytes) is less than this value, then that amount will be returned. The minimum value is 1024 bytes, and the maximum value is 65536 bytes. To retrieve all the subnet client elements for the default user and vendor class at the specified level, set this parameter to 0xFFFFFFFF.</param>
+        /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO_ARRAY_V4 structure that contains the DHCPv4 client lease record array. If no clients are available, this field will be null.</param>
+        /// <param name="ClientsRead">Pointer to a DWORD value that specifies the number of client lease records returned in ClientInfo.</param>
+        /// <param name="ClientsTotal">Pointer to a DWORD value that specifies the total number of client lease records remaining on the DHCPv4 server. For example, if there are 100 DHCPv4 lease records for an IPv4 subnet, and if 10 DHCPv4 lease records are enumerated per call, then this parameter would return a value of 90 after the first call.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>The caller of this function must free the memory for ClientInfo after the call completes. </remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumSubnetClientsV4(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+
+        /// <summary>
+        /// The DhcpEnumSubnetClientsV5 function returns an enumerated list of clients with served IP addresses in the specified subnet. This function extends the features provided in the DhcpEnumSubnetClients function by returning a list of DHCP_CLIENT_INFO_V5 structures that contain the specific client type (DHCP and/or BOOTP) and the IP address state.
+        /// </summary>
+        /// <param name="ServerIpAddress">A UNICODE string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">A value containing the IP address of the subnet gateway. If this parameter is set to 0, then the DHCP clients for all IPv4 subnets defined on the DHCP server are returned.</param>
+        /// <param name="ResumeHandle">A pointer to a handle that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes worth of subnet client information structures are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth.</param>
+        /// <param name="PreferredMaximum">The preferred maximum number of bytes of subnet client information structures to return. If the number of remaining unenumerated options (in bytes) is less than this value, then that amount will be returned.</param>
+        /// <param name="ClientInfo">A pointer to a DHCP_CLIENT_INFO_ARRAY_V5 structure containing information on the clients served under this specific subnet. If no clients are available, this field will be null.</param>
+        /// <param name="ClientsRead">A pointer to a value that specifies the number of clients returned in ClientInfo.</param>
+        /// <param name="ClientsTotal">A pointer to a value that specifies the total number of clients for the specified subnet stored on the DHCP server.</param>
+        /// <returns>The DhcpEnumSubnetClientsV5 function returns ERROR_SUCCESS upon success. </returns>
+        /// <remarks>The caller of this function must release the memory used by the DHCP_CLIENT_INFO_ARRAY_V5 structure returned in buffer pointed to by the ClientInfo parameter when the information is no longer needed.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumSubnetClientsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+
+        /// <summary>
+        /// The DhcpEnumSubnetClientsVQ function retrieves all DHCP clients serviced from the specified IPv4 subnet.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that contains the IPv4 subnet for which the DHCP clients are returned. If this parameter is set to 0, the DHCP clients for all known IPv4 subnets are returned.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation on the DHCP server. Initially, this value must be set to 0. A successful call will return a handle value in this parameter, which can be passed to subsequent enumeration requests. The returned handle value is the last IPv4 address retrieved in the enumeration operation.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes to return in the enumeration operation. the minimum value is 1024 bytes, and the maximum value is 65536 bytes.</param>
+        /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO_ARRAY_VQ structure that contains the DHCP client lease record set returned by the enumeration operation.</param>
+        /// <param name="ClientsRead">Pointer to a value that specifies the number of DHCP client records returned in ClientInfo.</param>
+        /// <param name="ClientsTotal">Pointer to a value that specifies the number of DHCP client record remaining and as-yet unreturned. For example, if there are 100 DHCP client records for a given IPv4 subnet, and if 10 client records are enumerated per call, then after the first call this value would return 90.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>If SubnetAddress is set to zero (0), then all of the DHCP clients from all known IPv4 subnets. The caller of this function must free the data pointed to by ClientInfo.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumSubnetClientsVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+
+        /// <summary>
+        /// The DhcpEnumSubnetElementsV5 function returns an enumerated list of elements for a specific DHCP subnet.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that specifies the address of the IP subnet whose elements will be enumerated.</param>
+        /// <param name="EnumElementType">DHCP_SUBNET_ELEMENT_TYPE enumeration value that indicates the type of subnet element to enumerate.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes worth of subnet elements are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth.
+        /// The presence of additional enumerable data is indicated when this function returns ERROR_MORE_DATA. If no additional enumerable data is available on the DHCPv4 server, ERROR_NO_MORE_ITEMS is returned.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of subnet elements to return. If the number of remaining unenumerated options (in bytes) is less than this value, then that amount will be returned.
+        /// To retrieve all the subnet client elements for the default user and vendor class at the specified level, set this parameter to 0xFFFFFFFF.</param>
+        /// <param name="EnumElementInfo">Pointer to a DHCP_SUBNET_ELEMENT_INFO_ARRAY_V5 structure containing an enumerated list of all elements available for the specified subnet. If no elements are available for enumeration, this value will be null.</param>
+        /// <param name="ElementsRead">Pointer to a DWORD value that specifies the number of subnet elements returned in EnumElementInfo.</param>
+        /// <param name="ElementsTotal">Pointer to a DWORD value that specifies the total number of elements for the specified subnet.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes. Common errors include the following:</returns>
+        /// <remarks>When no longer needed, the resources consumed for the enumerated data, and all pointers contained within, should be released with DhcpRpcFreeMemory.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumSubnetElementsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE_V5 EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
+
+        /// <summary>
+        /// The DhcpGetClientInfo function returns information about a specific DHCP client.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SearchInfo">DHCP_SEARCH_INFO structure that contains the parameters for the search.</param>
+        /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO structure that contains information describing the DHCP client that most closely matches the provided search parameters. If no client is found, this parameter will be null. Note: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>This function requires host byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetClientInfo(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
+
+        /// <summary>
+        /// The DhcpGetClientInfoVQ function retrieves DHCP client lease record information from the DHCP server database.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SearchInfo">Pointer to a DHCP_SEARCH_INFO structure that defines the key used to search the client lease record database on the DHCP server for a particular client record.</param>
+        /// <param name="ClientInfo">Pointer to the DHCP_CLIENT_INFO_VQ structure returned by a successful search operation.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>The caller of this function must release the memory used by the DHCP_CLIENT_INFO_VQ structure returned in ClientInfo.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetClientInfoVQ(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
+
+        /// <summary>
+        /// The DhcpRpcFreeMemory function frees a block of buffer space returned as a parameter.
+        /// </summary>
+        /// <param name="BufferPointer">Pointer to an address that contains a structure (or structures, in the case of an array) returned as a parameter. </param>
+        /// <remarks>This function should be called to release the memory consumed by any structures.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true)]
+        public static extern void DhcpRpcFreeMemory(IntPtr BufferPointer);
+    }
+}
