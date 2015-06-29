@@ -11,10 +11,11 @@ namespace Dhcp
         public abstract DhcpServerOptionElementType Type { get; }
 
         public abstract object Value { get; }
+        public abstract string ValueFormatted { get; }
 
         public override string ToString()
         {
-            return string.Format("{0}: {1}", Type, Value);
+            return string.Format("{0}: {1}", Type, ValueFormatted);
         }
 
         internal static IEnumerable<DhcpServerOptionElement> ReadNativeElements(DHCP_OPTION_DATA ElementArray)
@@ -56,6 +57,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.Byte; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return RawValue.ToString("X2"); } }
 
         public Byte RawValue { get; private set; }
 
@@ -74,6 +76,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.Word; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return RawValue.ToString("N"); } }
 
         public Int16 RawValue { get; private set; }
 
@@ -92,6 +95,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.DWord; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return RawValue.ToString("N"); } }
 
         public Int32 RawValue { get; private set; }
 
@@ -110,6 +114,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.DWordDWord; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return RawValue.ToString("N"); } }
 
         public Int64 RawValue { get; private set; }
 
@@ -128,11 +133,11 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.IpAddress; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return ipAddress.ToString(); } }
 
         private DHCP_IP_ADDRESS ipAddress;
 
-        public UInt32 RawValue { get { return ipAddress.IpAddress; } }
-        public string FormattedValue { get { return ipAddress.ToString(); } }
+        public UInt32 RawValue { get { return (UInt32)ipAddress; } }
 
         private DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS Value)
         {
@@ -143,17 +148,13 @@ namespace Dhcp
         {
             return new DhcpServerOptionElementIpAddress(Native.IpAddressOption);
         }
-
-        public override string ToString()
-        {
-            return string.Format("{0}: {1}", Type, FormattedValue);
-        }
     }
 
     public class DhcpServerOptionElementString : DhcpServerOptionElement
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.StringData; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return RawValue; } }
 
         public string RawValue { get; private set; }
 
@@ -174,6 +175,25 @@ namespace Dhcp
 
         public override DhcpServerOptionElementType Type { get { return type; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted
+        {
+            get
+            {
+                var builder = new StringBuilder();
+
+                if (RawValue.Length > 0)
+                {
+                    builder.Append(RawValue[0].ToString("X2"));
+
+                    for (int i = 1; i < RawValue.Length; i++)
+                    {
+                        builder.Append(" ").Append(RawValue[i].ToString("X2"));
+                    }
+                }
+
+                return builder.ToString();
+            }
+        }
 
         public byte[] RawValue { get; private set; }
 
@@ -187,26 +207,13 @@ namespace Dhcp
         {
             return new DhcpServerOptionElementBinary((DhcpServerOptionElementType)Native.OptionType, Native.BinaryDataOption.Data);
         }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-
-            builder.Append(Type).Append(": ");
-
-            foreach (var b in RawValue)
-            {
-                builder.Append(b.ToString("X2")).Append(' ');
-            }
-
-            return builder.ToString();
-        }
     }
 
     public class DhcpServerOptionElementIpv6Address : DhcpServerOptionElement
     {
         public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.Ipv6Address; } }
         public override object Value { get { return RawValue; } }
+        public override string ValueFormatted { get { return RawValue; } }
 
         public string RawValue { get; private set; }
 

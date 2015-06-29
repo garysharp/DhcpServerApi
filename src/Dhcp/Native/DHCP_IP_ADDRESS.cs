@@ -2,6 +2,7 @@
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Dhcp.Native
 {
@@ -10,24 +11,16 @@ namespace Dhcp.Native
     {
         private uint ipAddress;
 
-        public uint IpAddress
-        {
-            get
-            {
-                return ipAddress;
-            }
-        }
-
         public DHCP_IP_ADDRESS ToReverseOrder()
         {
             unchecked
             {
                 return new DHCP_IP_ADDRESS()
                 {
-                    ipAddress = (IpAddress << 24) |
-                                ((IpAddress << 8) & 0xFF0000) |
-                                ((IpAddress >> 8) & 0xFF00) |
-                                (IpAddress >> 24)
+                    ipAddress = (ipAddress << 24) |
+                                ((ipAddress << 8) & 0xFF0000) |
+                                ((ipAddress >> 8) & 0xFF00) |
+                                (ipAddress >> 24)
                 };
             }
         }
@@ -60,6 +53,11 @@ namespace Dhcp.Native
             return builder.ToString();
         }
 
+        public IPAddress ToIPAddress()
+        {
+            return new IPAddress(this.ToReverseOrder().ipAddress);
+        }
+
         public static DHCP_IP_ADDRESS FromIPAddress(IPAddress IpAddress)
         {
             var address = IpAddress.GetAddressBytes();
@@ -73,6 +71,29 @@ namespace Dhcp.Native
                             ((uint)address[1] << 16) |
                             ((uint)address[2] << 8) |
                             ((uint)address[3])
+            };
+        }
+
+        public static DHCP_IP_ADDRESS FromString(string IpAddress)
+        {
+            if (IpAddress == null)
+            {
+                throw new ArgumentNullException("IpAddress");
+            }
+
+            var match = Regex.Match(IpAddress, @"^(\d{1,3}).(\d{1,3}).(\d{1,3}).(\d{1,3})$");
+
+            if (!match.Success)
+            {
+                throw new ArgumentOutOfRangeException("IpAddress");
+            }
+
+            return new DHCP_IP_ADDRESS()
+            {
+                ipAddress = (uint.Parse(match.Groups[1].Value) << 24) |
+                            (uint.Parse(match.Groups[2].Value) << 16) |
+                            (uint.Parse(match.Groups[3].Value) << 8) |
+                            (uint.Parse(match.Groups[4].Value))
             };
         }
 
@@ -108,6 +129,26 @@ namespace Dhcp.Native
             {
                 ipAddress = (uint)ipAddress
             };
+        }
+
+        public static bool operator >(DHCP_IP_ADDRESS a, DHCP_IP_ADDRESS b)
+        {
+            return a.ipAddress > b.ipAddress;
+        }
+
+        public static bool operator >=(DHCP_IP_ADDRESS a, DHCP_IP_ADDRESS b)
+        {
+            return a.ipAddress >= b.ipAddress;
+        }
+
+        public static bool operator <(DHCP_IP_ADDRESS a, DHCP_IP_ADDRESS b)
+        {
+            return a.ipAddress < b.ipAddress;
+        }
+
+        public static bool operator <=(DHCP_IP_ADDRESS a, DHCP_IP_ADDRESS b)
+        {
+            return a.ipAddress <= b.ipAddress;
         }
     }
 }

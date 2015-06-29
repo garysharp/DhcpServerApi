@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="DhcpServer.cs" />
     <Compile Include="DhcpServerApiProtocol.cs" />
+    <Compile Include="DhcpServerAuditLog.cs" />
     <Compile Include="DhcpServerBindingElement.cs" />
     <Compile Include="DhcpServerClass.cs" />
     <Compile Include="DhcpServerClient.cs" />

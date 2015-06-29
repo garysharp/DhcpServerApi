@@ -1,6 +1,7 @@
 ﻿using Dhcp.Native;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.InteropServices;
 
 namespace Dhcp
@@ -28,12 +29,22 @@ namespace Dhcp
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the IP address assigned to the ethernet adapter of the DHCP server.
         /// </summary>
-        public string AdapterPrimaryIpAddress { get { return adapterPrimaryIpAddress.ToString(); } }
+        public IPAddress AdapterPrimaryIpAddress { get { return adapterPrimaryIpAddress.ToIPAddress(); } }
+
+        /// <summary>
+        /// DHCP_IP_ADDRESS value that specifies the IP address assigned to the ethernet adapter of the DHCP server.
+        /// </summary>
+        public int AdapterPrimaryIpAddressNative { get { return (int)adapterPrimaryIpAddress; } }
 
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet IP mask used by this ethernet adapter.
         /// </summary>
-        public string AdapterSubnetAddress { get { return adapterSubnetAddress.ToString(); } }
+        public IPAddress AdapterSubnetAddress { get { return adapterSubnetAddress.ToIPAddress(); } }
+
+        /// <summary>
+        /// DHCP_IP_ADDRESS value that specifies the subnet IP mask used by this ethernet adapter.
+        /// </summary>
+        public int AdapterSubnetAddressNative { get { return (int)adapterSubnetAddress; } }
 
         /// <summary>
         /// Unicode string that specifies the name assigned to this network interface device.
@@ -65,7 +76,7 @@ namespace Dhcp
         {
             IntPtr elementsPtr;
 
-            var result = Api.DhcpGetServerBindingInfo(Server.IpAddress, 0, out elementsPtr);
+            var result = Api.DhcpGetServerBindingInfo(Server.ipAddress.ToString(), 0, out elementsPtr);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpGetServerBindingInfo", result);

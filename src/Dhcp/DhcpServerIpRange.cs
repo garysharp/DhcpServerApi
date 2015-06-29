@@ -1,4 +1,5 @@
 ﻿using Dhcp.Native;
+using System.Net;
 
 namespace Dhcp
 {
@@ -7,8 +8,10 @@ namespace Dhcp
         private DHCP_IP_ADDRESS startAddress;
         private DHCP_IP_ADDRESS endAddress;
 
-        public string StartAddress { get { return startAddress.ToString(); } }
-        public string EndAddress { get { return endAddress.ToString(); } }
+        public IPAddress StartAddress { get { return startAddress.ToIPAddress(); } }
+        public int StartAddressNative { get { return (int)startAddress; } }
+        public IPAddress EndAddress { get { return endAddress.ToIPAddress(); } }
+        public int EndAddressNative { get { return (int)endAddress; } }
 
         public int BootpClientsAllocated { get; private set; }
         public int MaxBootpAllowed { get; private set; }
@@ -17,6 +20,31 @@ namespace Dhcp
         {
             this.startAddress = StartAddress;
             this.endAddress = EndAddress;
+        }
+
+        public bool Contains(IPAddress IpAddress)
+        {
+            return Contains(DHCP_IP_ADDRESS.FromIPAddress(IpAddress));
+        }
+
+        public bool Contains(string IpAddress)
+        {
+            return Contains(DHCP_IP_ADDRESS.FromString(IpAddress));
+        }
+
+        public bool Contains(int IpAddress)
+        {
+            return Contains((DHCP_IP_ADDRESS)IpAddress);
+        }
+
+        public bool Contains(uint IpAddress)
+        {
+            return Contains((DHCP_IP_ADDRESS)IpAddress);
+        }
+
+        internal bool Contains(DHCP_IP_ADDRESS IpAddress)
+        {
+            return IpAddress >= startAddress && IpAddress <= endAddress;
         }
 
         internal static DhcpServerIpRange FromNative(DHCP_IP_RANGE Native)

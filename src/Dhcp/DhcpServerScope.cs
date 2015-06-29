@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 
 namespace Dhcp
@@ -13,16 +14,20 @@ namespace Dhcp
         private Lazy<TimeSpan> timeDelayOffer;
         private Lazy<DhcpServerIpRange> ipRange;
         private Lazy<List<DhcpServerIpRange>> excludedIpRanges;
+        private Lazy<TimeSpan> leaseDuration;
 
         public DhcpServer Server { get; private set; }
 
-        public string Address { get { return address.ToString(); } }
-        public string Mask { get { return info.Value.SubnetMask.ToString(); } }
+        public IPAddress Address { get { return address.ToIPAddress(); } }
+        public int AddressNative { get { return (int)address; } }
+        public IPAddress Mask { get { return info.Value.SubnetMask.ToIPAddress(); } }
+        public int MaskNative { get { return (int)info.Value.SubnetMask; } }
 
         public string Name { get { return info.Value.SubnetName; } }
         public string Comment { get { return info.Value.SubnetComment; } }
 
-        public string PrimaryHostIpAddress { get { return info.Value.PrimaryHost.IpAddress.ToNetworkOrderString(); } }
+        public IPAddress PrimaryHostIpAddress { get { return info.Value.PrimaryHost.IpAddress.ToReverseOrder().ToIPAddress(); } }
+        public int PrimaryHostIpAddressNative { get { return (int)info.Value.PrimaryHost.IpAddress.ToReverseOrder(); } }
 
         public DhcpServerScopeState State { get { return (DhcpServerScopeState)info.Value.SubnetState; } }
 
@@ -37,6 +42,7 @@ namespace Dhcp
             this.timeDelayOffer = new Lazy<TimeSpan>(GetTimeDelayOffer);
             this.ipRange = new Lazy<DhcpServerIpRange>(GetIpRange);
             this.excludedIpRanges = new Lazy<List<DhcpServerIpRange>>(GetExcludedIpRanges);
+            this.leaseDuration = new Lazy<TimeSpan>(GetLeaseDuration);
         }
 
         /// <summary>
@@ -82,13 +88,21 @@ namespace Dhcp
             }
         }
 
+        public TimeSpan LeaseDuration
+        {
+            get
+            {
+                return this.leaseDuration.Value;
+            }
+        }
+
         internal static IEnumerable<DhcpServerScope> GetScopes(DhcpServer Server)
         {
             IntPtr enumInfoPtr;
             int elementsRead, elementsTotal;
             IntPtr resumeHandle = IntPtr.Zero;
 
-            var result = Api.DhcpEnumSubnets(Server.IpAddress, ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumSubnets(Server.ipAddress.ToString(), ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;
@@ -118,7 +132,7 @@ namespace Dhcp
         {
             IntPtr subnetInfoPtr;
 
-            var result = Api.DhcpGetSubnetInfo(Server.IpAddress, this.address, out subnetInfoPtr);
+            var result = Api.DhcpGetSubnetInfo(Server.ipAddress.ToString(), this.address, out subnetInfoPtr);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpGetSubnetInfo", result);
@@ -153,7 +167,7 @@ namespace Dhcp
             int elementsRead, elementsTotal;
             IntPtr resumeHandle = IntPtr.Zero;
 
-            var result = Api.DhcpEnumSubnetElementsV5(Server.IpAddress, this.address, EnumElementType, ref resumeHandle, 0xFFFFFFFF, out elementsPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumSubnetElementsV5(Server.ipAddress.ToString(), this.address, EnumElementType, ref resumeHandle, 0xFFFFFFFF, out elementsPtr, out elementsRead, out elementsTotal);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpEnumSubnetElementsV5", result);
@@ -184,12 +198,26 @@ namespace Dhcp
         {
             UInt16 timeDelay;
 
-            var result = Api.DhcpGetSubnetDelayOffer(Server.IpAddress, this.address, out timeDelay);
+            var result = Api.DhcpGetSubnetDelayOffer(Server.ipAddress.ToString(), this.address, out timeDelay);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpGetSubnetDelayOffer", result);
 
             return TimeSpan.FromMilliseconds(timeDelay);
+        }
+
+        private TimeSpan GetLeaseDuration()
+        {
+            var option = DhcpServerOptionValue.GetScopeOptionValue(this, 51);
+
+            if (option == null)
+            {
+                return default(TimeSpan);
+            }
+            else
+            {
+                return TimeSpan.FromSeconds(((DhcpServerOptionElementDWord)option.Values[0]).RawValue);
+            }
         }
 
         public override string ToString()

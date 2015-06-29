@@ -1,6 +1,7 @@
 ﻿using Dhcp.Native;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -14,21 +15,50 @@ namespace Dhcp
 
         public DhcpServer Server { get; private set; }
 
-        public string IpAddress { get { return ipAddress.ToString(); } }
-        public string SubnetMask { get { return subnetMask.ToString(); } }
+        public IPAddress IpAddress { get { return ipAddress.ToIPAddress(); } }
+        public int IpAddressNative { get { return (int)ipAddress; } }
+        public IPAddress SubnetMask { get { return subnetMask.ToIPAddress(); } }
+        public int SubnetMaskNative { get { return (int)subnetMask; } }
 
         public string HardwareAddress
         {
             get
             {
-                var builder = new StringBuilder();
+                var builder = new StringBuilder((hardwareAddress.Length * 2) + hardwareAddress.Length);
 
-                foreach (var b in hardwareAddress)
-                    builder.Append(b.ToString("X2"));
+                if (hardwareAddress.Length > 0)
+                {
+                    builder.Append(hardwareAddress[0].ToString("X2"));
+
+                    for (int i = 1; i < hardwareAddress.Length; i++)
+                    {
+                        builder.Append(":").Append(hardwareAddress[i].ToString("X2"));
+                    }
+                }
 
                 return builder.ToString();
             }
         }
+        public long HardwareAddressNative
+        {
+            get
+            {
+                if (hardwareAddress.Length == 6)
+                {
+                    return (long)hardwareAddress[0] << 40 |
+                        (long)hardwareAddress[1] << 32 |
+                        (long)hardwareAddress[2] << 24 |
+                        (long)hardwareAddress[3] << 16 |
+                        (long)hardwareAddress[4] << 08 |
+                        (long)hardwareAddress[5];
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
+        public byte[] HardwareAddressBytes { get { return hardwareAddress; } }
 
         public string Name { get; private set; }
         public string Comment { get; private set; }
@@ -88,7 +118,7 @@ namespace Dhcp
             {
                 IntPtr clientPtr;
 
-                DhcpErrors result = Api.DhcpGetClientInfo(Server.IpAddress, SearchInfo, out clientPtr);
+                DhcpErrors result = Api.DhcpGetClientInfo(Server.ipAddress.ToString(), SearchInfo, out clientPtr);
 
                 if (result == DhcpErrors.JET_ERROR)
                     return null;
@@ -119,7 +149,7 @@ namespace Dhcp
             {
                 IntPtr clientPtr;
 
-                DhcpErrors result = Api.DhcpGetClientInfoVQ(Server.IpAddress, SearchInfo, out clientPtr);
+                DhcpErrors result = Api.DhcpGetClientInfoVQ(Server.ipAddress.ToString(), SearchInfo, out clientPtr);
 
                 if (result == DhcpErrors.JET_ERROR)
                     return null;
@@ -170,7 +200,7 @@ namespace Dhcp
             IntPtr resultHandle = IntPtr.Zero;
             int clientsRead, clientsTotal;
 
-            DhcpErrors result = Api.DhcpEnumSubnetClients(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+            DhcpErrors result = Api.DhcpEnumSubnetClients(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
                 throw new DhcpServerException("DhcpEnumSubnetClients", result);
@@ -194,7 +224,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClients(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+                result = Api.DhcpEnumSubnetClients(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
                 if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
                     throw new DhcpServerException("DhcpEnumSubnetClients", result);
@@ -207,7 +237,7 @@ namespace Dhcp
             IntPtr resultHandle = IntPtr.Zero;
             int clientsRead, clientsTotal;
 
-            DhcpErrors result = Api.DhcpEnumSubnetClientsV4(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+            DhcpErrors result = Api.DhcpEnumSubnetClientsV4(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
                 throw new DhcpServerException("DhcpEnumSubnetClientsV4", result);
@@ -231,7 +261,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClientsV4(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+                result = Api.DhcpEnumSubnetClientsV4(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
                 if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
                     throw new DhcpServerException("DhcpEnumSubnetClientsV4", result);
@@ -244,7 +274,7 @@ namespace Dhcp
             IntPtr resultHandle = IntPtr.Zero;
             int clientsRead, clientsTotal;
 
-            DhcpErrors result = Api.DhcpEnumSubnetClientsV5(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+            DhcpErrors result = Api.DhcpEnumSubnetClientsV5(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
                 throw new DhcpServerException("DhcpEnumSubnetClientsV5", result);
@@ -268,7 +298,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClientsV5(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+                result = Api.DhcpEnumSubnetClientsV5(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
                 if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
                     throw new DhcpServerException("DhcpEnumSubnetClientsV5", result);
@@ -281,7 +311,7 @@ namespace Dhcp
             IntPtr resultHandle = IntPtr.Zero;
             int clientsRead, clientsTotal;
 
-            DhcpErrors result = Api.DhcpEnumSubnetClientsVQ(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+            DhcpErrors result = Api.DhcpEnumSubnetClientsVQ(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException("DhcpEnumSubnetClientsVQ", result);
@@ -309,7 +339,7 @@ namespace Dhcp
                 clientsRead = 0;
                 clientsTotal = 0;
 
-                result = Api.DhcpEnumSubnetClientsVQ(Server.IpAddress, SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
+                result = Api.DhcpEnumSubnetClientsVQ(Server.ipAddress.ToString(), SubnetAddress, ref resultHandle, 65536, out clientsPtr, out clientsRead, out clientsTotal);
 
                 if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                     throw new DhcpServerException("DhcpEnumSubnetClientsVQ", result);

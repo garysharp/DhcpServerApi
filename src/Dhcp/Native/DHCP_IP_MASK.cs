@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Dhcp.Native
@@ -7,14 +8,6 @@ namespace Dhcp.Native
     internal struct DHCP_IP_MASK
     {
         private uint ipMask;
-
-        public uint IpMask
-        {
-            get
-            {
-                return ipMask;
-            }
-        }
 
         public int SignificantBits
         {
@@ -61,10 +54,10 @@ namespace Dhcp.Native
             {
                 return new DHCP_IP_MASK()
                 {
-                    ipMask = (IpMask << 24) |
-                                ((IpMask << 8) & 0xFF0000) |
-                                ((IpMask >> 8) & 0xFF00) |
-                                (IpMask >> 24)
+                    ipMask = (ipMask << 24) |
+                            ((ipMask << 8) & 0xFF0000) |
+                            ((ipMask >> 8) & 0xFF00) |
+                            (ipMask >> 24)
                 };
             }
         }
@@ -95,6 +88,11 @@ namespace Dhcp.Native
                     .Append(ipMask >> 24);
             }
             return builder.ToString();
+        }
+
+        public IPAddress ToIPAddress()
+        {
+            return new IPAddress(this.ToReverseOrder().ipMask);
         }
 
         /// <summary>
@@ -138,7 +136,7 @@ namespace Dhcp.Native
 
         public static explicit operator DHCP_IP_MASK(DHCP_IP_ADDRESS ipMask)
         {
-            return (DHCP_IP_MASK)ipMask.IpAddress;
+            return (DHCP_IP_MASK)(uint)ipMask;
         }
     }
 }

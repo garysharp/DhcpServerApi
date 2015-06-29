@@ -21,6 +21,12 @@ namespace Dhcp.Native
         [DhcpErrorDescription("The UUID type is not supported.")]
         RPC_S_UNSUPPORTED_TYPE = 1734,
 
+        [DhcpErrorDescription("This call was performed by a client who is not a member of the \"DHCP Administrators\" security group.")]
+        ERROR_ACCESS_DENIED = 5,
+
+        [DhcpErrorDescription("The system cannot find the file specified.")]
+        ERROR_FILE_NOT_FOUND = 2,
+
         [DhcpErrorDescription("The DHCP server registry initialization parameters are incorrect.")]
         REGISTRY_INIT_FAILED = 20000,
         [DhcpErrorDescription("The DHCP server was unable to open the database of DHCP clients.")]

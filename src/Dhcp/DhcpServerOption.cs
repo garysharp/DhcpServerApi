@@ -46,7 +46,7 @@ namespace Dhcp
         {
             IntPtr optionPtr;
 
-            var result = Api.DhcpGetOptionInfo(Server.IpAddress, OptionId, out optionPtr);
+            var result = Api.DhcpGetOptionInfo(Server.ipAddress.ToString(), OptionId, out optionPtr);
 
             if (result == DhcpErrors.OPTION_NOT_PRESENT)
                 return null;
@@ -72,7 +72,7 @@ namespace Dhcp
             int elementsRead, elementsTotal;
             IntPtr resumeHandle = IntPtr.Zero;
 
-            var result = Api.DhcpEnumOptions(Server.IpAddress, ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumOptions(Server.ipAddress.ToString(), ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;

@@ -1,4 +1,5 @@
 ﻿using Dhcp.Native;
+using System.Net;
 using System.Text;
 
 namespace Dhcp
@@ -7,7 +8,8 @@ namespace Dhcp
     {
         private DHCP_IP_ADDRESS ipAddress;
 
-        public string IpAddress { get { return ipAddress.ToString(); } }
+        public IPAddress IpAddress { get { return ipAddress.ToIPAddress(); } }
+        public int IpAddressNative { get { return (int)ipAddress; } }
         public string NetBiosName { get; private set; }
         public string ServerName { get; private set; }
 

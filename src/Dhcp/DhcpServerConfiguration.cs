@@ -52,7 +52,7 @@ namespace Dhcp
         {
             IntPtr configInfoPtr;
 
-            var result = Api.DhcpServerGetConfig(Server.IpAddress, out configInfoPtr);
+            var result = Api.DhcpServerGetConfig(Server.ipAddress.ToString(), out configInfoPtr);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpServerGetConfig", result);

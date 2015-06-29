@@ -1,6 +1,7 @@
 ﻿using Dhcp.Native;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -16,9 +17,11 @@ namespace Dhcp
         private byte[] macAddress;
         private Lazy<DhcpServerClient> client;
 
-        public string IpAddress { get { return ipAddress.ToString(); } }
+        public IPAddress IpAddress { get { return ipAddress.ToIPAddress(); } }
+        public int IpAddressNative { get { return (int)ipAddress; } }
 
-        public string IpAddressMask { get { return ipAddressMask.ToString(); } }
+        public IPAddress IpAddressMask { get { return ipAddressMask.ToIPAddress(); } }
+        public int IpAddressMaskNative { get { return (int)ipAddressMask; } }
 
         public string HardwareAddress
         {
@@ -32,6 +35,26 @@ namespace Dhcp
                 return builder.ToString();
             }
         }
+        public long HardwareAddressNative
+        {
+            get
+            {
+                if (macAddress.Length == 6)
+                {
+                    return (long)macAddress[0] << 40 |
+                        (long)macAddress[1] << 32 |
+                        (long)macAddress[2] << 24 |
+                        (long)macAddress[3] << 16 |
+                        (long)macAddress[4] << 08 |
+                        (long)macAddress[5];
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
+        public byte[] HardwareAddressBytes { get { return macAddress; } }
 
         public DhcpServerClientTypes AllowedClientTypes { get; private set; }
 
@@ -66,7 +89,7 @@ namespace Dhcp
             int elementsRead, elementsTotal;
             IntPtr resumeHandle = IntPtr.Zero;
 
-            var result = Api.DhcpEnumSubnetElementsV5(Scope.Server.IpAddress, Scope.address, DHCP_SUBNET_ELEMENT_TYPE_V5.DhcpReservedIps, ref resumeHandle, 0xFFFFFFFF, out reservationsPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumSubnetElementsV5(Scope.Server.ipAddress.ToString(), Scope.address, DHCP_SUBNET_ELEMENT_TYPE_V5.DhcpReservedIps, ref resumeHandle, 0xFFFFFFFF, out reservationsPtr, out elementsRead, out elementsTotal);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;

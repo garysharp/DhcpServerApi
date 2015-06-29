@@ -13,12 +13,13 @@ namespace Dhcp
     /// </summary>
     public class DhcpServer
     {
-        private DHCP_IP_ADDRESS ipAddress;
+        internal DHCP_IP_ADDRESS ipAddress;
         private string name;
         private Lazy<Tuple<int, int>> version;
         private Lazy<DhcpServerConfiguration> config;
         private Lazy<Tuple<string, string>> specificStrings;
         private Lazy<Dictionary<int, DhcpServerOption>> options;
+        private Lazy<DhcpServerAuditLog> auditLog;
 
         internal DhcpServer(DHCP_IP_ADDRESS ipAddress, string name)
         {
@@ -29,9 +30,11 @@ namespace Dhcp
             this.config = new Lazy<DhcpServerConfiguration>(() => DhcpServerConfiguration.GetConfiguration(this));
             this.specificStrings = new Lazy<Tuple<string, string>>(GetSpecificStrings);
             this.options = new Lazy<Dictionary<int, DhcpServerOption>>(() => DhcpServerOption.GetOptions(this).ToDictionary(o => o.OptionId));
+            this.auditLog = new Lazy<DhcpServerAuditLog>(() => DhcpServerAuditLog.GetParams(this));
         }
 
-        public string IpAddress { get { return this.ipAddress.ToString(); } }
+        public IPAddress IpAddress { get { return this.ipAddress.ToIPAddress(); } }
+        public int IpAddressNative { get { return (int)this.ipAddress; } }
         public string Name { get { return this.name; } }
         public int VersionMajor { get { return this.version.Value.Item1; } }
         public int VersionMinor { get { return this.version.Value.Item2; } }
@@ -135,6 +138,17 @@ namespace Dhcp
         }
 
         /// <summary>
+        /// The audit log configuration settings from the DHCP server.
+        /// </summary>
+        public DhcpServerAuditLog AuditLog
+        {
+            get
+            {
+                return auditLog.Value;
+            }
+        }
+
+        /// <summary>
         /// Enumerates a list of DHCP servers found in the directory service. 
         /// </summary>
         public static IEnumerable<DhcpServer> Servers
@@ -189,7 +203,7 @@ namespace Dhcp
         {
             int major, minor;
 
-            var result = Api.DhcpGetVersion(this.IpAddress, out major, out minor);
+            var result = Api.DhcpGetVersion(this.ipAddress.ToString(), out major, out minor);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpGetVersion", result);
@@ -201,7 +215,7 @@ namespace Dhcp
         {
             IntPtr stringsPtr;
 
-            var result = Api.DhcpGetServerSpecificStrings(this.IpAddress, out stringsPtr);
+            var result = Api.DhcpGetServerSpecificStrings(this.ipAddress.ToString(), out stringsPtr);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException("DhcpGetServerSpecificStrings", result);

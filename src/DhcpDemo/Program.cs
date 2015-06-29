@@ -43,6 +43,16 @@ namespace DhcpDemo
             Console.WriteLine("{0,30}: {1}", "Database Logging Enabled", config.DatabaseLoggingEnabled);
             Console.WriteLine("{0,30}: {1}", "Cleanup Interval", config.DatabaseCleanupInterval);
 
+            // Audit Logging
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" Audit Log:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            var auditLog = dhcpServer.AuditLog;
+            Console.WriteLine("{0,30}: {1}", "Log Directory", auditLog.AuditLogDirectory);
+            Console.WriteLine("{0,30}: {1}", "Disk Check Interval", auditLog.DiskCheckInterval);
+            Console.WriteLine("{0,30}: {1}", "Max Log Files Size", auditLog.MaxLogFilesSize);
+            Console.WriteLine("{0,30}: {1}", "Min Space On Disk", auditLog.MinSpaceOnDisk);
+
             // Binding Elements
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Binding Elements:");
@@ -122,6 +132,7 @@ namespace DhcpDemo
                 Console.WriteLine("      Name: {0}", scope.Name);
                 Console.WriteLine("      Comment: {0}", scope.Comment);
                 Console.WriteLine("      Primary Host: {0}", scope.PrimaryHostIpAddress);
+                Console.WriteLine("      Lease Duration: {0}", scope.LeaseDuration);
                 Console.WriteLine("      Delay Offer: {0} milliseconds", scope.TimeDelayOffer.TotalMilliseconds);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Excluded IP Ranges:");
@@ -151,19 +162,19 @@ namespace DhcpDemo
                 {
                     Console.WriteLine("        {0}", reservation);
                     Console.WriteLine("        Client: {0}", reservation.Client);
-                    //Console.WriteLine("          Options:");
-                    //Console.ForegroundColor = ConsoleColor.Gray;
-                    //foreach (var value in reservation.OptionValues.ToList())
-                    //{
-                    //    if (value.Option == null)
-                    //        Console.WriteLine("            {0} [UNKNOWN OPTION]:", value.OptionId);
-                    //    else
-                    //        Console.WriteLine("            {0} [{1}]:", value.OptionId, value.Option.Name);
-                    //    foreach (var element in value.Value.ToList())
-                    //    {
-                    //        Console.WriteLine("               {0}", element);
-                    //    }
-                    //}
+                    Console.WriteLine("          Options:");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    foreach (var value in reservation.OptionValues.ToList())
+                    {
+                        if (value.Option == null)
+                            Console.WriteLine("            {0} [UNKNOWN OPTION]:", value.OptionId);
+                        else
+                            Console.WriteLine("            {0} [{1}]:", value.OptionId, value.Option.Name);
+                        foreach (var element in value.Values.ToList())
+                        {
+                            Console.WriteLine("               {0}", element);
+                        }
+                    }
                 }
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Clients:");

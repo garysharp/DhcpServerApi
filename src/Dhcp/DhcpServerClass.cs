@@ -45,7 +45,7 @@ namespace Dhcp
             int elementsRead, elementsTotal;
             IntPtr resumeHandle = IntPtr.Zero;
 
-            var result = Api.DhcpEnumClasses(Server.IpAddress, 0, ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumClasses(Server.ipAddress.ToString(), 0, ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;

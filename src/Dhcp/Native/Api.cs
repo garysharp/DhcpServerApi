@@ -100,6 +100,17 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpEnumOptionValues(string ServerIpAddress, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
 
         /// <summary>
+        /// The DhcpGetOptionValue function retrieves a DHCP option value (the option code and associated data) for a particular scope.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that specifies the code for the option value to retrieve.</param>
+        /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains information on the scope where the option value is set.</param>
+        /// <param name="OptionValue">DHCP_OPTION_VALUE structure that contains the returned option code and data. NOTE: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, out IntPtr OptionValue);
+
+        /// <summary>
         /// The DhcpEnumClasses function enumerates the user or vendor classes configured for the DHCP server.
         /// </summary>
         /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
@@ -259,6 +270,19 @@ namespace Dhcp.Native
         /// <remarks>The caller of this function must release the memory used by the DHCP_CLIENT_INFO_VQ structure returned in ClientInfo.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern DhcpErrors DhcpGetClientInfoVQ(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
+
+        /// <summary>
+        /// The DhcpAuditLogGetParams function returns the audit log configuration settings from the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a set of bit flags for filtering the audit log. Currently, this parameter is reserved and should be set to 0.</param>
+        /// <param name="AuditLogDir">Unicode string that contains the directory where the audit log is stored as an absolute path within the file system.</param>
+        /// <param name="DiskCheckInterval">Specifies the disk check interval for attempting to write the audit log to the specified file as the number of logged DHCP server events that should occur between checks. The default is 50 DHCP server events between checks.</param>
+        /// <param name="MaxLogFilesSize">Specifies the maximum log file size, in bytes.</param>
+        /// <param name="MinSpaceOnDisk">Specifies the minimum required disk space, in bytes, for audit log storage.</param>
+        /// <returns></returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpAuditLogGetParams(string ServerIpAddress, int Flags, [MarshalAs(UnmanagedType.LPWStr)] out string AuditLogDir, out int DiskCheckInterval, out int MaxLogFilesSize, out int MinSpaceOnDisk);
 
         /// <summary>
         /// The DhcpRpcFreeMemory function frees a block of buffer space returned as a parameter.
