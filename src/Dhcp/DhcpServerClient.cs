@@ -320,11 +320,12 @@ namespace Dhcp
             {
                 try
                 {
-                    var clients = (DHCP_CLIENT_INFO_ARRAY_VQ)Marshal.PtrToStructure(clientsPtr, typeof(DHCP_CLIENT_INFO_ARRAY_VQ));
-
-                    foreach (var client in clients.Clients)
+                    using (var clients = DHCP_CLIENT_INFO_ARRAY_VQ.Read(clientsPtr))
                     {
-                        yield return DhcpServerClient.FromNative(Server, client);
+                        foreach (var client in clients.Clients)
+                        {
+                            yield return DhcpServerClient.FromNative(Server, client.Item2);
+                        }
                     }
                 }
                 finally

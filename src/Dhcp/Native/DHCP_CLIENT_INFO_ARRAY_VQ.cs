@@ -7,31 +7,59 @@ namespace Dhcp.Native
     /// <summary>
     /// The DHCP_CLIENT_INFO_ARRAY_VQ structure specifies an array of DHCP_CLIENT_INFO_VQ structures.
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_ARRAY_VQ
+    internal struct DHCP_CLIENT_INFO_ARRAY_VQ : IDisposable
     {
         public int NumElements;
-        /// <summary>
-        /// Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
-        /// </summary>
+
         private IntPtr ClientsPointer;
 
-        /// <summary>
-        /// Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
-        /// </summary>
-        public IEnumerable<DHCP_CLIENT_INFO_VQ> Clients
+        public List<Tuple<IntPtr, DHCP_CLIENT_INFO_VQ>> Clients;
+
+        public static DHCP_CLIENT_INFO_ARRAY_VQ Read(IntPtr Pointer)
         {
-            get
+            // Number of elements in the array
+            var numElements = Marshal.ReadIntPtr(Pointer).ToInt32();
+
+            var clients = new List<Tuple<IntPtr, DHCP_CLIENT_INFO_VQ>>(numElements);
+
+            // Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
+            var clientsPointer = Marshal.ReadIntPtr(Pointer, IntPtr.Size);
+
+            var iter = clientsPointer;
+            for (int i = 0; i < numElements; i++)
             {
-                var iter = this.ClientsPointer;
-                for (int i = 0; i < this.NumElements; i++)
+                var clientPtr = Marshal.ReadIntPtr(iter);
+                var client = (DHCP_CLIENT_INFO_VQ)Marshal.PtrToStructure(clientPtr, typeof(DHCP_CLIENT_INFO_VQ));
+
+                clients.Add(Tuple.Create(clientPtr, client));
+
+                iter += IntPtr.Size;
+            }
+
+            return new DHCP_CLIENT_INFO_ARRAY_VQ()
+            {
+                NumElements = numElements,
+                ClientsPointer = clientsPointer,
+                Clients = clients
+            };
+        }
+
+        public void Dispose()
+        {
+            if (Clients != null)
+            {
+                foreach (var client in Clients)
                 {
-                    var clientPtr = Marshal.ReadIntPtr(iter);
-
-                    yield return (DHCP_CLIENT_INFO_VQ)Marshal.PtrToStructure(clientPtr, typeof(DHCP_CLIENT_INFO_VQ));
-
-                    iter += IntPtr.Size;
+                    client.Item2.Dispose();
+                    Api.DhcpRpcFreeMemory(client.Item1);
                 }
+                Clients = null;
+            }
+
+            if (ClientsPointer != IntPtr.Zero)
+            {
+                Api.DhcpRpcFreeMemory(ClientsPointer);
+                ClientsPointer = IntPtr.Zero;
             }
         }
     }

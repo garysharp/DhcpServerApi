@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_BINARY_DATA structure defines an opaque blob of binary data.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BINARY_DATA
+    internal struct DHCP_BINARY_DATA : IDisposable
     {
         /// <summary>
         /// Specifies the size of Data, in bytes.
@@ -26,14 +26,30 @@ namespace Dhcp.Native
         {
             get
             {
-                byte[] blob = new byte[this.DataLength];
-
-                if (this.DataLength != 0)
+                if (DataPointer == IntPtr.Zero)
                 {
-                    Marshal.Copy(this.DataPointer, blob, 0, this.DataLength);
+                    return null;
                 }
+                else
+                {
+                    byte[] blob = new byte[this.DataLength];
 
-                return blob;
+                    if (this.DataLength != 0)
+                    {
+                        Marshal.Copy(this.DataPointer, blob, 0, this.DataLength);
+                    }
+
+                    return blob;
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (DataPointer != IntPtr.Zero)
+            {
+                Api.DhcpRpcFreeMemory(DataPointer);
+                DataPointer = IntPtr.Zero;
             }
         }
     }

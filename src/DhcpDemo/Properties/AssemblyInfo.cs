@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Dhcp Server API")]
-[assembly: AssemblyCopyright("Copyright 2015 Gary Sharp")]
+[assembly: AssemblyCopyright("Copyright 2016 Gary Sharp")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Dhcp.Native
 {
@@ -6,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO_VQ structure defines information about the DHCPv4 client.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_VQ
+    internal struct DHCP_CLIENT_INFO_VQ : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS type value that contains the DHCPv4 client's IPv4 address. 
@@ -23,13 +24,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the DHCPv4 client's machine name.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string ClientName;
+        private IntPtr ClientNamePointer;
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the description given to the DHCPv4 client.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string ClientComment;
+        private IntPtr ClientCommentPointer;
         /// <summary>
         /// DATE_TIME structure that contains the lease expiry time for the DHCPv4 client. This is UTC time represented in the FILETIME format.
         /// </summary>
@@ -58,5 +57,59 @@ namespace Dhcp.Native
         /// If TRUE, the DHCPv4 client is quarantine-enabled; if FALSE, it is not.
         /// </summary>
         public bool QuarantineCapable;
+
+        /// <summary>
+        /// Pointer to a null-terminated Unicode string that represents the DHCPv4 client's machine name.
+        /// </summary>
+        public string ClientName
+        {
+            get
+            {
+                if (ClientNamePointer == IntPtr.Zero)
+                {
+                    return null;
+                }
+                else
+                {
+                    return Marshal.PtrToStringUni(ClientNamePointer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Pointer to a null-terminated Unicode string that represents the description given to the DHCPv4 client.
+        /// </summary>
+        public string ClientComment
+        {
+            get
+            {
+                if (ClientCommentPointer == IntPtr.Zero)
+                {
+                    return null;
+                }
+                else
+                {
+                    return Marshal.PtrToStringUni(ClientCommentPointer);
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            ClientHardwareAddress.Dispose();
+            OwnerHost.Dispose();
+
+            if (ClientNamePointer != IntPtr.Zero)
+            {
+                Api.DhcpRpcFreeMemory(ClientNamePointer);
+                ClientNamePointer = IntPtr.Zero;
+            }
+
+            if (ClientCommentPointer != IntPtr.Zero)
+            {
+                Api.DhcpRpcFreeMemory(ClientCommentPointer);
+                ClientCommentPointer = IntPtr.Zero;
+            }
+        }
     }
 }
