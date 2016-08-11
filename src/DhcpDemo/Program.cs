@@ -53,6 +53,18 @@ namespace DhcpDemo
             Console.WriteLine("{0,30}: {1}", "Max Log Files Size", auditLog.MaxLogFilesSize);
             Console.WriteLine("{0,30}: {1}", "Min Space On Disk", auditLog.MinSpaceOnDisk);
 
+            // DNS Settings
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" DNS Settings:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            var dnsSettings = dhcpServer.DnsSettings;
+            Console.WriteLine("{0,44}: {1}", "Dynamic DNS Updates Enabled", dnsSettings.DynamicDnsUpdatesEnabled);
+            Console.WriteLine("{0,44}: {1}", "Dynamic DNS Updates Only When Requested", dnsSettings.DynamicDnsUpdatedOnlyWhenRequested);
+            Console.WriteLine("{0,44}: {1}", "Dynamic DNS Updates Always", dnsSettings.DynamicDnsUpdatedAlways);
+            Console.WriteLine("{0,44}: {1}", "Discard Records When Leases Deleted", dnsSettings.DiscardRecordsWhenLeasesDeleted);
+            Console.WriteLine("{0,44}: {1}", "Update Records for Down-Level Clients", dnsSettings.UpdateRecordsForDownLevelClients);
+            Console.WriteLine("{0,44}: {1}", "Disable Dynamic PTR Record Updates", dnsSettings.DisableDynamicPtrRecordUpdates); 
+
             // Binding Elements
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Binding Elements:");
@@ -66,6 +78,33 @@ namespace DhcpDemo
                 Console.WriteLine("{0,30}: {1}", "Adapter Subnet Address", be.AdapterSubnetAddress);
             }
 
+            // Enum Default Options
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" All Options:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var option in dhcpServer.AllOptions.ToList())
+            {
+                Console.WriteLine("   {0}", option.ToString());
+            }
+
+            // Enum Default Options
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" Default Options ({0}):", dhcpServer.DefaultVendorClassName);
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var option in dhcpServer.Options.ToList())
+            {
+                Console.WriteLine("   {0}", option.ToString());
+            }
+
+            // Enum Default Global Option Values
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" Global Option Values:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var value in dhcpServer.AllGlobalOptionValues.ToList())
+            {
+                Console.WriteLine("   {0}", value.ToString());
+            }
+
             // Enum Classes
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Classes:");
@@ -77,36 +116,14 @@ namespace DhcpDemo
             {
                 Console.WriteLine("   {0}", c.Name);
                 Console.WriteLine("      Comment: {0}", c.Comment);
-                Console.WriteLine("      Is Vendor: {0}", c.IsVendor);
-                Console.WriteLine("      Data: {0}", c.Data.ToString());
-            }
+                Console.WriteLine("      Type: {0}", c.IsVendorClass ? "Vendor Class" : "User Class");
+                Console.WriteLine("      Data: {0}", c.DataText);
 
-            // Enum Options
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Options:");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var option in dhcpServer.Options.ToList())
-            {
-                Console.WriteLine("   {0} [{1}: {2}]", option.OptionId, option.Name, option.Comment);
-                foreach (var element in option.DefaultValue.ToList())
+                // Enum Class Options
+                Console.WriteLine("      Options");
+                foreach (var option in c.Options.ToList())
                 {
-                    Console.WriteLine("      Default: {0}", element);
-                }
-            }
-
-            // Enum Global Option Values
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Global Option Values:");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var value in dhcpServer.GlobalOptionValues.ToList())
-            {
-                if (value.Option == null)
-                    Console.WriteLine("   {0} [UNKNOWN OPTION]:", value.OptionId);
-                else
-                    Console.WriteLine("   {0} [{1}]:", value.OptionId, value.Option.Name);
-                foreach (var element in value.Values.ToList())
-                {
-                    Console.WriteLine("      {0}", element);
+                    Console.WriteLine("         {0}", option.ToString());
                 }
             }
 
@@ -144,16 +161,9 @@ namespace DhcpDemo
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Options:");
                 Console.ForegroundColor = ConsoleColor.Gray;
-                foreach (var value in scope.OptionValues.ToList())
+                foreach (var value in scope.AllOptionValues.ToList())
                 {
-                    if (value.Option == null)
-                        Console.WriteLine("        {0} [UNKNOWN OPTION]:", value.OptionId);
-                    else
-                        Console.WriteLine("        {0} [{1}]:", value.OptionId, value.Option.Name);
-                    foreach (var element in value.Values.ToList())
-                    {
-                        Console.WriteLine("           {0}", element);
-                    }
+                    Console.WriteLine("        {0}", value.ToString());
                 }
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Reservations:");
@@ -166,14 +176,7 @@ namespace DhcpDemo
                     Console.ForegroundColor = ConsoleColor.Gray;
                     foreach (var value in reservation.OptionValues.ToList())
                     {
-                        if (value.Option == null)
-                            Console.WriteLine("            {0} [UNKNOWN OPTION]:", value.OptionId);
-                        else
-                            Console.WriteLine("            {0} [{1}]:", value.OptionId, value.Option.Name);
-                        foreach (var element in value.Values.ToList())
-                        {
-                            Console.WriteLine("               {0}", element);
-                        }
+                        Console.WriteLine("            {0}", value.ToString());
                     }
                 }
                 Console.ForegroundColor = ConsoleColor.White;

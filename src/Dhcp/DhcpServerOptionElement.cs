@@ -181,6 +181,9 @@ namespace Dhcp
             {
                 var builder = new StringBuilder();
 
+                if (RawValue == null)
+                    return null;
+
                 if (RawValue.Length > 0)
                 {
                     builder.Append(RawValue[0].ToString("X2"));

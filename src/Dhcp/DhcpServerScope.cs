@@ -15,6 +15,7 @@ namespace Dhcp
         private Lazy<DhcpServerIpRange> ipRange;
         private Lazy<List<DhcpServerIpRange>> excludedIpRanges;
         private Lazy<TimeSpan> leaseDuration;
+        private Lazy<DhcpServerDnsSettings> dnsSettings;
 
         public DhcpServer Server { get; private set; }
 
@@ -43,16 +44,28 @@ namespace Dhcp
             this.ipRange = new Lazy<DhcpServerIpRange>(GetIpRange);
             this.excludedIpRanges = new Lazy<List<DhcpServerIpRange>>(GetExcludedIpRanges);
             this.leaseDuration = new Lazy<TimeSpan>(GetLeaseDuration);
+            this.dnsSettings = new Lazy<DhcpServerDnsSettings>(() => DhcpServerDnsSettings.GetScopeDnsSettings(this));
         }
 
         /// <summary>
-        /// Enumerates a list of Global Option Values associated with the DHCP Server
+        /// Enumerates a list of Default Option Values associated with the DHCP Scope
         /// </summary>
         public IEnumerable<DhcpServerOptionValue> OptionValues
         {
             get
             {
-                return DhcpServerOptionValue.EnumScopeOptionValues(this);
+                return DhcpServerOptionValue.EnumScopeDefaultOptionValues(this);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
+        /// </summary>
+        public IEnumerable<DhcpServerOptionValue> AllOptionValues
+        {
+            get
+            {
+                return DhcpServerOptionValue.GetAllScopeOptionValues(this);
             }
         }
 
@@ -94,6 +107,48 @@ namespace Dhcp
             {
                 return this.leaseDuration.Value;
             }
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Scope
+        /// </summary>
+        /// <param name="Option">The associated option to retrieve the option value for</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetOptionValue(DhcpServerOption Option)
+        {
+            return Option.GetScopeValue(this);
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Scope from the Default options
+        /// </summary>
+        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetOptionValue(int OptionId)
+        {
+            return DhcpServerOptionValue.GetScopeDefaultOptionValue(this, OptionId);
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Scope within a Vendor Class
+        /// </summary>
+        /// <param name="VendorName">The name of the Vendor Class to retrieve the Option from</param>
+        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetVendorOptionValue(string VendorName, int OptionId)
+        {
+            return DhcpServerOptionValue.GetScopeVendorOptionValue(this, OptionId, VendorName);
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Scope within a User Class
+        /// </summary>
+        /// <param name="ClassName">The name of the User Class to retrieve the Option from</param>
+        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetUserOptionValue(string ClassName, int OptionId)
+        {
+            return DhcpServerOptionValue.GetScopeUserOptionValue(this, OptionId, ClassName);
         }
 
         internal static IEnumerable<DhcpServerScope> GetScopes(DhcpServer Server)
@@ -208,7 +263,7 @@ namespace Dhcp
 
         private TimeSpan GetLeaseDuration()
         {
-            var option = DhcpServerOptionValue.GetScopeOptionValue(this, 51);
+            var option = DhcpServerOptionValue.GetScopeDefaultOptionValue(this, 51);
 
             if (option == null)
             {

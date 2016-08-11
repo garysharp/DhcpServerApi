@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Dhcp
 {
@@ -27,16 +28,106 @@ namespace Dhcp
         /// <summary>
         /// Indicates whether or not the options are vendor-specific
         /// </summary>
-        public bool IsVendor { get; private set; }
+        public bool IsVendorClass { get; private set; }
+
+        /// <summary>
+        /// Indicates whether or not the options are user-specific
+        /// </summary>
+        public bool IsUserClass
+        {
+            get
+            {
+                return !IsVendorClass;
+            }
+        }
 
         /// <summary>
         /// A byte buffer that contains specific data for the class
         /// </summary>
         public byte[] Data { get; private set; }
 
+        /// <summary>
+        /// An ASCII representation of the <see cref="Data"/> buffer.
+        /// </summary>
+        public string DataText
+        {
+            get
+            {
+                if (Data == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return Encoding.ASCII.GetString(Data);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates a list of all Options associated with this class
+        /// </summary>
+        public IEnumerable<DhcpServerOption> Options
+        {
+            get
+            {
+                if (IsVendorClass)
+                {
+                    return DhcpServerOption.EnumVendorOptions(Server, Name);
+                }
+                else
+                {
+                    return DhcpServerOption.EnumUserOptions(Server, Name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates a list of all Global Option Values associated with this class
+        /// </summary>
+        public IEnumerable<DhcpServerOptionValue> GlobalOptionValues
+        {
+            get
+            {
+                if (IsVendorClass)
+                {
+                    return DhcpServerOptionValue.EnumGlobalVendorOptionValues(Server, Name);
+                }
+                else
+                {
+                    return DhcpServerOptionValue.EnumGlobalUserOptionValues(Server, Name);
+                }
+            }
+        }
+
         private DhcpServerClass(DhcpServer Server)
         {
             this.Server = Server;
+        }
+
+        internal static DhcpServerClass GetClass(DhcpServer Server, string Name)
+        {
+            IntPtr classIntoPtr;
+
+            var query = new DHCP_CLASS_INFO()
+            {
+                ClassName = Name,
+                ClassDataLength = 0,
+                ClassData = IntPtr.Zero
+            };
+
+            var result = Api.DhcpGetClassInfo(Server.ipAddress.ToString(), 0, query, out classIntoPtr);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException("DhcpGetClassInfo", result);
+
+            var classInfo = (DHCP_CLASS_INFO)Marshal.PtrToStructure(classIntoPtr, typeof(DHCP_CLASS_INFO));
+
+            var dhcpClass = FromNative(Server, classInfo);
+
+            Api.DhcpRpcFreeMemory(classIntoPtr);
+
+            return dhcpClass;
         }
 
         internal static IEnumerable<DhcpServerClass> GetClasses(DhcpServer Server)
@@ -79,7 +170,7 @@ namespace Dhcp
             {
                 Name = Native.ClassName,
                 Comment = Native.ClassComment,
-                IsVendor = Native.IsVendor,
+                IsVendorClass = Native.IsVendor,
                 Data = data
             };
         }

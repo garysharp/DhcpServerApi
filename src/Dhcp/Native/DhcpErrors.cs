@@ -23,6 +23,8 @@ namespace Dhcp.Native
 
         [DhcpErrorDescription("This call was performed by a client who is not a member of the \"DHCP Administrators\" security group.")]
         ERROR_ACCESS_DENIED = 5,
+        [DhcpErrorDescription("The parameter is incorrect.")]
+        ERROR_INVALID_PARAMETER = 87,
 
         [DhcpErrorDescription("The system cannot find the file specified.")]
         ERROR_FILE_NOT_FOUND = 2,

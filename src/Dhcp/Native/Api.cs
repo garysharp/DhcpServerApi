@@ -82,7 +82,23 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern DhcpErrors DhcpEnumOptions(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
-        
+
+        /// <summary>
+        /// The DhcpEnumOptions function returns an enumerated set of options stored on the DHCPv4 server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">A set of flags that indicate the option definition for enumeration. 0x00000000 = The option definitions are enumerated for a default vendor class; DHCP_FLAGS_OPTION_IS_VENDOR (0x00000003) = The option definitions are enumerated for a specific vendor class.</param>
+        /// <param name="ClassName">Pointer to a Unicode string that contains the name of the class whose options will be enumerated. This parameter is optional. </param>
+        /// <param name="VendorName">Pointer to a Unicode string that contains the name of the vendor for the class. This parameter is optional. If a vendor class name is not provided, the default vendor class name is used.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes of option definitions are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of options to return. If the number of remaining unenumerated option definitions (in bytes) is less than this value, all option definitions are returned.</param>
+        /// <param name="Options">Pointer to a DHCP_OPTION_ARRAY structure containing the returned option definitions. If there are no option definitions available on the DHCP server, this parameter will return null.</param>
+        /// <param name="OptionsRead">Pointer to a DWORD value that specifies the number of option definitions returned in Options.</param>
+        /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of unenumerated option definitions on the DHCP server.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumOptionsV5(string ServerIpAddress, uint Flags, string ClassName, string VendorName, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
+
         /// <summary>
         /// The DhcpEnumOptionValues function returns an enumerated list of option values (just the option data and the associated ID number) for a given scope.
         /// </summary>
@@ -95,9 +111,26 @@ namespace Dhcp.Native
         /// <param name="OptionValues">Pointer to a <see cref="DHCP_OPTION_VALUE_ARRAY"/> structure that contains the enumerated option values returned for the specified scope. If there are no option values available for this scope on the DHCP server, this parameter will return null.</param>
         /// <param name="OptionsRead">Pointer to a DWORD value that specifies the number of option values returned in OptionValues.</param>
         /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of remaining option values for this scope stored on the DHCP server.</param>
-        /// <returns></returns>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern DhcpErrors DhcpEnumOptionValues(string ServerIpAddress, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
+
+        /// <summary>
+        /// The DhcpEnumOptionValuesV5 function returns an enumerated list of option values (just the option data and the associated ID number) for a specific scope within a given user or vendor class.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a bit flag that indicates whether or not the option is vendor specific. If it is not vendor specific, this parameter must be 0. 0x00000000 = The option values are enumerated for a default vendor class; DHCP_FLAGS_OPTION_IS_VENDOR (0x00000003) = The option values are enumerated for a specific vendor class.</param>
+        /// <param name="ClassName">Pointer to a Unicode string that contains the name of the class whose scope option values will be enumerated.</param>
+        /// <param name="VendorName">Pointer to a Unicode string that contains the name of the vendor for the class. This parameter is optional. If a vendor class name is not provided, the option values enumerated for a default vendor class.</param>
+        /// <param name="ScopeInfo">Pointer to a DHCP_OPTION_SCOPE_INFO structure that contains the scope for which the option values are defined. This value defines the option values that will be retrieved from the server, scope, or default level, or for an IPv4 reservation.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE value that identifies the enumeration operation. Initially, this value should be zero, with a successful call returning the handle value used for subsequent enumeration requests. For example, if PreferredMaximum is set to 1000 bytes, and 2000 bytes' worth of option values are stored on the server, the resume handle can be used after the first 1000 bytes are retrieved to obtain the next 1000 on a subsequent call, and so forth.</param>
+        /// <param name="PreferredMaximum">Specifies the preferred maximum number of bytes of option values to return. If the number of remaining unenumerated options (in bytes) is less than this value, all option values are returned.</param>
+        /// <param name="OptionValues">Pointer to a DHCP_OPTION_VALUE_ARRAY structure that contains the enumerated option values returned for the specified scope. If there are no option values available for this scope on the DHCP server, this parameter will return null.</param>
+        /// <param name="OptionsRead">Pointer to a DWORD value that specifies the number of option values returned in OptionValues.</param>
+        /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of as-yet unenumerated option values for this scope stored on the DHCP server.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpEnumOptionValuesV5(string ServerIpAddress, uint Flags, string ClassName, string VendorName, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
 
         /// <summary>
         /// The DhcpGetOptionValue function retrieves a DHCP option value (the option code and associated data) for a particular scope.
@@ -111,6 +144,35 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpGetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, out IntPtr OptionValue);
 
         /// <summary>
+        /// The DhcpGetOptionValueV5 function retrieves a DHCP option value (the option code and associated data) for a particular scope. This function extends the functionality provided by DhcpGetOptionValue by allowing the caller to specify a class and/or vendor for the option.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Flag value that indicates whether the option is for a specific or default vendor class. 0x00000000 = The option value is retrieved for a default vendor class; DHCP_FLAGS_OPTION_IS_VENDOR (0x00000003) = The option value is retrieved for a specific vendor class. The vendor name is supplied in VendorName.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that specifies the code for the option value to retrieve.</param>
+        /// <param name="ClassName">Unicode string that specifies the DHCP class name of the option. This parameter is optional.</param>
+        /// <param name="VendorName">Unicode string that specifies the vendor of the option. This parameter is optional, and should be null when Flags is not set to DHCP_FLAGS_OPTION_IS_VENDOR. If the vendor class is not specified, the option value is returned for the default vendor class.</param>
+        /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains information on the scope where the option value is set.</param>
+        /// <param name="OptionValue">DHCP_OPTION_VALUE structure that contains the returned option code and data.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, out IntPtr OptionValue);
+
+        /// <summary>
+        /// The DhcpGetClassInfo function returns the user or vendor class information configured on a specific DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ReservedMustBeZero">Reserved. This parameter must be set to 0.</param>
+        /// <param name="PartialClassInfo">DHCP_CLASS_INFO structure that contains data provided by the caller for the following members, with all other fields initialized.
+        /// - ClassName;
+        /// - ClassData;
+        /// - ClassDataLength;
+        /// These fields must not be null.</param>
+        /// <param name="FilledClassInfo">DHCP_CLASS_INFO structure returned after lookup that contains the complete class information.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO PartialClassInfo, out IntPtr FilledClassInfo);
+
+        /// <summary>
         /// The DhcpEnumClasses function enumerates the user or vendor classes configured for the DHCP server.
         /// </summary>
         /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
@@ -121,6 +183,7 @@ namespace Dhcp.Native
         /// <param name="nRead">Pointer to a DWORD value that specifies the number of classes returned in ClassInfoArray.</param>
         /// <param name="nTotal">Pointer to a DWORD value that specifies the total number of classes stored on the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>A DHCP class is a specific category of client, defined either by the vendor or by a user. An example of a vendor-defined class would be all Windows 8 clients, with Microsoft as the vendor. A user-defined class consists of those clients with specific attributes selected by a user or administrator, such as all laptops or clients that support wireless connections.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern DhcpErrors DhcpEnumClasses(string ServerIpAddress, uint ReservedMustBeZero, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClassInfoArray, out int nRead, out int nTotal);
 
@@ -161,6 +224,18 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpGetAllOptions(string ServerIpAddress, uint Flags, out IntPtr OptionStruct);
 
         /// <summary>
+        /// The DhcpGetAllOptionValues function returns an array that contains all option values defined for a specific scope on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a bit flag that indicates whether the options are vendor-specific. If the qualification of vendor options is not necessary, this parameter should be 0.</param>
+        /// <param name="ScopeInfo">Pointer to a DHCP_OPTION_SCOPE_INFO structure that contains information on the specific scope whose option values will be returned. This information defines the option values that are being retrieved from the default, server, or scope level, or for a specific IPv4 reservation.</param>
+        /// <param name="Values">Pointer to a DHCP_ALL_OPTION_VALUES structure that contains the returned option values for the scope specified in ScopeInfo.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        /// <remarks>There will be one option value in the array specified by Values for each vendor/class pair defined on the DHCP server.</remarks>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetAllOptionValues(string ServerIpAddress, uint Flags, IntPtr ScopeInfo, out IntPtr Values);
+
+        /// <summary>
         /// The DhcpGetOptionInfo function returns information on a specific DHCP option for the default user and vendor class.
         /// </summary>
         /// <param name="ServerIpAddress">Unicode string that specifies the IPv4 address of the DHCP server.</param>
@@ -170,6 +245,19 @@ namespace Dhcp.Native
         /// ERROR_DHCP_OPTION_NOT_PRESENT = The specified option definition could not be found in the DHCP server database.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern DhcpErrors DhcpGetOptionInfo(string ServerIpAddress, int OptionID, out IntPtr OptionInfo);
+
+        /// <summary>
+        /// The DhcpGetOptionInfoV5 function returns information on a specific DHCP option.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a bit flag that indicates whether or not the option is vendor-specific. If it is not, this parameter should be 0.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that specifies the code for the option to retrieve information on.</param>
+        /// <param name="ClassName">Unicode string that specifies the DHCP class name of the option. This parameter is optional.</param>
+        /// <param name="VendorName">Unicode string that specifies the vendor of the option. This parameter is optional, and must be null when Flags is not set to DHCP_FLAGS_OPTION_IS_VENDOR. If it is not set, then the option definition for the default vendor class is returned.</param>
+        /// <param name="OptionInfo">Pointer to a DHCP_OPTION structure that contains the returned information on the option specified by OptionID.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpGetOptionInfoV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, out IntPtr OptionInfo);
 
         /// <summary>
         /// The DhcpEnumSubnetClients function returns an enumerated list of clients with served IP addresses in the specified subnet.

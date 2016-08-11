@@ -61,14 +61,67 @@ namespace Dhcp
         public DhcpServerClient Client { get { return this.client.Value; } }
 
         /// <summary>
-        /// Enumerates a list of Global Option Values associated with the DHCP Server
+        /// Enumerates a list of Default Global Option Values associated with the DHCP Server
         /// </summary>
         public IEnumerable<DhcpServerOptionValue> OptionValues
         {
             get
             {
-                return DhcpServerOptionValue.EnumScopeReservationOptionValues(this);
+                return DhcpServerOptionValue.EnumScopeReservationDefaultOptionValues(this);
             }
+        }
+
+        /// <summary>
+        /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Server
+        /// </summary>
+        public IEnumerable<DhcpServerOptionValue> AllOptionValues
+        {
+            get
+            {
+                return DhcpServerOptionValue.GetAllScopeReservationOptionValues(this);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Reservation Scope
+        /// </summary>
+        /// <param name="Option">The associated option to retrieve the option value for</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetOptionValue(DhcpServerOption Option)
+        {
+            return Option.GetScopeReservationValue(this);
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Reservation Scope from the Default options
+        /// </summary>
+        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetOptionValue(int OptionId)
+        {
+            return DhcpServerOptionValue.GetScopeReservationDefaultOptionValue(this, OptionId);
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Reservation Scope within a Vendor Class
+        /// </summary>
+        /// <param name="VendorName">The name of the Vendor Class to retrieve the Option from</param>
+        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetVendorOptionValue(string VendorName, int OptionId)
+        {
+            return DhcpServerOptionValue.GetScopeReservationVendorOptionValue(this, OptionId, VendorName);
+        }
+
+        /// <summary>
+        /// Retrieves the Option Value assoicated with the Option and Reservation Scope within a User Class
+        /// </summary>
+        /// <param name="ClassName">The name of the User Class to retrieve the Option from</param>
+        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public DhcpServerOptionValue GetUserOptionValue(string ClassName, int OptionId)
+        {
+            return DhcpServerOptionValue.GetScopeReservationUserOptionValue(this, OptionId, ClassName);
         }
 
         private DhcpServerScopeReservation(DhcpServerScope Scope)
