@@ -110,7 +110,7 @@ namespace Dhcp
             return GetOption(Server, OptionId, ClassName, null);
         }
 
-        private static DhcpServerOption GetOption(DhcpServer Server, int OptionId, string ClassName, string VendorName)
+        internal static DhcpServerOption GetOption(DhcpServer Server, int OptionId, string ClassName, string VendorName)
         {
             if (Server.IsCompatible(DhcpServerVersions.Windows2008R2))
             {

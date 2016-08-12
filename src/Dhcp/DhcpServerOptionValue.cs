@@ -38,7 +38,7 @@ namespace Dhcp
 
         private DhcpServerOption GetOption()
         {
-            return this.Server.GetOption(this.OptionId);
+            return DhcpServerOption.GetOption(this.Server, this.OptionId, this.ClassName, this.VendorName);
         }
 
         private static DhcpServerOptionValue FromNative(DhcpServer Server, DHCP_OPTION_VALUE Native, string ClassName, string VendorName)
@@ -46,7 +46,9 @@ namespace Dhcp
             return new DhcpServerOptionValue(Server)
             {
                 OptionId = Native.OptionID,
-                Values = DhcpServerOptionElement.ReadNativeElements(Native.Value).ToList()
+                Values = DhcpServerOptionElement.ReadNativeElements(Native.Value).ToList(),
+                ClassName = ClassName,
+                VendorName = VendorName
             };
         }
 
@@ -237,7 +239,8 @@ namespace Dhcp
                     {
                         foreach (var value in @class.OptionsArray.Values)
                         {
-                            if (value.OptionID != 81)
+                            // Ignore OptionID 81 (Used for DNS Settings - has no matching Option)
+                            if (!(@class.ClassName == null && @class.VendorName == null && value.OptionID == 81))
                             {
                                 yield return FromNative(Server, value, @class.ClassName, @class.VendorName);
                             }
