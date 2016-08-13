@@ -224,9 +224,6 @@ namespace Dhcp
 
             var result = Api.DhcpEnumSubnetElementsV5(Server.ipAddress.ToString(), this.address, EnumElementType, ref resumeHandle, 0xFFFFFFFF, out elementsPtr, out elementsRead, out elementsTotal);
 
-            if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpEnumSubnetElementsV5", result);
-
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
                 yield break;
 
