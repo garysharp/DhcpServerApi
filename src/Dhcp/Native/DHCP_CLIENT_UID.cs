@@ -9,12 +9,12 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the size of Data, in bytes.
         /// </summary>
-        public int DataLength;
+        public readonly int DataLength;
 
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private IntPtr DataPointer;
+        private readonly IntPtr DataPointer;
 
         /// <summary>
         /// Blob of byte (binary) data.
@@ -23,30 +23,22 @@ namespace Dhcp.Native
         {
             get
             {
-                byte[] blob = new byte[this.DataLength];
+                var blob = new byte[DataLength];
 
-                if (this.DataLength != 0)
-                {
-                    Marshal.Copy(this.DataPointer, blob, 0, this.DataLength);
-                }
+                if (DataLength != 0)
+                    Marshal.Copy(DataPointer, blob, 0, DataLength);
 
                 return blob;
             }
         }
 
-        public DHCP_IP_ADDRESS ClientIpAddressMask
-        {
-            get
-            {
-                return (DHCP_IP_ADDRESS)Marshal.ReadInt32(DataPointer);
-            }
-        }
+        public DHCP_IP_ADDRESS ClientIpAddressMask => (DHCP_IP_ADDRESS)Marshal.ReadInt32(DataPointer);
 
         public byte[] ClientMacAddress
         {
             get
             {
-                byte[] macAddress = new byte[6];
+                var macAddress = new byte[6];
 
                 Marshal.Copy(DataPointer + 5, macAddress, 0, 6);
 

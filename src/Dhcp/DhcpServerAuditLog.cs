@@ -7,47 +7,50 @@ namespace Dhcp
         /// <summary>
         /// The associated DHCP Server
         /// </summary>
-        public DhcpServer Server { get; private set; }
+        public DhcpServer Server { get; }
 
         /// <summary>
         /// The directory where the audit log is stored as an absolute path within the file system.
         /// </summary>
-        public string AuditLogDirectory { get; private set; }
+        public string AuditLogDirectory { get; }
 
         /// <summary>
         /// The disk check interval for attempting to write the audit log to the specified file as the number of logged DHCP server events that should occur between checks.
         /// </summary>
-        public int DiskCheckInterval { get; private set; }
+        public int DiskCheckInterval { get; }
 
         /// <summary>
         /// The maximum log file size, in bytes.
         /// </summary>
-        public int MaxLogFilesSize { get; private set; }
+        public int MaxLogFilesSize { get; }
         
         /// <summary>
         /// The minimum required disk space, in bytes, for audit log storage.
         /// </summary>
-        public int MinSpaceOnDisk { get; private set; }
+        public int MinSpaceOnDisk { get; }
 
-        private DhcpServerAuditLog(string AuditLogDir, int DiskCheckInterval, int MaxLogFilesSize, int MinSpaceOnDisk)
+        private DhcpServerAuditLog(DhcpServer server, string auditLogDir, int diskCheckInterval, int maxLogFilesSize, int minSpaceOnDisk)
         {
-            this.AuditLogDirectory = AuditLogDir;
-            this.DiskCheckInterval = DiskCheckInterval;
-            this.MaxLogFilesSize = MaxLogFilesSize;
-            this.MinSpaceOnDisk = MinSpaceOnDisk;
+            Server = server;
+            AuditLogDirectory = auditLogDir;
+            DiskCheckInterval = diskCheckInterval;
+            MaxLogFilesSize = maxLogFilesSize;
+            MinSpaceOnDisk = minSpaceOnDisk;
         }
 
-        internal static DhcpServerAuditLog GetParams(DhcpServer Server)
+        internal static DhcpServerAuditLog GetParams(DhcpServer server)
         {
-            string auditLogDir;
-            int diskCheckInterval, maxLogFilesSize, minSpaceOnDisk;
-
-            DhcpErrors result = Api.DhcpAuditLogGetParams(Server.ipAddress.ToString(), 0, out auditLogDir, out diskCheckInterval, out maxLogFilesSize, out minSpaceOnDisk);
+            var result = Api.DhcpAuditLogGetParams(ServerIpAddress: server.ipAddress,
+                                                   Flags: 0,
+                                                   AuditLogDir: out var auditLogDir,
+                                                   DiskCheckInterval: out var diskCheckInterval,
+                                                   MaxLogFilesSize: out var maxLogFilesSize,
+                                                   MinSpaceOnDisk: out var minSpaceOnDisk);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpAuditLogGetParams", result);
+                throw new DhcpServerException(nameof(Api.DhcpAuditLogGetParams), result);
 
-            return new DhcpServerAuditLog(auditLogDir, diskCheckInterval, maxLogFilesSize, minSpaceOnDisk);
+            return new DhcpServerAuditLog(server, auditLogDir, diskCheckInterval, maxLogFilesSize, minSpaceOnDisk);
         }
     }
 }

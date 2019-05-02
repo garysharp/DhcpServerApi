@@ -12,25 +12,19 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the reserved IP address.
         /// </summary>
-        public DHCP_IP_ADDRESS ReservedIpAddress;
+        public readonly DHCP_IP_ADDRESS ReservedIpAddress;
         /// <summary>
         /// DHCP_CLIENT_UID structure that contains the hardware address (MAC address) of the DHCPv4 client that holds this reservation.
         /// </summary>
-        private IntPtr reservedForClient;
+        private readonly IntPtr reservedForClient;
         /// <summary>
         /// Value that specifies the DHCPv4 reserved client type.
         /// </summary>
-        public ClientTypes bAllowedClientTypes;
+        public readonly ClientTypes bAllowedClientTypes;
 
         /// <summary>
         /// DHCP_CLIENT_UID structure that contains the hardware address (MAC address) of the DHCPv4 client that holds this reservation.
         /// </summary>
-        public DHCP_CLIENT_UID ReservedForClient
-        {
-            get
-            {
-                return (DHCP_CLIENT_UID)Marshal.PtrToStructure(reservedForClient, typeof(DHCP_CLIENT_UID));
-            }
-        }
+        public DHCP_CLIENT_UID ReservedForClient => reservedForClient.MarshalToStructure<DHCP_CLIENT_UID>();
     }
 }

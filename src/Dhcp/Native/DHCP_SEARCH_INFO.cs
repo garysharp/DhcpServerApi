@@ -16,14 +16,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_SEARCH_INFO_TYPE SearchType
         {
-            get
-            {
-                return (DHCP_SEARCH_INFO_TYPE)searchType;
-            }
-            set
-            {
-                searchType = (IntPtr)value;
-            }
+            get => (DHCP_SEARCH_INFO_TYPE)searchType;
+            set => searchType = (IntPtr)value;
         }
 
         /// <summary>
@@ -45,14 +39,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_SEARCH_INFO_TYPE SearchType
         {
-            get
-            {
-                return (DHCP_SEARCH_INFO_TYPE)searchType;
-            }
-            set
-            {
-                searchType = (IntPtr)value;
-            }
+            get => (DHCP_SEARCH_INFO_TYPE)searchType;
+            set => searchType = (IntPtr)value;
         }
 
         /// <summary>
@@ -74,14 +62,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_SEARCH_INFO_TYPE SearchType
         {
-            get
-            {
-                return (DHCP_SEARCH_INFO_TYPE)searchType;
-            }
-            set
-            {
-                searchType = (IntPtr)value;
-            }
+            get => (DHCP_SEARCH_INFO_TYPE)searchType;
+            set => searchType = (IntPtr)value;
         }
 
         /// <summary>

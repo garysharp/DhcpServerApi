@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Dhcp.Native
 {
@@ -15,33 +13,27 @@ namespace Dhcp.Native
         /// <summary>
         /// Reserved. This value should be set to 0.
         /// </summary>
-        public int Flags;
+        public readonly int Flags;
         /// <summary>
         /// DHCP_OPTION_ARRAY structure that contains the set of non-vendor options.
         /// </summary>
-        public IntPtr NonVendorOptionsPointer;
+        public readonly IntPtr NonVendorOptionsPointer;
         /// <summary>
         /// Specifies the number of vendor options listed in VendorOptions.
         /// </summary>
-        public int NumVendorOptions;
+        public readonly int NumVendorOptions;
         /// <summary>
         /// Pointer to a list of structures that contain the following fields.
         /// - Option: DHCP_OPTION structure that contains specific information describing the option.
         /// - VendorName: Unicode string that contains the name of the vendor for the option.
         /// - ClassName: Unicode string that contains the name of the DHCP class for the option.
         /// </summary>
-        public IntPtr VendorOptionsPointer;
+        public readonly IntPtr VendorOptionsPointer;
 
         /// <summary>
         /// DHCP_OPTION_ARRAY structure that contains the set of non-vendor options.
         /// </summary>
-        public DHCP_OPTION_ARRAY NonVendorOptions
-        {
-            get
-            {
-                return (DHCP_OPTION_ARRAY)Marshal.PtrToStructure(NonVendorOptionsPointer, typeof(DHCP_OPTION_ARRAY));
-            }
-        }
+        public DHCP_OPTION_ARRAY NonVendorOptions => NonVendorOptionsPointer.MarshalToStructure<DHCP_OPTION_ARRAY>();
 
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_VENDOR_OPTION"/> structures containing DHCP server options and the associated data.
@@ -50,12 +42,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.VendorOptionsPointer;
+                var instanceIter = VendorOptionsPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_VENDOR_OPTION));
-                for (int i = 0; i < this.NumVendorOptions; i++)
+                for (var i = 0; i < NumVendorOptions; i++)
                 {
-                    yield return (DHCP_VENDOR_OPTION)Marshal.PtrToStructure(instanceIter, typeof(DHCP_VENDOR_OPTION));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_VENDOR_OPTION>();
                     instanceIter += instanceSize;
                 }
             }

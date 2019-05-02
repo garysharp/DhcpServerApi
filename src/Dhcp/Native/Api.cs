@@ -66,7 +66,7 @@ namespace Dhcp.Native
         /// <param name="TimeDelayInMilliseconds">Unsigned 16-bit integer value that receive the time to delay an OFFER message after receiving a DISCOVER message as configured on the DHCP server, in milliseconds.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out UInt16 TimeDelayInMilliseconds);
+        public static extern DhcpErrors DhcpGetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out ushort TimeDelayInMilliseconds);
 
         /// <summary>
         /// The DhcpEnumOptions function returns an enumerated set of options stored on the DHCPv4 server.

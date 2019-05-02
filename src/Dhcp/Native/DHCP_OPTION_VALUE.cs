@@ -11,10 +11,10 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_OPTION_ID value that specifies a unique ID number for the option.
         /// </summary>
-        public int OptionID;
+        public readonly int OptionID;
         /// <summary>
         /// DHCP_OPTION_DATA structure that contains the data for a DHCP server option.
         /// </summary>
-        public DHCP_OPTION_DATA Value;
+        public readonly DHCP_OPTION_DATA Value;
     }
 }

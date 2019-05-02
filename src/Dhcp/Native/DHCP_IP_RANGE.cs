@@ -11,10 +11,10 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the first IP address in the range.
         /// </summary>
-        public DHCP_IP_ADDRESS StartAddress;
+        public readonly DHCP_IP_ADDRESS StartAddress;
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the last IP address in the range.
         /// </summary>
-        public DHCP_IP_ADDRESS EndAddress;
+        public readonly DHCP_IP_ADDRESS EndAddress;
     }
 }

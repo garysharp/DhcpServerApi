@@ -13,12 +13,12 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the number of elements in Elements.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
 
         /// <summary>
         /// Pointer to a list of DHCP_SUBNET_ELEMENT_DATA_V5 structures that contain the data for the corresponding subnet elements.
         /// </summary>
-        private IntPtr ElementsPointer;
+        private readonly IntPtr ElementsPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_SUBNET_ELEMENT_DATA_V5 structures that contain the data for the corresponding subnet elements.
@@ -27,12 +27,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.ElementsPointer;
+                var instanceIter = ElementsPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_SUBNET_ELEMENT_DATA_V5));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_SUBNET_ELEMENT_DATA_V5)Marshal.PtrToStructure(instanceIter, typeof(DHCP_SUBNET_ELEMENT_DATA_V5));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_SUBNET_ELEMENT_DATA_V5>();
                     instanceIter += instanceSize;
                 }
             }

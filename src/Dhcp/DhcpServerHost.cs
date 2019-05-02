@@ -1,6 +1,6 @@
-﻿using Dhcp.Native;
-using System.Net;
+﻿using System.Net;
 using System.Text;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -8,28 +8,24 @@ namespace Dhcp
     {
         private DHCP_IP_ADDRESS ipAddress;
 
-        public IPAddress IpAddress { get { return ipAddress.ToIPAddress(); } }
-        public int IpAddressNative { get { return (int)ipAddress; } }
-        public string NetBiosName { get; private set; }
-        public string ServerName { get; private set; }
+        public IPAddress IpAddress => ipAddress.ToIPAddress();
+        public int IpAddressNative => (int)ipAddress;
+        public string NetBiosName { get; }
+        public string ServerName { get; }
 
-        private DhcpServerHost(DHCP_IP_ADDRESS IpAddress)
+        private DhcpServerHost(DHCP_IP_ADDRESS ipAddress, string netBiosName, string serverName)
         {
-            this.ipAddress = IpAddress;
+            this.ipAddress = ipAddress;
+            NetBiosName = netBiosName;
+            ServerName = serverName;
         }
 
-        internal static DhcpServerHost FromNative(DHCP_HOST_INFO Native)
-        {
-            return new DhcpServerHost(Native.IpAddress)
-            {
-                NetBiosName = Native.NetBiosName,
-                ServerName = Native.ServerName
-            };
-        }
+        internal static DhcpServerHost FromNative(DHCP_HOST_INFO native) 
+            => new DhcpServerHost(native.IpAddress, native.NetBiosName, native.ServerName);
 
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder(ipAddress.ToString());
+            var builder = new StringBuilder(ipAddress);
 
             if (!string.IsNullOrEmpty(ServerName))
                 builder.Append(" [").Append(ServerName).Append("]");

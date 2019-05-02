@@ -13,15 +13,15 @@ namespace Dhcp.Native
         /// <summary>
         /// Reserved. This value should be set to 0.
         /// </summary>
-        public int Flags;
+        public readonly int Flags;
         /// <summary>
         /// Specifies the number of elements in Options.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
         /// <summary>
         /// Pointer to a list of structures that contain the option values for specific class/vendor pairs.
         /// </summary>
-        public IntPtr OptionsPointer;
+        public readonly IntPtr OptionsPointer;
 
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_ALL_OPTION_VALUE_ITEM"/> structures containing the option values for specific class/vendor pairs.
@@ -30,12 +30,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.OptionsPointer;
+                var instanceIter = OptionsPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_ALL_OPTION_VALUE_ITEM));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_ALL_OPTION_VALUE_ITEM)Marshal.PtrToStructure(instanceIter, typeof(DHCP_ALL_OPTION_VALUE_ITEM));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_ALL_OPTION_VALUE_ITEM>();
                     instanceIter += instanceSize;
                 }
             }

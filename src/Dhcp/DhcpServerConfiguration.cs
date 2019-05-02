@@ -1,67 +1,71 @@
-﻿using Dhcp.Native;
-using System;
-using System.Runtime.InteropServices;
+﻿using System;
+using Dhcp.Native;
 
 namespace Dhcp
 {
     public class DhcpServerConfiguration
     {
-        public DhcpServer Server { get; private set; }
+        public DhcpServer Server { get; }
 
         /// <summary>
         /// Specifies a set of bit flags that contain the RPC protocols supported by the DHCP server.
         /// </summary>
-        public DhcpServerApiProtocol ApiProtocolSupport { get; private set; }
+        public DhcpServerApiProtocol ApiProtocolSupport { get; }
 
         /// <summary>
         /// Unicode string that specifies the file name of the client lease JET database.
         /// </summary>
-        public string DatabaseName { get; private set; }
+        public string DatabaseName { get; }
 
         /// <summary>
         /// Unicode string that specifies the absolute path to DatabaseName.
         /// </summary>
-        public string DatabasePath { get; private set; }
+        public string DatabasePath { get; }
 
         /// <summary>
         /// Unicode string that specifies the absolute path and file name of the backup client lease JET database.
         /// </summary>
-        public string BackupPath { get; private set; }
+        public string BackupPath { get; }
 
         /// <summary>
         /// Specifies the interval between backups of the client lease database.
         /// </summary>
-        public TimeSpan BackupInterval { get; private set; }
+        public TimeSpan BackupInterval { get; }
 
         /// <summary>
         /// Specifies a bit flag that indicates whether or not database actions should be logged.
         /// </summary>
-        public bool DatabaseLoggingEnabled { get; private set; }
+        public bool DatabaseLoggingEnabled { get; }
 
         /// <summary>
         /// Specifies the interval between cleanup operations performed on the client lease database.
         /// </summary>
-        public TimeSpan DatabaseCleanupInterval { get; private set; }
+        public TimeSpan DatabaseCleanupInterval { get; }
 
-        private DhcpServerConfiguration(DhcpServer Server)
+        private DhcpServerConfiguration(DhcpServer server, DhcpServerApiProtocol apiProtocolSupport, string databaseName, string databasePath, string backupPath, TimeSpan backupInterval, bool databaseLoggingEnabled, TimeSpan databaseCleanupInterval)
         {
-            this.Server = Server;
+            Server = server;
+            ApiProtocolSupport = apiProtocolSupport;
+            DatabaseName = databaseName;
+            DatabasePath = databasePath;
+            BackupPath = backupPath;
+            BackupInterval = backupInterval;
+            DatabaseLoggingEnabled = databaseLoggingEnabled;
+            DatabaseCleanupInterval = databaseCleanupInterval;
         }
 
-        internal static DhcpServerConfiguration GetConfiguration(DhcpServer Server)
+        internal static DhcpServerConfiguration GetConfiguration(DhcpServer server)
         {
-            IntPtr configInfoPtr;
-
-            var result = Api.DhcpServerGetConfig(Server.ipAddress.ToString(), out configInfoPtr);
+            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.ipAddress,
+                                                 ConfigInfo: out var configInfoPtr);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpServerGetConfig", result);
+                throw new DhcpServerException(nameof(Api.DhcpServerGetConfig), result);
 
             try
             {
-                var configInfo = (DHCP_SERVER_CONFIG_INFO)Marshal.PtrToStructure(configInfoPtr, typeof(DHCP_SERVER_CONFIG_INFO));
-                
-                return FromNative(Server, configInfo);
+                var configInfo = configInfoPtr.MarshalToStructure<DHCP_SERVER_CONFIG_INFO>();
+                return FromNative(server, configInfo);
             }
             finally
             {
@@ -69,23 +73,18 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerConfiguration FromNative(DhcpServer Server, DHCP_SERVER_CONFIG_INFO Native)
+        private static DhcpServerConfiguration FromNative(DhcpServer server, DHCP_SERVER_CONFIG_INFO native)
         {
-            return new DhcpServerConfiguration(Server)
-            {
-                ApiProtocolSupport = (DhcpServerApiProtocol)Native.APIProtocolSupport,
-                DatabaseName = Native.DatabaseName,
-                DatabasePath = Native.DatabasePath,
-                BackupPath = Native.BackupPath,
-                BackupInterval = TimeSpan.FromMinutes(Native.BackupInterval),
-                DatabaseLoggingEnabled = (Native.DatabaseLoggingFlag & 0x1) == 0x1,
-                DatabaseCleanupInterval = TimeSpan.FromMinutes(Native.DatabaseCleanupInterval)
-            };
+            return new DhcpServerConfiguration(server,
+                apiProtocolSupport: (DhcpServerApiProtocol)native.APIProtocolSupport,
+                databaseName: native.DatabaseName,
+                databasePath: native.DatabasePath,
+                backupPath: native.BackupPath,
+                backupInterval: TimeSpan.FromMinutes(native.BackupInterval),
+                databaseLoggingEnabled: (native.DatabaseLoggingFlag & 0x1) == 0x1,
+                databaseCleanupInterval: TimeSpan.FromMinutes(native.DatabaseCleanupInterval));
         }
 
-        public override string ToString()
-        {
-            return string.Format("DHCP Configuration: {0} ({1})", this.Server.Name, this.Server.IpAddress);
-        }
+        public override string ToString() => $"DHCP Configuration: {Server.Name} ({Server.IpAddress})";
     }
 }

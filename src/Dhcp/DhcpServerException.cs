@@ -1,72 +1,48 @@
-﻿using Dhcp.Native;
-using System;
+﻿using System;
 using System.Text;
+using Dhcp.Native;
 
 namespace Dhcp
 {
     public class DhcpServerException : Exception
     {
-        private DhcpErrors error;
-        private string additionalMessage;
-        private Lazy<string> errorMessage;
+        private readonly DhcpErrors error;
+        private readonly string additionalMessage;
+        private string errorMessage;
 
-        internal DhcpServerException(string ApiFunction, DhcpErrors Error)
+        internal DhcpServerException(string apiFunction, DhcpErrors error)
         {
-            this.ApiFunction = ApiFunction;
-            this.error = Error;
-
-            this.errorMessage = new Lazy<string>(this.GetApiErrorMessage);
+            ApiFunction = apiFunction;
+            this.error = error;
         }
 
-        internal DhcpServerException(string ApiFunction, DhcpErrors Error, string AdditionalMessage)
-            : this(ApiFunction, Error)
+        internal DhcpServerException(string apiFunction, DhcpErrors error, string additionalMessage)
+            : this(apiFunction, error)
         {
-            this.additionalMessage = AdditionalMessage;
+            this.additionalMessage = additionalMessage;
         }
 
-        public string ApiFunction { get; private set; }
+        public string ApiFunction { get; }
 
-        public string ApiError
-        {
-            get
-            {
-                return this.error.ToString();
-            }
-        }
+        public string ApiError => error.ToString();
 
-        public uint ApiErrorId
-        {
-            get
-            {
-                return (uint)this.error;
-            }
-        }
+        public uint ApiErrorId => (uint)error;
 
-        public string ApiErrorMessage
-        {
-            get
-            {
-                return this.errorMessage.Value;
-            }
-        }
+        public string ApiErrorMessage => errorMessage ??= GetApiErrorMessage();
 
         public override string Message
         {
             get
             {
-                StringBuilder builder = new StringBuilder();
+                var builder = new StringBuilder();
 
-                if (this.ApiFunction != null)
-                {
-                    builder.Append("An error occurred calling '").Append(this.ApiFunction).Append("'. ");
-                }
+                if (ApiFunction != null)
+                    builder.Append("An error occurred calling '").Append(ApiFunction).Append("'. ");
 
-                if (this.additionalMessage != null)
-                {
-                    builder.Append(this.additionalMessage).Append(". ");
-                }
+                if (additionalMessage != null)
+                    builder.Append(additionalMessage).Append(". ");
 
-                builder.Append(this.errorMessage.Value).Append(" [").Append(this.error.ToString()).Append(' ').Append((uint)this.error).Append(']');
+                builder.Append(ApiErrorMessage).Append(" [").Append(error.ToString()).Append(' ').Append((uint)error).Append(']');
 
                 return builder.ToString();
             }
@@ -80,17 +56,12 @@ namespace Dhcp
                 var errorAttribute = errorType[0].GetCustomAttributes(typeof(DhcpErrorDescriptionAttribute), false);
 
                 if (errorAttribute.Length != 0)
-                {
                     return ((DhcpErrorDescriptionAttribute)errorAttribute[0]).Description;
-                }
             }
 
             return "Unknown Error";
         }
 
-        public override string ToString()
-        {
-            return this.Message;
-        }
+        public override string ToString() => Message;
     }
 }

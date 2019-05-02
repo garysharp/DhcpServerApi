@@ -5,11 +5,11 @@ namespace Dhcp.Native
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
     internal class DhcpErrorDescriptionAttribute : Attribute
     {
-        public string Description { get; private set; }
+        public string Description { get; }
 
-        public DhcpErrorDescriptionAttribute(string Description)
+        public DhcpErrorDescriptionAttribute(string description)
         {
-            this.Description = Description;
+            Description = description;
         }
     }
 }

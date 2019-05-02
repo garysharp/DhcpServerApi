@@ -11,10 +11,10 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the reserved IP address.
         /// </summary>
-        public DHCP_IP_ADDRESS ReservedIpAddress;
+        public readonly DHCP_IP_ADDRESS ReservedIpAddress;
         /// <summary>
         /// DHCP_CLIENT_UID structure that contains information on the client holding this IP reservation.
         /// </summary>
-        public DHCP_CLIENT_UID ReservedForClient;
+        public readonly DHCP_CLIENT_UID ReservedForClient;
     }
 }

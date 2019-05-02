@@ -11,36 +11,36 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the assigned IP address of the DHCP client.
         /// </summary>
-        public DHCP_IP_ADDRESS ClientIpAddress;
+        public readonly DHCP_IP_ADDRESS ClientIpAddress;
         /// <summary>
         /// DHCP_IP_MASK value that contains the subnet mask value assigned to the DHCP client.
         /// </summary>
-        public DHCP_IP_MASK SubnetMask;
+        public readonly DHCP_IP_MASK SubnetMask;
         /// <summary>
         /// DHCP_CLIENT_UID structure containing the MAC address of the client's network interface device.
         /// </summary>
-        public DHCP_BINARY_DATA ClientHardwareAddress;
+        public readonly DHCP_BINARY_DATA ClientHardwareAddress;
         /// <summary>
         /// Unicode string that specifies the network name of the DHCP client. This member is optional.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string ClientName;
+        public readonly string ClientName;
         /// <summary>
         /// Unicode string that contains a comment associated with the DHCP client. This member is optional.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string ClientComment;
+        public readonly string ClientComment;
         /// <summary>
         /// DATE_TIME structure that contains the date and time the DHCP client lease will expire, in UTC time.
         /// </summary>
-        public DATE_TIME ClientLeaseExpires;
+        public readonly DATE_TIME ClientLeaseExpires;
         /// <summary>
         /// DHCP_HOST_INFO structure that contains information on the DHCP server that assigned the IP address to the client. 
         /// </summary>
-        public DHCP_HOST_INFO OwnerHost;
+        public readonly DHCP_HOST_INFO OwnerHost;
         /// <summary>
         /// Specifies the types of dynamic IP address service used by the client.
         /// </summary>
-        public ClientTypes bClientType;
+        public readonly ClientTypes bClientType;
     }
 }

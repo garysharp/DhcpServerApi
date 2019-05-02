@@ -1,8 +1,8 @@
-﻿using Dhcp.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -14,55 +14,36 @@ namespace Dhcp
         /// <summary>
         /// The associated DHCP Server
         /// </summary>
-        public DhcpServer Server { get; private set; }
+        public DhcpServer Server { get; }
 
         /// <summary>
         /// Name of the Class
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
         /// <summary>
         /// Comment associated with the Class
         /// </summary>
-        public string Comment { get; private set; }
+        public string Comment { get; }
 
         /// <summary>
         /// Indicates whether or not the options are vendor-specific
         /// </summary>
-        public bool IsVendorClass { get; private set; }
+        public bool IsVendorClass { get; }
 
         /// <summary>
         /// Indicates whether or not the options are user-specific
         /// </summary>
-        public bool IsUserClass
-        {
-            get
-            {
-                return !IsVendorClass;
-            }
-        }
+        public bool IsUserClass => !IsVendorClass;
 
         /// <summary>
         /// A byte buffer that contains specific data for the class
         /// </summary>
-        public byte[] Data { get; private set; }
+        public byte[] Data { get; }
 
         /// <summary>
         /// An ASCII representation of the <see cref="Data"/> buffer.
         /// </summary>
-        public string DataText
-        {
-            get
-            {
-                if (Data == null)
-                {
-                    return null;
-                }
-                else
-                {
-                    return Encoding.ASCII.GetString(Data);
-                }
-            }
-        }
+        public string DataText => (Data == null) ? null : Encoding.ASCII.GetString(Data);
 
         /// <summary>
         /// Enumerates a list of all Options associated with this class
@@ -72,13 +53,9 @@ namespace Dhcp
             get
             {
                 if (IsVendorClass)
-                {
                     return DhcpServerOption.EnumVendorOptions(Server, Name);
-                }
                 else
-                {
                     return DhcpServerOption.EnumUserOptions(Server, Name);
-                }
             }
         }
 
@@ -90,69 +67,69 @@ namespace Dhcp
             get
             {
                 if (IsVendorClass)
-                {
                     return DhcpServerOptionValue.EnumGlobalVendorOptionValues(Server, Name);
-                }
                 else
-                {
                     return DhcpServerOptionValue.EnumGlobalUserOptionValues(Server, Name);
-                }
             }
         }
 
-        private DhcpServerClass(DhcpServer Server)
+        private DhcpServerClass(DhcpServer server, string name, string comment, bool isVendorClass, byte[] data)
         {
-            this.Server = Server;
+            Server = server;
         }
 
-        internal static DhcpServerClass GetClass(DhcpServer Server, string Name)
+        internal static DhcpServerClass GetClass(DhcpServer server, string name)
         {
-            IntPtr classIntoPtr;
-
             var query = new DHCP_CLASS_INFO()
             {
-                ClassName = Name,
+                ClassName = name,
                 ClassDataLength = 0,
                 ClassData = IntPtr.Zero
             };
 
-            var result = Api.DhcpGetClassInfo(Server.ipAddress.ToString(), 0, query, out classIntoPtr);
+            var result = Api.DhcpGetClassInfo(ServerIpAddress: server.ipAddress,
+                                              ReservedMustBeZero: 0,
+                                              PartialClassInfo: query,
+                                              FilledClassInfo: out var classIntoPtr);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpGetClassInfo", result);
+                throw new DhcpServerException(nameof(Api.DhcpGetClassInfo), result);
 
-            var classInfo = (DHCP_CLASS_INFO)Marshal.PtrToStructure(classIntoPtr, typeof(DHCP_CLASS_INFO));
-
-            var dhcpClass = FromNative(Server, classInfo);
-
-            Api.DhcpRpcFreeMemory(classIntoPtr);
-
-            return dhcpClass;
+            try
+            {
+                var classInfo = classIntoPtr.MarshalToStructure<DHCP_CLASS_INFO>();
+                return FromNative(server, classInfo);
+            }
+            finally
+            {
+                Api.DhcpRpcFreeMemory(classIntoPtr);
+            }
         }
 
-        internal static IEnumerable<DhcpServerClass> GetClasses(DhcpServer Server)
+        internal static IEnumerable<DhcpServerClass> GetClasses(DhcpServer server)
         {
-            IntPtr enumInfoPtr;
-            int elementsRead, elementsTotal;
-            IntPtr resumeHandle = IntPtr.Zero;
-
-            var result = Api.DhcpEnumClasses(Server.ipAddress.ToString(), 0, ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
+            var resumeHandle = IntPtr.Zero;
+            var result = Api.DhcpEnumClasses(ServerIpAddress: server.ipAddress,
+                                             ReservedMustBeZero: 0,
+                                             ResumeHandle: ref resumeHandle,
+                                             PreferredMaximum: 0xFFFFFFFF,
+                                             ClassInfoArray: out var enumInfoPtr,
+                                             nRead: out var elementsRead,
+                                             nTotal: out _);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
-                throw new DhcpServerException("DhcpEnumClasses", result);
+                throw new DhcpServerException(nameof(Api.DhcpEnumClasses), result);
 
             if (elementsRead > 0)
             {
-                var enumInfo = (DHCP_CLASS_INFO_ARRAY)Marshal.PtrToStructure(enumInfoPtr, typeof(DHCP_CLASS_INFO_ARRAY));
+                var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_CLASS_INFO_ARRAY>();
                 try
                 {
                     foreach (var element in enumInfo.Classes)
-                    {
-                        yield return FromNative(Server, element);
-                    }
+                        yield return FromNative(server, element);
                 }
                 finally
                 {
@@ -161,18 +138,16 @@ namespace Dhcp
             }
         }
 
-        internal static DhcpServerClass FromNative(DhcpServer Server, DHCP_CLASS_INFO Native)
+        internal static DhcpServerClass FromNative(DhcpServer server, DHCP_CLASS_INFO native)
         {
-            var data = new byte[Native.ClassDataLength];
-            Marshal.Copy(Native.ClassData, data, 0, Native.ClassDataLength);
+            var data = new byte[native.ClassDataLength];
+            Marshal.Copy(native.ClassData, data, 0, native.ClassDataLength);
 
-            return new DhcpServerClass(Server)
-            {
-                Name = Native.ClassName,
-                Comment = Native.ClassComment,
-                IsVendorClass = Native.IsVendor,
-                Data = data
-            };
+            return new DhcpServerClass(server,
+                name: native.ClassName,
+                comment: native.ClassComment,
+                isVendorClass: native.IsVendor,
+                data: data);
         }
     }
 }

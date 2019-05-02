@@ -13,11 +13,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the number of IP addresses in Elements.
         /// </summary>
-        public UInt32 NumElements;
+        public readonly uint NumElements;
         /// <summary>
         /// Pointer to a list of DHCP_IP_ADDRESS values.
         /// </summary>
-        private IntPtr ElementsPointer;
+        private readonly IntPtr ElementsPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_IP_ADDRESS values.
@@ -26,12 +26,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.ElementsPointer;
+                var instanceIter = ElementsPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_IP_ADDRESS));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_IP_ADDRESS)Marshal.PtrToStructure(instanceIter, typeof(DHCP_IP_ADDRESS));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_IP_ADDRESS>();
                     instanceIter += instanceSize;
                 }
             }

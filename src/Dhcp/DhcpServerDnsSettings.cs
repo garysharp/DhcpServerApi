@@ -1,8 +1,5 @@
-﻿using Dhcp.Native;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -11,85 +8,73 @@ namespace Dhcp
     /// </summary>
     public class DhcpServerDnsSettings
     {
-        private const uint FlagDefaultSettings = Constants.DNS_FLAG_ENABLED | Constants.DNS_FLAG_CLEANUP_EXPIRED;
+        private const uint flagDefaultSettings = Constants.DNS_FLAG_ENABLED | Constants.DNS_FLAG_CLEANUP_EXPIRED;
+        private readonly uint flags;
 
         /// <summary>
         /// True when DNS dynamic updates are enabled
         /// </summary>
-        public bool DynamicDnsUpdatesEnabled { get; private set; }
+        public bool DynamicDnsUpdatesEnabled => (flags & Constants.DNS_FLAG_ENABLED) == Constants.DNS_FLAG_ENABLED;
 
         /// <summary>
         /// True when DNS dynamic updates are enabled only when requested by the DHCP clients
         /// </summary>
-        public bool DynamicDnsUpdatedOnlyWhenRequested { get; private set; }
+        public bool DynamicDnsUpdatedOnlyWhenRequested => (flags & Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS) == 0;
 
         /// <summary>
         /// True when DNS dynamic updates always update DNS records 
         /// </summary>
-        public bool DynamicDnsUpdatedAlways { get; private set; }
+        public bool DynamicDnsUpdatedAlways => (flags & Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS) == Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
 
         /// <summary>
         /// True when A and PTR records are discarded when the lease is deleted
         /// </summary>
-        public bool DiscardRecordsWhenLeasesDeleted { get; private set; }
+        public bool DiscardRecordsWhenLeasesDeleted => (flags & Constants.DNS_FLAG_CLEANUP_EXPIRED) == Constants.DNS_FLAG_CLEANUP_EXPIRED;
 
         /// <summary>
         /// True when DNS records are dynamically updated for DHCP clients that do not request updates (for example, clients running Windows NT 4.0)
         /// </summary>
-        public bool UpdateRecordsForDownLevelClients { get; private set; }
+        public bool UpdateRecordsForDownLevelClients => (flags & Constants.DNS_FLAG_UPDATE_DOWNLEVEL) == Constants.DNS_FLAG_UPDATE_DOWNLEVEL;
 
         /// <summary>
         /// True when Dynamic updates for DNS PTR records are disabled
         /// </summary>
-        public bool DisableDynamicPtrRecordUpdates { get; private set; }
+        public bool DisableDynamicPtrRecordUpdates => (flags & Constants.DNS_FLAG_DISABLE_PTR_UPDATE) == Constants.DNS_FLAG_DISABLE_PTR_UPDATE;
 
-        private DhcpServerDnsSettings(uint Flags)
+        private DhcpServerDnsSettings(uint flags)
         {
-            DynamicDnsUpdatesEnabled = (Flags & Constants.DNS_FLAG_ENABLED) == Constants.DNS_FLAG_ENABLED;
-            DynamicDnsUpdatedOnlyWhenRequested = (Flags & Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS) == 0;
-            UpdateRecordsForDownLevelClients = (Flags & Constants.DNS_FLAG_UPDATE_DOWNLEVEL) == Constants.DNS_FLAG_UPDATE_DOWNLEVEL;
-            DiscardRecordsWhenLeasesDeleted = (Flags & Constants.DNS_FLAG_CLEANUP_EXPIRED) == Constants.DNS_FLAG_CLEANUP_EXPIRED;
-            DynamicDnsUpdatedAlways = (Flags & Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS) == Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
-            DisableDynamicPtrRecordUpdates = (Flags & Constants.DNS_FLAG_DISABLE_PTR_UPDATE) == Constants.DNS_FLAG_DISABLE_PTR_UPDATE;
+            this.flags = flags;
         }
 
-        internal static DhcpServerDnsSettings GetGlobalDnsSettings(DhcpServer Server)
+        internal static DhcpServerDnsSettings GetGlobalDnsSettings(DhcpServer server)
         {
             // Flag is Global Option 81
             try
             {
-                var option = DhcpServerOptionValue.GetGlobalDefaultOptionValue(Server, 81);
-                if (option.Values.Count == 1 && option.Values[0] is DhcpServerOptionElementDWord)
-                {
-                    var value = (DhcpServerOptionElementDWord)option.Values[0];
+                var option = DhcpServerOptionValue.GetGlobalDefaultOptionValue(server, 81);
+
+                if (option.Values.FirstOrDefault() is DhcpServerOptionElementDWord value)
                     return new DhcpServerDnsSettings((uint)value.RawValue);
-                }
                 else
-                {
-                    return new DhcpServerDnsSettings(FlagDefaultSettings);
-                }
+                    return new DhcpServerDnsSettings(flagDefaultSettings);
             }
             catch (DhcpServerException e) when (e.ApiErrorId == (uint)DhcpErrors.ERROR_FILE_NOT_FOUND)
             {
                 // Default Settings
-                return new DhcpServerDnsSettings(FlagDefaultSettings);
+                return new DhcpServerDnsSettings(flagDefaultSettings);
             }
         }
 
-        internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServerScope Scope)
+        internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServerScope scope)
         {
             // Flag is Option 81
             try
             {
-                var option = DhcpServerOptionValue.GetScopeDefaultOptionValue(Scope, 81);
-                if (option.Values.Count != 1)
-                {
-                    return GetGlobalDnsSettings(Scope.Server);
-                }
+                var option = DhcpServerOptionValue.GetScopeDefaultOptionValue(scope, 81);
+                if (option.Values.FirstOrDefault() is DhcpServerOptionElementDWord value)
+                    return new DhcpServerDnsSettings((uint)value.RawValue);
                 else
-                {
                     return null;
-                }
             }
             catch (DhcpServerException e) when (e.ApiErrorId == (uint)DhcpErrors.ERROR_FILE_NOT_FOUND)
             {

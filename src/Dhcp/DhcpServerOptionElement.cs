@@ -1,8 +1,7 @@
-﻿using Dhcp.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -13,221 +12,179 @@ namespace Dhcp
         public abstract object Value { get; }
         public abstract string ValueFormatted { get; }
 
-        public override string ToString()
+        internal static IEnumerable<DhcpServerOptionElement> ReadNativeElements(DHCP_OPTION_DATA elementArray)
         {
-            return string.Format("{0}: {1}", Type, ValueFormatted);
-        }
-
-        internal static IEnumerable<DhcpServerOptionElement> ReadNativeElements(DHCP_OPTION_DATA ElementArray)
-        {
-            foreach (var element in ElementArray.Elements)
-            {
+            foreach (var element in elementArray.Elements)
                 yield return ReadNative(element);
-            }
         }
 
-        private static DhcpServerOptionElement ReadNative(DHCP_OPTION_DATA_ELEMENT Element)
+        private static DhcpServerOptionElement ReadNative(DHCP_OPTION_DATA_ELEMENT element)
         {
-            switch (Element.OptionType)
+            switch (element.OptionType)
             {
                 case DHCP_OPTION_DATA_TYPE.DhcpByteOption:
-                    return DhcpServerOptionElementByte.ReadNative(Element);
+                    return DhcpServerOptionElementByte.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpWordOption:
-                    return DhcpServerOptionElementWord.ReadNative(Element);
+                    return DhcpServerOptionElementWord.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpDWordOption:
-                    return DhcpServerOptionElementDWord.ReadNative(Element);
+                    return DhcpServerOptionElementDWord.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpDWordDWordOption:
-                    return DhcpServerOptionElementDWordDWord.ReadNative(Element);
+                    return DhcpServerOptionElementDWordDWord.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpIpAddressOption:
-                    return DhcpServerOptionElementIpAddress.ReadNative(Element);
+                    return DhcpServerOptionElementIpAddress.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpStringDataOption:
-                    return DhcpServerOptionElementString.ReadNative(Element);
+                    return DhcpServerOptionElementString.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption:
                 case DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption:
-                    return DhcpServerOptionElementBinary.ReadNative(Element);
+                    return DhcpServerOptionElementBinary.ReadNative(element);
                 case DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption:
-                    return DhcpServerOptionElementIpv6Address.ReadNative(Element);
+                    return DhcpServerOptionElementIpv6Address.ReadNative(element);
                 default:
-                    throw new InvalidCastException(string.Format("Unknown Option Data Type: {0}", Element.OptionType));
+                    throw new InvalidCastException($"Unknown Option Data Type: {element.OptionType}");
             }
         }
+
+        public override string ToString() => $"{Type}: {ValueFormatted}";
     }
 
     public class DhcpServerOptionElementByte : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.Byte; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return RawValue.ToString("X2"); } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.Byte;
+        public override object Value => RawValue;
+        public override string ValueFormatted => RawValue.ToHexString();
 
-        public Byte RawValue { get; private set; }
+        public byte RawValue { get; }
 
-        private DhcpServerOptionElementByte(Byte Value)
+        private DhcpServerOptionElementByte(byte value)
         {
-            this.RawValue = Value;
+            RawValue = value;
         }
 
-        internal static DhcpServerOptionElementByte ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementByte(Native.ByteOption);
-        }
+        internal static DhcpServerOptionElementByte ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementByte(native.ByteOption);
     }
 
     public class DhcpServerOptionElementWord : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.Word; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return RawValue.ToString("N"); } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.Word;
+        public override object Value => RawValue;
+        public override string ValueFormatted => RawValue.ToString("N");
 
-        public Int16 RawValue { get; private set; }
+        public short RawValue { get; }
 
-        private DhcpServerOptionElementWord(Int16 Value)
+        private DhcpServerOptionElementWord(short value)
         {
-            this.RawValue = Value;
+            RawValue = value;
         }
 
-        internal static DhcpServerOptionElementWord ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementWord(Native.WordOption);
-        }
+        internal static DhcpServerOptionElementWord ReadNative(DHCP_OPTION_DATA_ELEMENT native) 
+            => new DhcpServerOptionElementWord(native.WordOption);
     }
 
     public class DhcpServerOptionElementDWord : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.DWord; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return RawValue.ToString("N"); } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.DWord;
+        public override object Value => RawValue;
+        public override string ValueFormatted => RawValue.ToString("N");
 
-        public Int32 RawValue { get; private set; }
+        public int RawValue { get; }
 
-        private DhcpServerOptionElementDWord(Int32 Value)
+        private DhcpServerOptionElementDWord(int value)
         {
-            this.RawValue = Value;
+            RawValue = value;
         }
 
-        internal static DhcpServerOptionElementDWord ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementDWord(Native.DWordOption);
-        }
+        internal static DhcpServerOptionElementDWord ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementDWord(native.DWordOption);
     }
 
     public class DhcpServerOptionElementDWordDWord : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.DWordDWord; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return RawValue.ToString("N"); } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.DWordDWord;
+        public override object Value => RawValue;
+        public override string ValueFormatted => RawValue.ToString("N");
 
-        public Int64 RawValue { get; private set; }
+        public long RawValue { get; }
 
-        private DhcpServerOptionElementDWordDWord(Int64 Value)
+        private DhcpServerOptionElementDWordDWord(long value)
         {
-            this.RawValue = Value;
+            RawValue = value;
         }
 
-        internal static DhcpServerOptionElementDWordDWord ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementDWordDWord(Native.DWordDWordOption);
-        }
+        internal static DhcpServerOptionElementDWordDWord ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementDWordDWord(native.DWordDWordOption);
     }
 
     public class DhcpServerOptionElementIpAddress : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.IpAddress; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return ipAddress.ToString(); } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.IpAddress;
+        public override object Value => RawValue;
+        public override string ValueFormatted => ipAddress;
 
         private DHCP_IP_ADDRESS ipAddress;
 
-        public UInt32 RawValue { get { return (UInt32)ipAddress; } }
+        public uint RawValue => (uint)ipAddress;
 
-        private DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS Value)
+        private DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
         {
-            this.ipAddress = Value;
+            ipAddress = value;
         }
 
-        internal static DhcpServerOptionElementIpAddress ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementIpAddress(Native.IpAddressOption);
-        }
+        internal static DhcpServerOptionElementIpAddress ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementIpAddress(native.IpAddressOption);
     }
 
     public class DhcpServerOptionElementString : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.StringData; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return RawValue; } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.StringData;
+        public override object Value => RawValue;
+        public override string ValueFormatted => RawValue;
 
-        public string RawValue { get; private set; }
+        public string RawValue { get; }
 
-        private DhcpServerOptionElementString(string Value)
+        private DhcpServerOptionElementString(string value)
         {
-            this.RawValue = Value;
+            RawValue = value;
         }
 
-        internal static DhcpServerOptionElementString ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementString(Marshal.PtrToStringUni(Native.StringDataOption));
-        }
+        internal static DhcpServerOptionElementString ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementString(Marshal.PtrToStringUni(native.StringDataOption));
     }
 
     public class DhcpServerOptionElementBinary : DhcpServerOptionElement
     {
-        private DhcpServerOptionElementType type;
+        private readonly DhcpServerOptionElementType type;
 
-        public override DhcpServerOptionElementType Type { get { return type; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted
+        public override DhcpServerOptionElementType Type => type;
+        public override object Value => RawValue;
+        public override string ValueFormatted { get => RawValue.ToHexString(' '); }
+
+        public byte[] RawValue { get; }
+
+        private DhcpServerOptionElementBinary(DhcpServerOptionElementType type, byte[] value)
         {
-            get
-            {
-                var builder = new StringBuilder();
-
-                if (RawValue == null)
-                    return null;
-
-                if (RawValue.Length > 0)
-                {
-                    builder.Append(RawValue[0].ToString("X2"));
-
-                    for (int i = 1; i < RawValue.Length; i++)
-                    {
-                        builder.Append(" ").Append(RawValue[i].ToString("X2"));
-                    }
-                }
-
-                return builder.ToString();
-            }
+            this.type = type;
+            RawValue = value;
         }
 
-        public byte[] RawValue { get; private set; }
-
-        private DhcpServerOptionElementBinary(DhcpServerOptionElementType Type, byte[] Value)
-        {
-            this.type = Type;
-            this.RawValue = Value;
-        }
-
-        internal static DhcpServerOptionElementBinary ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementBinary((DhcpServerOptionElementType)Native.OptionType, Native.BinaryDataOption.Data);
-        }
+        internal static DhcpServerOptionElementBinary ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementBinary((DhcpServerOptionElementType)native.OptionType, native.BinaryDataOption.Data);
     }
 
     public class DhcpServerOptionElementIpv6Address : DhcpServerOptionElement
     {
-        public override DhcpServerOptionElementType Type { get { return DhcpServerOptionElementType.Ipv6Address; } }
-        public override object Value { get { return RawValue; } }
-        public override string ValueFormatted { get { return RawValue; } }
+        public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.Ipv6Address;
+        public override object Value => RawValue;
+        public override string ValueFormatted => RawValue;
 
-        public string RawValue { get; private set; }
+        public string RawValue { get; }
 
-        private DhcpServerOptionElementIpv6Address(string Value)
+        private DhcpServerOptionElementIpv6Address(string value)
         {
-            this.RawValue = Value;
+            RawValue = value;
         }
 
-        internal static DhcpServerOptionElementIpv6Address ReadNative(DHCP_OPTION_DATA_ELEMENT Native)
-        {
-            return new DhcpServerOptionElementIpv6Address(Marshal.PtrToStringUni(Native.Ipv6AddressDataOption));
-        }
+        internal static DhcpServerOptionElementIpv6Address ReadNative(DHCP_OPTION_DATA_ELEMENT native)
+            => new DhcpServerOptionElementIpv6Address(Marshal.PtrToStringUni(native.Ipv6AddressDataOption));
     }
 }

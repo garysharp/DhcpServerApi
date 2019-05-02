@@ -10,26 +10,25 @@ namespace Dhcp.Native
     internal struct DHCP_CLIENT_INFO_ARRAY_VQ : IDisposable
     {
         public int NumElements;
-
         private IntPtr ClientsPointer;
 
         public List<Tuple<IntPtr, DHCP_CLIENT_INFO_VQ>> Clients;
 
-        public static DHCP_CLIENT_INFO_ARRAY_VQ Read(IntPtr Pointer)
+        public static DHCP_CLIENT_INFO_ARRAY_VQ Read(IntPtr ptr)
         {
             // Number of elements in the array
-            var numElements = Marshal.ReadIntPtr(Pointer).ToInt32();
+            var numElements = Marshal.ReadIntPtr(ptr).ToInt32();
 
             var clients = new List<Tuple<IntPtr, DHCP_CLIENT_INFO_VQ>>(numElements);
 
             // Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
-            var clientsPointer = Marshal.ReadIntPtr(Pointer, IntPtr.Size);
+            var clientsPointer = Marshal.ReadIntPtr(ptr, IntPtr.Size);
 
             var iter = clientsPointer;
-            for (int i = 0; i < numElements; i++)
+            for (var i = 0; i < numElements; i++)
             {
                 var clientPtr = Marshal.ReadIntPtr(iter);
-                var client = (DHCP_CLIENT_INFO_VQ)Marshal.PtrToStructure(clientPtr, typeof(DHCP_CLIENT_INFO_VQ));
+                var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_VQ>();
 
                 clients.Add(Tuple.Create(clientPtr, client));
 

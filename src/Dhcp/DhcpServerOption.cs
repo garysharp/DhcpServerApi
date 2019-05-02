@@ -1,89 +1,87 @@
-﻿using Dhcp.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using Dhcp.Native;
 
 namespace Dhcp
 {
     public class DhcpServerOption
     {
-        private Lazy<DhcpServerClass> @class;
+        private DhcpServerClass openClass;
 
         /// <summary>
         /// The associated DHCP Server
         /// </summary>
-        public DhcpServer Server { get; private set; }
+        public DhcpServer Server { get; }
 
         /// <summary>
         /// Unique ID number (also called a "code") for this Option
         /// </summary>
-        public int OptionId { get; private set; }
+        public int OptionId { get; }
 
         /// <summary>
         /// Name for this Option
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
         /// <summary>
         /// Comment about this Option
         /// </summary>
-        public string Comment { get; private set; }
+        public string Comment { get; }
 
         /// <summary>
         /// Contains the data associated with this option
         /// </summary>
-        public List<DhcpServerOptionElement> DefaultValue { get; private set; }
+        public IEnumerable<DhcpServerOptionElement> DefaultValue { get; }
 
         /// <summary>
         /// True if this Option has a single data item associated with it, False when an array of data items are associated with it.
         /// </summary>
-        public bool IsUnaryOption { get; private set; }
+        public bool IsUnaryOption { get; }
 
         /// <summary>
         /// Name of the Vendor Class associated with this Option
         /// </summary>
-        public string VendorName { get; private set; }
+        public string VendorName { get; }
 
         /// <summary>
         /// Name of the User Class associated with this Option
         /// </summary>
-        public string ClassName { get; private set; }
+        public string ClassName { get; }
 
-        public bool IsVendorClassOption { get { return VendorName != null; } }
+        public bool IsVendorClassOption => VendorName != null;
 
-        public bool IsUserClassOption { get { return ClassName != null; } }
+        public bool IsUserClassOption => ClassName != null;
 
-        public DhcpServerClass Class { get { return this.@class.Value; } }
+        public DhcpServerClass Class => openClass ??= GetClass();
 
-        private DhcpServerOption(DhcpServer Server)
+        private DhcpServerOption(DhcpServer server, int optionId, string name, string comment, IEnumerable<DhcpServerOptionElement> defaultValue, bool isUnaryOption, string vendorName, string className)
         {
-            this.Server = Server;
-            this.@class = new Lazy<DhcpServerClass>(GetClass);
+            Server = server;
+            OptionId = optionId;
+            Name = name;
+            Comment = comment;
+            DefaultValue = defaultValue;
+            IsUnaryOption = isUnaryOption;
+            VendorName = vendorName;
+            ClassName = className;
         }
 
         /// <summary>
         /// The Option Value associated with the Global Server Configuration
         /// </summary>
-        public DhcpServerOptionValue GetGlobalValue()
-        {
-            return DhcpServerOptionValue.GetGlobalOptionValue(Server, OptionId, ClassName, VendorName);
-        }
+        public DhcpServerOptionValue GetGlobalValue() => DhcpServerOptionValue.GetGlobalOptionValue(Server, OptionId, ClassName, VendorName);
 
         /// <summary>
         /// The Option Value associated with the Scope Configuration
         /// </summary>
-        public DhcpServerOptionValue GetScopeValue(DhcpServerScope Scope)
-        {
-            return DhcpServerOptionValue.GetScopeOptionValue(Scope, OptionId, ClassName, VendorName);
-        }
+        public DhcpServerOptionValue GetScopeValue(DhcpServerScope scope)
+            => DhcpServerOptionValue.GetScopeOptionValue(scope, OptionId, ClassName, VendorName);
 
         /// <summary>
         /// The Option Value associated with the Reservation Configuration
         /// </summary>
-        public DhcpServerOptionValue GetScopeReservationValue(DhcpServerScopeReservation Reservation)
-        {
-            return DhcpServerOptionValue.GetScopeReservationOptionValue(Reservation, OptionId, ClassName, VendorName);
-        }
+        public DhcpServerOptionValue GetScopeReservationValue(DhcpServerScopeReservation reservation)
+            => DhcpServerOptionValue.GetScopeReservationOptionValue(reservation, OptionId, ClassName, VendorName);
 
         private DhcpServerClass GetClass()
         {
@@ -95,51 +93,44 @@ namespace Dhcp
                 return null;
         }
 
-        internal static DhcpServerOption GetDefaultOption(DhcpServer Server, int OptionId)
-        {
-            return GetOption(Server, OptionId, null, null);
-        }
+        internal static DhcpServerOption GetDefaultOption(DhcpServer server, int optionId)
+            => GetOption(server, optionId, null, null);
 
-        internal static DhcpServerOption GetVendorOption(DhcpServer Server, int OptionId, string VendorName)
-        {
-            return GetOption(Server, OptionId, null, VendorName);
-        }
+        internal static DhcpServerOption GetVendorOption(DhcpServer server, int optionId, string vendorName)
+            => GetOption(server, optionId, null, vendorName);
 
-        internal static DhcpServerOption GetUserOption(DhcpServer Server, int OptionId, string ClassName)
-        {
-            return GetOption(Server, OptionId, ClassName, null);
-        }
+        internal static DhcpServerOption GetUserOption(DhcpServer server, int optionId, string className)
+            => GetOption(server, optionId, className, null);
 
-        internal static DhcpServerOption GetOption(DhcpServer Server, int OptionId, string ClassName, string VendorName)
+        internal static DhcpServerOption GetOption(DhcpServer server, int optionId, string className, string vendorName)
         {
-            if (Server.IsCompatible(DhcpServerVersions.Windows2008R2))
+            if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
             {
-                return GetOptionV5(Server, OptionId, ClassName, VendorName);
+                return GetOptionV5(server, optionId, className, vendorName);
             }
             else
             {
-                if (VendorName != null || ClassName != null)
+                if (vendorName != null || className != null)
                 {
-                    throw new PlatformNotSupportedException(string.Format("DHCP Server v{0}.{1} does not support this feature", Server.VersionMajor, Server.VersionMinor));
+                    throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
                 }
-                return GetOptionV0(Server, OptionId);
+                return GetOptionV0(server, optionId);
             }
         }
 
-        private static DhcpServerOption GetOptionV0(DhcpServer Server, int OptionId)
+        private static DhcpServerOption GetOptionV0(DhcpServer server, int optionId)
         {
-            IntPtr optionPtr;
-
-            var result = Api.DhcpGetOptionInfo(Server.ipAddress.ToString(), OptionId, out optionPtr);
+            var result = Api.DhcpGetOptionInfo(ServerIpAddress: server.ipAddress,
+                                               OptionID: optionId,
+                                               OptionInfo: out var optionPtr);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpGetOptionInfo", result);
+                throw new DhcpServerException(nameof(Api.DhcpGetOptionInfo), result);
 
             try
             {
-                var option = (DHCP_OPTION)Marshal.PtrToStructure(optionPtr, typeof(DHCP_OPTION));
-
-                return DhcpServerOption.FromNative(Server, option, null, null);
+                var option = optionPtr.MarshalToStructure<DHCP_OPTION>();
+                return FromNative(server, option, null, null);
             }
             finally
             {
@@ -147,20 +138,22 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerOption GetOptionV5(DhcpServer Server, int OptionId, string ClassName, string VendorName)
+        private static DhcpServerOption GetOptionV5(DhcpServer server, int optionId, string className, string vendorName)
         {
-            IntPtr optionPtr;
-            uint flags = VendorName == null ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR;
-            var result = Api.DhcpGetOptionInfoV5(Server.ipAddress.ToString(), flags, OptionId, ClassName, VendorName, out optionPtr);
+            var result = Api.DhcpGetOptionInfoV5(ServerIpAddress: server.ipAddress,
+                                                 Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
+                                                 OptionID: optionId,
+                                                 ClassName: className,
+                                                 VendorName: vendorName,
+                                                 OptionInfo: out var optionPtr);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpGetOptionInfoV5", result);
+                throw new DhcpServerException(nameof(Api.DhcpGetOptionInfoV5), result);
 
             try
             {
-                var option = (DHCP_OPTION)Marshal.PtrToStructure(optionPtr, typeof(DHCP_OPTION));
-
-                return DhcpServerOption.FromNative(Server, option, ClassName, VendorName);
+                var option = optionPtr.MarshalToStructure<DHCP_OPTION>();
+                return FromNative(server, option, className, vendorName);
             }
             finally
             {
@@ -168,31 +161,24 @@ namespace Dhcp
             }
         }
 
-        internal static IEnumerable<DhcpServerOption> GetAllOptions(DhcpServer Server)
+        internal static IEnumerable<DhcpServerOption> GetAllOptions(DhcpServer server)
         {
-            IntPtr optionsPtr;
-
-            var result = Api.DhcpGetAllOptions(Server.ipAddress.ToString(), 0, out optionsPtr);
+            var result = Api.DhcpGetAllOptions(ServerIpAddress: server.ipAddress,
+                                               Flags: 0,
+                                               OptionStruct: out var optionsPtr);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpGetAllOptions", result);
+                throw new DhcpServerException(nameof(Api.DhcpGetAllOptions), result);
 
             try
             {
-                var bytes = new byte[64];
-                Marshal.Copy(optionsPtr, bytes, 0, 64);
-
-                var options = (DHCP_ALL_OPTIONS)Marshal.PtrToStructure(optionsPtr, typeof(DHCP_ALL_OPTIONS));
+                var options = optionsPtr.MarshalToStructure<DHCP_ALL_OPTIONS>();
 
                 foreach (var option in options.NonVendorOptions.Options)
-                {
-                    yield return DhcpServerOption.FromNative(Server, option, null, null);
-                }
+                    yield return FromNative(server, option, null, null);
 
                 foreach (var option in options.VendorOptions)
-                {
-                    yield return DhcpServerOption.FromNative(Server, option);
-                }
+                    yield return FromNative(server, option);
             }
             finally
             {
@@ -200,62 +186,59 @@ namespace Dhcp
             }
         }
 
-        internal static IEnumerable<DhcpServerOption> EnumDefaultOptions(DhcpServer Server)
+        internal static IEnumerable<DhcpServerOption> EnumDefaultOptions(DhcpServer server)
         {
-            if (Server.IsCompatible(DhcpServerVersions.Windows2008R2))
-            {
-                return EnumOptionsV5(Server, null, null);
-            }
+            if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
+                return EnumOptionsV5(server, null, null);
             else
-            {
-                return EnumOptionsV0(Server);
-            }
+                return EnumOptionsV0(server);
         }
 
-        internal static IEnumerable<DhcpServerOption> EnumUserOptions(DhcpServer Server, string ClassName)
+        internal static IEnumerable<DhcpServerOption> EnumUserOptions(DhcpServer server, string className)
         {
-            if (!Server.IsCompatible(DhcpServerVersions.Windows2008R2))
-                throw new PlatformNotSupportedException(string.Format("DHCP Server v{0}.{1} does not support this feature", Server.VersionMajor, Server.VersionMinor));
+            if (!server.IsCompatible(DhcpServerVersions.Windows2008R2))
+                throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
 
-            return EnumOptionsV5(Server, ClassName, null);
+            return EnumOptionsV5(server, className, null);
         }
 
-        internal static IEnumerable<DhcpServerOption> EnumVendorOptions(DhcpServer Server, string VendorName)
+        internal static IEnumerable<DhcpServerOption> EnumVendorOptions(DhcpServer server, string vendorName)
         {
-            if (!Server.IsCompatible(DhcpServerVersions.Windows2008R2))
-                throw new PlatformNotSupportedException(string.Format("DHCP Server v{0}.{1} does not support this feature", Server.VersionMajor, Server.VersionMinor));
+            if (!server.IsCompatible(DhcpServerVersions.Windows2008R2))
+                throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
 
-            return EnumOptionsV5(Server, null, VendorName);
+            return EnumOptionsV5(server, null, vendorName);
         }
 
         /// <summary>
         /// Only returns Default Options
         /// </summary>
-        private static IEnumerable<DhcpServerOption> EnumOptionsV0(DhcpServer Server)
+        private static IEnumerable<DhcpServerOption> EnumOptionsV0(DhcpServer server)
         {
-            IntPtr enumInfoPtr;
-            int elementsRead, elementsTotal;
-            IntPtr resumeHandle = IntPtr.Zero;
+            var resumeHandle = IntPtr.Zero;
 
-            var result = Api.DhcpEnumOptions(Server.ipAddress.ToString(), ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumOptions(ServerIpAddress: server.ipAddress,
+                                             ResumeHandle: ref resumeHandle,
+                                             PreferredMaximum: 0xFFFFFFFF,
+                                             Options: out var enumInfoPtr,
+                                             OptionsRead: out var elementsRead,
+                                             OptionsTotal: out _);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
-                throw new DhcpServerException("DhcpEnumOptions", result);
+                throw new DhcpServerException(nameof(Api.DhcpEnumOptions), result);
 
             if (elementsRead == 0)
                 yield break;
 
             try
             {
-                var enumInfo = (DHCP_OPTION_ARRAY)Marshal.PtrToStructure(enumInfoPtr, typeof(DHCP_OPTION_ARRAY));
+                var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_OPTION_ARRAY>();
 
                 foreach (var option in enumInfo.Options)
-                {
-                    yield return DhcpServerOption.FromNative(Server, option, null, null);
-                }
+                    yield return FromNative(server, option, null, null);
             }
             finally
             {
@@ -263,33 +246,35 @@ namespace Dhcp
             }
         }
 
-        private static IEnumerable<DhcpServerOption> EnumOptionsV5(DhcpServer Server, string ClassName, string VendorName)
+        private static IEnumerable<DhcpServerOption> EnumOptionsV5(DhcpServer server, string className, string vendorName)
         {
-            IntPtr enumInfoPtr;
-            int elementsRead, elementsTotal;
-            IntPtr resumeHandle = IntPtr.Zero;
+            var resumeHandle = IntPtr.Zero;
 
-            uint flags = VendorName == null ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR;
-
-            var result = Api.DhcpEnumOptionsV5(Server.ipAddress.ToString(), flags, ClassName, VendorName, ref resumeHandle, 0xFFFFFFFF, out enumInfoPtr, out elementsRead, out elementsTotal);
+            var result = Api.DhcpEnumOptionsV5(ServerIpAddress: server.ipAddress,
+                                               Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
+                                               ClassName: className,
+                                               VendorName: vendorName,
+                                               ResumeHandle: ref resumeHandle,
+                                               PreferredMaximum: 0xFFFFFFFF,
+                                               Options: out var enumInfoPtr,
+                                               OptionsRead: out var elementsRead,
+                                               OptionsTotal: out _);
 
             if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
-                throw new DhcpServerException("DhcpEnumOptions", result);
+                throw new DhcpServerException(nameof(Api.DhcpEnumOptionsV5), result);
 
             if (elementsRead == 0)
                 yield break;
 
             try
             {
-                var enumInfo = (DHCP_OPTION_ARRAY)Marshal.PtrToStructure(enumInfoPtr, typeof(DHCP_OPTION_ARRAY));
+                var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_OPTION_ARRAY>();
 
                 foreach (var option in enumInfo.Options)
-                {
-                    yield return DhcpServerOption.FromNative(Server, option, VendorName, ClassName);
-                }
+                    yield return FromNative(server, option, vendorName, className);
             }
             finally
             {
@@ -297,45 +282,31 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerOption FromNative(DhcpServer Server, DHCP_OPTION Native, string VendorName, string ClassName)
+        private static DhcpServerOption FromNative(DhcpServer server, DHCP_OPTION native, string vendorName, string className)
         {
-            return new DhcpServerOption(Server)
-            {
-                OptionId = Native.OptionID,
-                Name = Native.OptionName,
-                Comment = Native.OptionComment,
-                DefaultValue = DhcpServerOptionElement.ReadNativeElements(Native.DefaultValue).ToList(),
-                IsUnaryOption = Native.OptionType == DHCP_OPTION_TYPE.DhcpUnaryElementTypeOption,
-                VendorName = VendorName,
-                ClassName = ClassName
-            };
+            return new DhcpServerOption(server: server,
+                                        optionId: native.OptionID,
+                                        name: native.OptionName,
+                                        comment: native.OptionComment,
+                                        defaultValue: DhcpServerOptionElement.ReadNativeElements(native.DefaultValue).ToList(),
+                                        isUnaryOption: native.OptionType == DHCP_OPTION_TYPE.DhcpUnaryElementTypeOption,
+                                        vendorName: vendorName,
+                                        className: className);
         }
 
-        private static DhcpServerOption FromNative(DhcpServer Server, DHCP_VENDOR_OPTION Native)
+        private static DhcpServerOption FromNative(DhcpServer server, DHCP_VENDOR_OPTION native)
         {
-            return new DhcpServerOption(Server)
-            {
-                OptionId = Native.OptionID,
-                Name = Native.OptionName,
-                Comment = Native.OptionComment,
-                DefaultValue = DhcpServerOptionElement.ReadNativeElements(Native.DefaultValue).ToList(),
-                IsUnaryOption = Native.OptionType == DHCP_OPTION_TYPE.DhcpUnaryElementTypeOption,
-                VendorName = Native.VendorName,
-                ClassName = Native.ClassName
-            };
+            return new DhcpServerOption(server: server,
+                                        optionId: native.OptionID,
+                                        name: native.OptionName,
+                                        comment: native.OptionComment,
+                                        defaultValue: DhcpServerOptionElement.ReadNativeElements(native.DefaultValue).ToList(),
+                                        isUnaryOption: native.OptionType == DHCP_OPTION_TYPE.DhcpUnaryElementTypeOption,
+                                        vendorName: native.VendorName,
+                                        className: native.ClassName);
         }
 
-        public override string ToString()
-        {
-            string className;
-            if (VendorName != null)
-                className = VendorName;
-            else if (ClassName != null)
-                className = ClassName;
-            else
-                className = Server.DefaultVendorClassName;
-
-            return $"{className}: {OptionId} [{Name}: {Comment}]; Default: {string.Join("; ", DefaultValue)}";
-        }
+        public override string ToString() 
+            => $"{VendorName ?? ClassName ?? Server.DefaultVendorClassName}: {OptionId} [{Name}: {Comment}]; Default: {string.Join("; ", DefaultValue)}";
     }
 }

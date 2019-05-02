@@ -13,11 +13,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the number of elements in Classes.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
         /// <summary>
         /// Pointer to an array of <see cref="DHCP_CLASS_INFO"/> structures that contain DHCP class information.
         /// </summary>
-        private IntPtr ClassesPointer;
+        private readonly IntPtr ClassesPointer;
 
         /// <summary>
         /// Pointer to an array of <see cref="DHCP_CLASS_INFO"/> structures that contain DHCP class information.
@@ -26,12 +26,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.ClassesPointer;
+                var instanceIter = ClassesPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_CLASS_INFO));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_CLASS_INFO)Marshal.PtrToStructure(instanceIter, typeof(DHCP_CLASS_INFO));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_CLASS_INFO>();
                     instanceIter += instanceSize;
                 }
             }

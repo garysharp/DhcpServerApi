@@ -12,53 +12,38 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_SUBNET_ELEMENT_TYPE enumeration value describing the type of element in the subsequent field.
         /// </summary>
-        public DHCP_SUBNET_ELEMENT_TYPE_V5 ElementType;
+        public readonly DHCP_SUBNET_ELEMENT_TYPE_V5 ElementType;
 
-        private IntPtr Element;
+        private readonly IntPtr Element;
 
         /// <summary>
         /// DHCP_IP_RANGE structure that contains the set of DHCP-served IP addresses. This member is present if ElementType is set to DhcpIpRanges.
         /// </summary>
         /// <returns></returns>
-        public DHCP_IP_RANGE ReadIpRange()
-        {
-            return (DHCP_IP_RANGE)Marshal.PtrToStructure(Element, typeof(DHCP_IP_RANGE));
-        }
+        public DHCP_IP_RANGE ReadIpRange() => Element.MarshalToStructure<DHCP_IP_RANGE>();
 
         /// <summary>
         /// DHCP_HOST_INFO structure that contains the IP addresses of secondary DHCP servers available on the subnet. This member is present if ElementType is set to DhcpSecondaryHosts.
         /// </summary>
         /// <returns></returns>
-        public DHCP_HOST_INFO ReadSecondaryHost()
-        {
-            return (DHCP_HOST_INFO)Marshal.PtrToStructure(Element, typeof(DHCP_HOST_INFO));
-        }
+        public DHCP_HOST_INFO ReadSecondaryHost() => Element.MarshalToStructure<DHCP_HOST_INFO>();
 
         /// <summary>
         /// DHCP_IP_RESERVATION structure that contains the set of reserved IP addresses for the subnet. This member is present if ElementType is set to DhcpExcludedIpRanges.
         /// </summary>
         /// <returns></returns>
-        public DHCP_IP_RESERVATION ReadReservedIp()
-        {
-            return (DHCP_IP_RESERVATION)Marshal.PtrToStructure(Element, typeof(DHCP_IP_RESERVATION));
-        }
+        public DHCP_IP_RESERVATION ReadReservedIp() => Element.MarshalToStructure<DHCP_IP_RESERVATION>();
 
         /// <summary>
         /// DHCP_IP_RANGE structure that contains the set of excluded IP addresses. This member is present if ElementType is set to DhcpExcludedIpRanges.
         /// </summary>
         /// <returns></returns>
-        public DHCP_IP_RANGE ReadExcludeIpRange()
-        {
-            return (DHCP_IP_RANGE)Marshal.PtrToStructure(Element, typeof(DHCP_IP_RANGE));
-        }
+        public DHCP_IP_RANGE ReadExcludeIpRange() => Element.MarshalToStructure<DHCP_IP_RANGE>();
 
         /// <summary>
         /// DHCP_IP_CLUSTER structure that contains the set of clusters within the subnet. This member is present if ElementType is set to DhcpIpUsedClusters.
         /// </summary>
         /// <returns></returns>
-        public DHCP_IP_CLUSTER ReadIpUsedCluster()
-        {
-            return (DHCP_IP_CLUSTER)Marshal.PtrToStructure(Element, typeof(DHCP_IP_CLUSTER));
-        }
+        public DHCP_IP_CLUSTER ReadIpUsedCluster() => Element.MarshalToStructure<DHCP_IP_CLUSTER>();
     }
 }

@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of DHCP_OPTION_VALUE structures containing DHCP option values.
         /// </summary>
-        private IntPtr ValuesPointer;
+        private readonly IntPtr ValuesPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_OPTION_VALUE structures containing DHCP option values.
@@ -26,12 +26,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.ValuesPointer;
+                var instanceIter = ValuesPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_OPTION_VALUE));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_OPTION_VALUE)Marshal.PtrToStructure(instanceIter, typeof(DHCP_OPTION_VALUE));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_OPTION_VALUE>();
                     instanceIter += instanceSize;
                 }
             }

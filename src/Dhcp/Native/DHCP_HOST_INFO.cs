@@ -15,65 +15,33 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the IP address of the DHCP server.
         /// </summary>
-        public DHCP_IP_ADDRESS IpAddress;
+        public readonly DHCP_IP_ADDRESS IpAddress;
         /// <summary>
         /// Unicode string that contains the NetBIOS name of the DHCP server.
         /// </summary>
-        private IntPtr NetBiosNamePointer;
+        private readonly IntPtr NetBiosNamePointer;
         /// <summary>
         /// Unicode string that contains the network name of the DHCP server.
         /// </summary>
-        private IntPtr ServerNamePointer;
+        private readonly IntPtr ServerNamePointer;
 
         /// <summary>
         /// Unicode string that contains the NetBIOS name of the DHCP server.
         /// </summary>
-        public string NetBiosName
-        {
-            get
-            {
-                if (NetBiosNamePointer == IntPtr.Zero)
-                {
-                    return null;
-                }
-                else
-                {
-                    return Marshal.PtrToStringUni(NetBiosNamePointer);
-                }
-            }
-        }
+        public string NetBiosName => (NetBiosNamePointer == IntPtr.Zero) ? null : Marshal.PtrToStringUni(NetBiosNamePointer);
 
         /// <summary>
         /// Unicode string that contains the network name of the DHCP server.
         /// </summary>
-        public string ServerName
-        {
-            get
-            {
-                if (ServerNamePointer == IntPtr.Zero)
-                {
-                    return null;
-                }
-                else
-                {
-                    return Marshal.PtrToStringUni(ServerNamePointer);
-                }
-            }
-        }
+        public string ServerName => (ServerNamePointer == IntPtr.Zero) ? null : Marshal.PtrToStringUni(ServerNamePointer);
 
         public void Dispose()
         {
             if (NetBiosNamePointer != IntPtr.Zero)
-            {
                 Api.DhcpRpcFreeMemory(NetBiosNamePointer);
-                NetBiosNamePointer = IntPtr.Zero;
-            }
 
             if (ServerNamePointer != IntPtr.Zero)
-            {
                 Api.DhcpRpcFreeMemory(ServerNamePointer);
-                ServerNamePointer = IntPtr.Zero;
-            }
         }
     }
 }

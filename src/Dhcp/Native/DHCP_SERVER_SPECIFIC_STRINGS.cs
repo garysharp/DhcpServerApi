@@ -12,11 +12,11 @@ namespace Dhcp.Native
         /// Pointer to a Unicode string that specifies the default vendor class name for the DHCP server.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string DefaultVendorClassName;
+        public readonly string DefaultVendorClassName;
         /// <summary>
         /// Pointer to a Unicode string that specifies the default user class name for the DHCP server.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string DefaultUserClassName;
+        public readonly string DefaultUserClassName;
     }
 }

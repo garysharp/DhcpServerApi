@@ -13,11 +13,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the number of option elements in Options.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION"/> structures containing DHCP server options and the associated data.
         /// </summary>
-        public IntPtr OptionsPointer;
+        public readonly IntPtr OptionsPointer;
 
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION"/> structures containing DHCP server options and the associated data.
@@ -26,12 +26,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.OptionsPointer;
+                var instanceIter = OptionsPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_OPTION));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_OPTION)Marshal.PtrToStructure(instanceIter, typeof(DHCP_OPTION));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_OPTION>();
                     instanceIter += instanceSize;
                 }
             }

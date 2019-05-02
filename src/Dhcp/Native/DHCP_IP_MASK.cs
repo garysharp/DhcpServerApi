@@ -19,27 +19,27 @@ namespace Dhcp.Native
                 if ((m & 0xFFFF0000) == 0xFFFF0000)
                     sb = 16;
                 else
-                    m = m >> 16;
+                    m >>= 16;
 
                 if ((m & 0xFF00) == 0xFF00)
                     sb += 8;
                 else
-                    m = m >> 8;
+                    m >>= 8;
 
                 if ((m & 0xF0) == 0xF0)
                     sb += 4;
                 else
-                    m = m >> 4;
+                    m >>= 4;
 
                 if ((m & 0xC) == 0xC)
                     sb += 2;
                 else
-                    m = m >> 2;
+                    m >>= 2;
 
                 if ((m & 2) == 2)
                     sb += 1;
                 else
-                    m = m >> 1;
+                    m >>= 1;
 
                 if ((m & 1) == 1)
                     sb += 1;
@@ -50,63 +50,49 @@ namespace Dhcp.Native
 
         public DHCP_IP_MASK ToReverseOrder()
         {
-            unchecked
+            return new DHCP_IP_MASK()
             {
-                return new DHCP_IP_MASK()
-                {
-                    ipMask = (ipMask << 24) |
-                            ((ipMask << 8) & 0xFF0000) |
-                            ((ipMask >> 8) & 0xFF00) |
-                            (ipMask >> 24)
-                };
-            }
+                ipMask = ((ipMask << 24) & 0xFF00_0000) |
+                        ((ipMask << 08) & 0x00FF_0000) |
+                        ((ipMask >> 08) & 0x0000_FF00) |
+                        ((ipMask >> 24) & 0x0000_00FF)
+            };
         }
 
         public string ToHostOrderString()
         {
-            StringBuilder builder = new StringBuilder();
-            unchecked
-            {
-                builder
-                    .Append(ipMask >> 24).Append('.')
-                    .Append((ipMask >> 16) & 0xFF).Append('.')
-                    .Append((ipMask >> 8) & 0xFF).Append('.')
-                    .Append(ipMask & 0xFF);
-            }
+            var builder = new StringBuilder(15);
+            builder.Append((ipMask >> 24) & 0xFF);
+            builder.Append('.');
+            builder.Append((ipMask >> 16) & 0xFF);
+            builder.Append('.');
+            builder.Append((ipMask >> 8) & 0xFF);
+            builder.Append('.');
+            builder.Append(ipMask & 0xFF);
             return builder.ToString();
         }
 
         public string ToNetworkOrderString()
         {
-            StringBuilder builder = new StringBuilder();
-            unchecked
-            {
-                builder
-                    .Append(ipMask & 0xFF).Append('.')
-                    .Append((ipMask >> 8) & 0xFF).Append('.')
-                    .Append((ipMask >> 16) & 0xFF).Append('.')
-                    .Append(ipMask >> 24);
-            }
+            var builder = new StringBuilder(15);
+            builder.Append(ipMask & 0xFF);
+            builder.Append('.');
+            builder.Append((ipMask >> 8) & 0xFF);
+            builder.Append('.');
+            builder.Append((ipMask >> 16) & 0xFF);
+            builder.Append('.');
+            builder.Append((ipMask >> 24) & 0xFF);
             return builder.ToString();
         }
 
-        public IPAddress ToIPAddress()
-        {
-            return new IPAddress(this.ToReverseOrder().ipMask);
-        }
+        public IPAddress ToIPAddress() => new IPAddress(ToReverseOrder().ipMask);
 
         /// <summary>
         /// Converts the IP Mask to a Host-Order string
         /// </summary>
-        public override string ToString()
-        {
-            return ToHostOrderString();
-        }
+        public override string ToString() => ToHostOrderString();
 
-        public static explicit operator uint(DHCP_IP_MASK ipMask)
-        {
-            return ipMask.ipMask;
-        }
+        public static explicit operator uint(DHCP_IP_MASK ipMask) => ipMask.ipMask;
 
         public static explicit operator DHCP_IP_MASK(uint ipMask)
         {
@@ -116,10 +102,7 @@ namespace Dhcp.Native
             };
         }
 
-        public static explicit operator int(DHCP_IP_MASK ipMask)
-        {
-            return (int)ipMask.ipMask;
-        }
+        public static explicit operator int(DHCP_IP_MASK ipMask) => (int)ipMask.ipMask;
 
         public static explicit operator DHCP_IP_MASK(int ipMask)
         {
@@ -129,14 +112,8 @@ namespace Dhcp.Native
             };
         }
 
-        public static explicit operator DHCP_IP_ADDRESS(DHCP_IP_MASK ipMask)
-        {
-            return (DHCP_IP_ADDRESS)ipMask.ipMask;
-        }
+        public static explicit operator DHCP_IP_ADDRESS(DHCP_IP_MASK ipMask) => (DHCP_IP_ADDRESS)ipMask.ipMask;
 
-        public static explicit operator DHCP_IP_MASK(DHCP_IP_ADDRESS ipMask)
-        {
-            return (DHCP_IP_MASK)(uint)ipMask;
-        }
+        public static explicit operator DHCP_IP_MASK(DHCP_IP_ADDRESS ipMask) => (DHCP_IP_MASK)(uint)ipMask;
     }
 }

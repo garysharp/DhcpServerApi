@@ -13,20 +13,20 @@ namespace Dhcp.Native
         /// Unicode string that contains the name of the DHCP class for the option list.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string ClassName;
+        public readonly string ClassName;
         /// <summary>
         /// Unicode string that contains the name of the vendor for the option list.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string VendorName;
+        public readonly string VendorName;
         /// <summary>
         /// Specifies whether or not this set of options is vendor-specific. This value is TRUE if it is, and FALSE if it is not.
         /// </summary>
-        public bool IsVendor;
+        public readonly bool IsVendor;
         /// <summary>
         /// DHCP_OPTION_VALUE_ARRAY structure that contains the option values for the specified vendor/class pair.
         /// </summary>
-        public IntPtr OptionsArrayPointer;
+        public readonly IntPtr OptionsArrayPointer;
 
         /// <summary>
         /// DHCP_OPTION_VALUE_ARRAY structure that contains the option values for the specified vendor/class pair.
@@ -44,7 +44,7 @@ namespace Dhcp.Native
                 }
                 else
                 {
-                    return (DHCP_OPTION_VALUE_ARRAY)Marshal.PtrToStructure(OptionsArrayPointer, typeof(DHCP_OPTION_VALUE_ARRAY));
+                    return OptionsArrayPointer.MarshalToStructure<DHCP_OPTION_VALUE_ARRAY>();
                 }
             }
         }

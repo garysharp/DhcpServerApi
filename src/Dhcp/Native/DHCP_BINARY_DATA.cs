@@ -12,12 +12,12 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the size of Data, in bytes.
         /// </summary>
-        public int DataLength;
+        public readonly int DataLength;
 
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private IntPtr DataPointer;
+        private readonly IntPtr DataPointer;
 
         /// <summary>
         /// Blob of byte (binary) data.
@@ -27,17 +27,13 @@ namespace Dhcp.Native
             get
             {
                 if (DataPointer == IntPtr.Zero)
-                {
                     return null;
-                }
                 else
                 {
-                    byte[] blob = new byte[this.DataLength];
+                    var blob = new byte[DataLength];
 
-                    if (this.DataLength != 0)
-                    {
-                        Marshal.Copy(this.DataPointer, blob, 0, this.DataLength);
-                    }
+                    if (DataLength != 0)
+                        Marshal.Copy(DataPointer, blob, 0, DataLength);
 
                     return blob;
                 }
@@ -47,10 +43,7 @@ namespace Dhcp.Native
         public void Dispose()
         {
             if (DataPointer != IntPtr.Zero)
-            {
                 Api.DhcpRpcFreeMemory(DataPointer);
-                DataPointer = IntPtr.Zero;
-            }
         }
     }
 }

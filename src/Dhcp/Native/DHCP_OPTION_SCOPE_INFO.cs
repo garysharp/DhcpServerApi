@@ -16,14 +16,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_OPTION_SCOPE_TYPE ScopeType
         {
-            get
-            {
-                return (DHCP_OPTION_SCOPE_TYPE)scopeType;
-            }
-            set
-            {
-                scopeType = (IntPtr)value;
-            }
+            get => (DHCP_OPTION_SCOPE_TYPE)scopeType;
+            set => scopeType = (IntPtr)value;
         }
 
         public IntPtr GlobalScopeInfo;
@@ -42,14 +36,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_OPTION_SCOPE_TYPE ScopeType
         {
-            get
-            {
-                return (DHCP_OPTION_SCOPE_TYPE)scopeType;
-            }
-            set
-            {
-                scopeType = (IntPtr)value;
-            }
+            get => (DHCP_OPTION_SCOPE_TYPE)scopeType;
+            set => scopeType = (IntPtr)value;
         }
 
         /// <summary>
@@ -71,14 +59,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_OPTION_SCOPE_TYPE ScopeType
         {
-            get
-            {
-                return (DHCP_OPTION_SCOPE_TYPE)scopeType;
-            }
-            set
-            {
-                scopeType = (IntPtr)value;
-            }
+            get => (DHCP_OPTION_SCOPE_TYPE)scopeType;
+            set => scopeType = (IntPtr)value;
         }
 
         /// <summary>
@@ -105,14 +87,8 @@ namespace Dhcp.Native
         /// </summary>
         public DHCP_OPTION_SCOPE_TYPE ScopeType
         {
-            get
-            {
-                return (DHCP_OPTION_SCOPE_TYPE)scopeType;
-            }
-            set
-            {
-                scopeType = (IntPtr)value;
-            }
+            get => (DHCP_OPTION_SCOPE_TYPE)scopeType;
+            set => scopeType = (IntPtr)value;
         }
 
         /// <summary>

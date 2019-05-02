@@ -1,5 +1,5 @@
-﻿using Dhcp.Native;
-using System.Net;
+﻿using System.Net;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -8,62 +8,38 @@ namespace Dhcp
         private DHCP_IP_ADDRESS startAddress;
         private DHCP_IP_ADDRESS endAddress;
 
-        public IPAddress StartAddress { get { return startAddress.ToIPAddress(); } }
-        public int StartAddressNative { get { return (int)startAddress; } }
-        public IPAddress EndAddress { get { return endAddress.ToIPAddress(); } }
-        public int EndAddressNative { get { return (int)endAddress; } }
+        public IPAddress StartAddress => startAddress.ToIPAddress();
+        public int StartAddressNative => (int)startAddress;
+        public IPAddress EndAddress => endAddress.ToIPAddress();
+        public int EndAddressNative => (int)endAddress;
 
-        public int BootpClientsAllocated { get; private set; }
-        public int MaxBootpAllowed { get; private set; }
+        public int BootpClientsAllocated { get; }
+        public int MaxBootpAllowed { get; }
 
-        private DhcpServerIpRange(DHCP_IP_ADDRESS StartAddress, DHCP_IP_ADDRESS EndAddress)
+        private DhcpServerIpRange(DHCP_IP_ADDRESS startAddress, DHCP_IP_ADDRESS endAddress, int bootpClientsAllocated, int maxBootpAllowed)
         {
-            this.startAddress = StartAddress;
-            this.endAddress = EndAddress;
+            this.startAddress = startAddress;
+            this.endAddress = endAddress;
+            BootpClientsAllocated = bootpClientsAllocated;
+            MaxBootpAllowed = maxBootpAllowed;
         }
 
-        public bool Contains(IPAddress IpAddress)
-        {
-            return Contains(DHCP_IP_ADDRESS.FromIPAddress(IpAddress));
-        }
+        public bool Contains(IPAddress ipAddress) => Contains(DHCP_IP_ADDRESS.FromIPAddress(ipAddress));
 
-        public bool Contains(string IpAddress)
-        {
-            return Contains(DHCP_IP_ADDRESS.FromString(IpAddress));
-        }
+        public bool Contains(string ipAddress) => Contains(DHCP_IP_ADDRESS.FromString(ipAddress));
 
-        public bool Contains(int IpAddress)
-        {
-            return Contains((DHCP_IP_ADDRESS)IpAddress);
-        }
+        public bool Contains(int ipAddress) => Contains((DHCP_IP_ADDRESS)ipAddress);
 
-        public bool Contains(uint IpAddress)
-        {
-            return Contains((DHCP_IP_ADDRESS)IpAddress);
-        }
+        public bool Contains(uint ipAddress) => Contains((DHCP_IP_ADDRESS)ipAddress);
 
-        internal bool Contains(DHCP_IP_ADDRESS IpAddress)
-        {
-            return IpAddress >= startAddress && IpAddress <= endAddress;
-        }
+        internal bool Contains(DHCP_IP_ADDRESS ipAddress) => ipAddress >= startAddress && ipAddress <= endAddress;
 
-        internal static DhcpServerIpRange FromNative(DHCP_IP_RANGE Native)
-        {
-            return new DhcpServerIpRange(Native.StartAddress, Native.EndAddress);
-        }
+        internal static DhcpServerIpRange FromNative(DHCP_IP_RANGE native)
+            => new DhcpServerIpRange(native.StartAddress, native.EndAddress, 0, 0);
 
-        internal static DhcpServerIpRange FromNative(DHCP_BOOTP_IP_RANGE Native)
-        {
-            return new DhcpServerIpRange(Native.StartAddress, Native.EndAddress)
-            {
-                BootpClientsAllocated = Native.BootpAllocated,
-                MaxBootpAllowed = Native.MaxBootpAllowed
-            };
-        }
+        internal static DhcpServerIpRange FromNative(DHCP_BOOTP_IP_RANGE native)
+            => new DhcpServerIpRange(native.StartAddress, native.EndAddress, native.BootpAllocated, native.MaxBootpAllowed);
 
-        public override string ToString()
-        {
-            return string.Format("{0} - {1}", startAddress, endAddress);
-        }
+        public override string ToString() => $"{startAddress} - {endAddress}";
     }
 }

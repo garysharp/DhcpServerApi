@@ -11,41 +11,41 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies a set of bit flags that contain the RPC protocols supported by the DHCP server.
         /// </summary>
-        public uint APIProtocolSupport;
+        public readonly uint APIProtocolSupport;
         /// <summary>
         /// Unicode string that specifies the file name of the client lease JET database.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string DatabaseName;
+        public readonly string DatabaseName;
         /// <summary>
         /// Unicode string that specifies the absolute path to DatabaseName.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string DatabasePath;
+        public readonly string DatabasePath;
         /// <summary>
         /// Unicode string that specifies the absolute path and file name of the backup client lease JET database.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string BackupPath;
+        public readonly string BackupPath;
         /// <summary>
         /// Specifies the interval, in minutes, between backups of the client lease database.
         /// </summary>
-        public int BackupInterval;
+        public readonly int BackupInterval;
         /// <summary>
         /// Specifies a bit flag that indicates whether or not database actions should be logged.
         /// </summary>
-        public uint DatabaseLoggingFlag;
+        public readonly uint DatabaseLoggingFlag;
         /// <summary>
         /// Specifies a bit flag that indicates whether or not a database restore operation should be performed.
         /// </summary>
-        public uint RestoreFlag;
+        public readonly uint RestoreFlag;
         /// <summary>
         /// Specifies the interval, in minutes, between cleanup operations performed on the client lease database.
         /// </summary>
-        public int DatabaseCleanupInterval;
+        public readonly int DatabaseCleanupInterval;
         /// <summary>
         /// Reserved. This field should be set to 0x00000000.
         /// </summary>
-        public uint DebugFlag;
+        public readonly uint DebugFlag;
     }
 }

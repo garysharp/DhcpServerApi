@@ -13,11 +13,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the number of elements present in Clients.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
         /// <summary>
         /// Pointer to a list of DHCP_CLIENT_INFO_V5 structures that contain information on specific DHCP subnet clients, including the dynamic address type (DHCP and/or BOOTP) and address state information.
         /// </summary>
-        private IntPtr ClientsPointer;
+        private readonly IntPtr ClientsPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_CLIENT_INFO_V5 structures that contain information on specific DHCP subnet clients, including the dynamic address type (DHCP and/or BOOTP) and address state information.
@@ -26,12 +26,12 @@ namespace Dhcp.Native
         {
             get
             {
-                var iter = this.ClientsPointer;
-                for (int i = 0; i < this.NumElements; i++)
+                var iter = ClientsPointer;
+                for (var i = 0; i < NumElements; i++)
                 {
                     var clientPtr = Marshal.ReadIntPtr(iter);
 
-                    yield return (DHCP_CLIENT_INFO_V5)Marshal.PtrToStructure(clientPtr, typeof(DHCP_CLIENT_INFO_V5));
+                    yield return clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_V5>();
 
                     iter += IntPtr.Size;
                 }

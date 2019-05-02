@@ -13,11 +13,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the number of network binding elements listed in Elements.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
         /// <summary>
         /// Specifies an array of DHCP_BIND_ELEMENT structures
         /// </summary>
-        private IntPtr ElementsPointer;
+        private readonly IntPtr ElementsPointer;
 
         /// <summary>
         /// Specifies an array of DHCP_BIND_ELEMENT structures
@@ -26,12 +26,11 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = this.ElementsPointer;
+                var instanceIter = ElementsPointer;
                 var instanceSize = Marshal.SizeOf(typeof(DHCP_BIND_ELEMENT));
-                for (int i = 0; i < this.NumElements; i++)
+                for (var i = 0; i < NumElements; i++)
                 {
-                    yield return (DHCP_BIND_ELEMENT)Marshal.PtrToStructure(instanceIter, typeof(DHCP_BIND_ELEMENT));
-
+                    yield return instanceIter.MarshalToStructure<DHCP_BIND_ELEMENT>();
                     instanceIter += instanceSize;
                 }
             }

@@ -1,10 +1,9 @@
-﻿using Dhcp.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -13,225 +12,139 @@ namespace Dhcp
     /// </summary>
     public class DhcpServer
     {
-        internal DHCP_IP_ADDRESS ipAddress;
-        private string name;
-        private Lazy<Tuple<int, int>> version;
-        private Lazy<DhcpServerConfiguration> config;
-        private Lazy<Tuple<string, string>> specificStrings;
-        private Lazy<DhcpServerAuditLog> auditLog;
-        private Lazy<DhcpServerDnsSettings> dnsSettings;
+        internal readonly DHCP_IP_ADDRESS ipAddress;
+        private Tuple<int, int> version;
+        private DhcpServerConfiguration config;
+        private Tuple<string, string> specificStrings;
+        private DhcpServerAuditLog auditLog;
+        private DhcpServerDnsSettings dnsSettings;
 
         internal DhcpServer(DHCP_IP_ADDRESS ipAddress, string name)
         {
             this.ipAddress = ipAddress;
-            this.name = name;
-
-            this.version = new Lazy<Tuple<int, int>>(GetVersion);
-            this.config = new Lazy<DhcpServerConfiguration>(() => DhcpServerConfiguration.GetConfiguration(this));
-            this.specificStrings = new Lazy<Tuple<string, string>>(GetSpecificStrings);
-            this.auditLog = new Lazy<DhcpServerAuditLog>(() => DhcpServerAuditLog.GetParams(this));
-            this.dnsSettings = new Lazy<DhcpServerDnsSettings>(() => DhcpServerDnsSettings.GetGlobalDnsSettings(this));
+            Name = name;
         }
 
-        public IPAddress IpAddress { get { return this.ipAddress.ToIPAddress(); } }
-        public int IpAddressNative { get { return (int)this.ipAddress; } }
-        public string Name { get { return this.name; } }
-        public int VersionMajor { get { return this.version.Value.Item1; } }
-        public int VersionMinor { get { return this.version.Value.Item2; } }
-        public DhcpServerVersions Version { get { return (DhcpServerVersions)(((ulong)this.version.Value.Item1 << 16) | (uint)this.version.Value.Item2); } }
-        public DhcpServerConfiguration Configuration { get { return this.config.Value; } }
-        public DhcpServerDnsSettings DnsSettings { get { return this.dnsSettings.Value; } }
+        public IPAddress IpAddress => ipAddress.ToIPAddress();
+        public int IpAddressNative => (int)ipAddress;
+        public string Name { get; }
+        public int VersionMajor => (version ??= GetVersion()).Item1;
+        public int VersionMinor => (version ??= GetVersion()).Item2;
+        public DhcpServerVersions Version => (DhcpServerVersions)(((ulong)(version ??= GetVersion()).Item1 << 16) | (uint)version.Item2);
+        public DhcpServerConfiguration Configuration => config ??= DhcpServerConfiguration.GetConfiguration(this);
+        public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
 
-        public string DefaultVendorClassName { get { return this.specificStrings.Value.Item1; } }
-        public string DefaultUserClassName { get { return this.specificStrings.Value.Item2; } }
+        public string DefaultVendorClassName => (specificStrings ??= GetSpecificStrings()).Item1;
+        public string DefaultUserClassName => (specificStrings ??= GetSpecificStrings()).Item2;
 
-        public bool IsCompatible(DhcpServerVersions Version)
-        {
-            return (long)Version <= (long)this.Version;
-        }
+        public bool IsCompatible(DhcpServerVersions version) => ((long)version <= (long)Version);
 
         /// <summary>
         /// Enumerates a list of Classes associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerClass> Classes
-        {
-            get
-            {
-                return DhcpServerClass.GetClasses(this);
-            }
-        }
+        public IEnumerable<DhcpServerClass> Classes => DhcpServerClass.GetClasses(this);
 
         /// <summary>
         /// Queries the DHCP Server for the specified User or Vendor Class
         /// </summary>
-        /// <param name="Name">The name of the User or Vendor Class to retrieve</param>
+        /// <param name="name">The name of the User or Vendor Class to retrieve</param>
         /// <returns>A <see cref="DhcpServerClass"/>.</returns>
-        public DhcpServerClass GetClass(string Name)
-        {
-            return DhcpServerClass.GetClass(this, Name);
-        }
+        public DhcpServerClass GetClass(string name) => DhcpServerClass.GetClass(this, name);
 
         /// <summary>
         /// Enumerates a list of Global Option Values associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerOptionValue> GlobalOptionValues
-        {
-            get
-            {
-                return DhcpServerOptionValue.EnumGlobalDefaultOptionValues(this);
-            }
-        }
+        public IEnumerable<DhcpServerOptionValue> GlobalOptionValues => DhcpServerOptionValue.EnumGlobalDefaultOptionValues(this);
 
         /// <summary>
         /// Enumerates a list of all Global Option Values, including vendor/user class options, associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerOptionValue> AllGlobalOptionValues
-        {
-            get
-            {
-                return DhcpServerOptionValue.GetAllGlobalOptionValues(this);
-            }
-        }
+        public IEnumerable<DhcpServerOptionValue> AllGlobalOptionValues => DhcpServerOptionValue.GetAllGlobalOptionValues(this);
 
         /// <summary>
         /// Enumerates a list of all default Options associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerOption> Options
-        {
-            get
-            {
-                return DhcpServerOption.EnumDefaultOptions(this);
-            }
-        }
+        public IEnumerable<DhcpServerOption> Options => DhcpServerOption.EnumDefaultOptions(this);
 
         /// <summary>
         /// Enumerates a list of all Options, including vendor/user class options, associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerOption> AllOptions
-        {
-            get
-            {
-                return DhcpServerOption.GetAllOptions(this);
-            }
-        }
+        public IEnumerable<DhcpServerOption> AllOptions => DhcpServerOption.GetAllOptions(this);
 
         /// <summary>
         /// Enumerates a list of Scopes associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerScope> Scopes
-        {
-            get
-            {
-                return DhcpServerScope.GetScopes(this);
-            }
-        }
+        public IEnumerable<DhcpServerScope> Scopes => DhcpServerScope.GetScopes(this);
 
         /// <summary>
         /// Enumerates a list of all Clients (in all Scopes) associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerClient> Clients
-        {
-            get
-            {
-                return DhcpServerClient.GetClients(this);
-            }
-        }
+        public IEnumerable<DhcpServerClient> Clients => DhcpServerClient.GetClients(this);
 
         /// <summary>
         /// Enumerates a list of Binding Elements associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerBindingElement> BindingElements
-        {
-            get
-            {
-                return DhcpServerBindingElement.GetBindingInfo(this);
-            }
-        }
+        public IEnumerable<DhcpServerBindingElement> BindingElements => DhcpServerBindingElement.GetBindingInfo(this);
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId from the Default options
         /// </summary>
-        /// <param name="OptionId">The identifier for the option to retrieve</param>
+        /// <param name="optionId">The identifier for the option to retrieve</param>
         /// <returns>A <see cref="DhcpServerOption"/>.</returns>
-        public DhcpServerOption GetOption(int OptionId)
-        {
-            return DhcpServerOption.GetDefaultOption(this, OptionId);
-        }
+        public DhcpServerOption GetOption(int optionId) => DhcpServerOption.GetDefaultOption(this, optionId);
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId within a Vendor Class
         /// </summary>
-        /// <param name="VendorName">The name of the Vendor Class to retrieve the Option from</param>
-        /// <param name="OptionId">The identifier for the option to retrieve</param>
+        /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option to retrieve</param>
         /// <returns>A <see cref="DhcpServerOption"/>.</returns>
-        public DhcpServerOption GetVendorOption(string VendorName, int OptionId)
-        {
-            return DhcpServerOption.GetVendorOption(this, OptionId, VendorName);
-        }
+        public DhcpServerOption GetVendorOption(string vendorName, int optionId) => DhcpServerOption.GetVendorOption(this, optionId, vendorName);
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId within a User Class
         /// </summary>
-        /// <param name="ClassName">The name of the User Class to retrieve the Option from</param>
-        /// <param name="OptionId">The identifier for the option to retrieve</param>
+        /// <param name="className">The name of the User Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option to retrieve</param>
         /// <returns>A <see cref="DhcpServerOption"/>.</returns>
-        public DhcpServerOption GetUserOption(string ClassName, int OptionId)
-        {
-            return DhcpServerOption.GetUserOption(this, OptionId, ClassName);
-        }
+        public DhcpServerOption GetUserOption(string className, int optionId) => DhcpServerOption.GetUserOption(this, optionId, className);
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId Value from the Default options
         /// </summary>
-        /// <param name="Option">The associated option to retrieve the option value for</param>
+        /// <param name="option">The associated option to retrieve the option value for</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetOptionValue(DhcpServerOption Option)
-        {
-            return Option.GetGlobalValue();
-        }
+        public DhcpServerOptionValue GetOptionValue(DhcpServerOption option) => option.GetGlobalValue();
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId Value from the Default options
         /// </summary>
-        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetOptionValue(int OptionId)
-        {
-            return DhcpServerOptionValue.GetGlobalDefaultOptionValue(this, OptionId);
-        }
+        public DhcpServerOptionValue GetOptionValue(int optionId) => DhcpServerOptionValue.GetGlobalDefaultOptionValue(this, optionId);
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId Value within a Vendor Class
         /// </summary>
-        /// <param name="VendorName">The name of the Vendor Class to retrieve the Option from</param>
-        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetVendorOptionValue(string VendorName, int OptionId)
-        {
-            return DhcpServerOptionValue.GetGlobalVendorOptionValue(this, OptionId, VendorName);
-        }
+        public DhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId)
+            => DhcpServerOptionValue.GetGlobalVendorOptionValue(this, optionId, vendorName);
 
         /// <summary>
         /// Queries the DHCP Server for the specified OptionId Value within a User Class
         /// </summary>
-        /// <param name="ClassName">The name of the User Class to retrieve the Option from</param>
-        /// <param name="OptionId">The identifier for the option value to retrieve</param>
+        /// <param name="className">The name of the User Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetUserOptionValue(string ClassName, int OptionId)
-        {
-            return DhcpServerOptionValue.GetGlobalUserOptionValue(this, OptionId, ClassName);
-        }
+        public DhcpServerOptionValue GetUserOptionValue(string className, int optionId)
+            => DhcpServerOptionValue.GetGlobalUserOptionValue(this, optionId, className);
 
         /// <summary>
         /// The audit log configuration settings from the DHCP server.
         /// </summary>
-        public DhcpServerAuditLog AuditLog
-        {
-            get
-            {
-                return auditLog.Value;
-            }
-        }
+        public DhcpServerAuditLog AuditLog => auditLog ??= DhcpServerAuditLog.GetParams(this);
 
         /// <summary>
         /// Enumerates a list of DHCP servers found in the directory service. 
@@ -240,21 +153,21 @@ namespace Dhcp
         {
             get
             {
-                IntPtr serversPtr;
-
-                var result = Api.DhcpEnumServers(0, IntPtr.Zero, out serversPtr, IntPtr.Zero, IntPtr.Zero);
+                var result = Api.DhcpEnumServers(Flags: 0,
+                                                 IdInfo: IntPtr.Zero,
+                                                 Servers: out var serversPtr,
+                                                 CallbackFn: IntPtr.Zero,
+                                                 CallbackData: IntPtr.Zero);
 
                 if (result != DhcpErrors.SUCCESS)
-                    throw new DhcpServerException("DhcpEnumServers", result);
-
-                var servers = (DHCPDS_SERVERS)Marshal.PtrToStructure(serversPtr, typeof(DHCPDS_SERVERS));
+                    throw new DhcpServerException(nameof(Api.DhcpEnumServers), result);
 
                 try
                 {
+                    var servers = serversPtr.MarshalToStructure<DHCPDS_SERVERS>();
+
                     foreach (var server in servers.Servers)
-                    {
-                        yield return DhcpServer.FromNative(server);
-                    }
+                        yield return FromNative(server);
                 }
                 finally
                 {
@@ -266,13 +179,13 @@ namespace Dhcp
         /// <summary>
         /// Connects to a DHCP server
         /// </summary>
-        /// <param name="HostNameOrAddress"></param>
-        public static DhcpServer Connect(string HostNameOrAddress)
+        /// <param name="hostNameOrAddress"></param>
+        public static DhcpServer Connect(string hostNameOrAddress)
         {
-            if (string.IsNullOrWhiteSpace(HostNameOrAddress))
-                throw new ArgumentNullException("HostNameOrAddress");
+            if (string.IsNullOrWhiteSpace(hostNameOrAddress))
+                throw new ArgumentNullException(nameof(hostNameOrAddress));
 
-            var dnsEntry = Dns.GetHostEntry(HostNameOrAddress);
+            var dnsEntry = Dns.GetHostEntry(hostNameOrAddress);
 
             var dnsAddress = dnsEntry.AddressList.Where(a => a.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault();
 
@@ -286,29 +199,26 @@ namespace Dhcp
 
         private Tuple<int, int> GetVersion()
         {
-            int major, minor;
-
-            var result = Api.DhcpGetVersion(this.ipAddress.ToString(), out major, out minor);
+            var result = Api.DhcpGetVersion(ipAddress, out var major, out var minor);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpGetVersion", result);
+                throw new DhcpServerException(nameof(Api.DhcpGetVersion), result);
 
             return Tuple.Create(major, minor);
         }
 
         private Tuple<string, string> GetSpecificStrings()
         {
-            IntPtr stringsPtr;
-
-            var result = Api.DhcpGetServerSpecificStrings(this.ipAddress.ToString(), out stringsPtr);
+            var result = Api.DhcpGetServerSpecificStrings(ServerIpAddress: ipAddress,
+                                                          ServerSpecificStrings: out var stringsPtr);
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException("DhcpGetServerSpecificStrings", result);
-
-            var strings = (DHCP_SERVER_SPECIFIC_STRINGS)Marshal.PtrToStructure(stringsPtr, typeof(DHCP_SERVER_SPECIFIC_STRINGS));
+                throw new DhcpServerException(nameof(Api.DhcpGetServerSpecificStrings), result);
 
             try
             {
+                var strings = stringsPtr.MarshalToStructure<DHCP_SERVER_SPECIFIC_STRINGS>();
+
                 return Tuple.Create(strings.DefaultVendorClassName, strings.DefaultUserClassName);
             }
             finally
@@ -317,14 +227,12 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServer FromNative(DHCPDS_SERVER Native)
+        private static DhcpServer FromNative(DHCPDS_SERVER native)
         {
-            return new DhcpServer(Native.ServerAddress, Native.ServerName);
+            return new DhcpServer(native.ServerAddress, native.ServerName);
         }
 
-        public override string ToString()
-        {
-            return string.Format("DHCP Server: {0} ({1})", this.Name, this.IpAddress);
-        }
+        public override string ToString() => $"DHCP Server: {Name} ({IpAddress})";
+
     }
 }

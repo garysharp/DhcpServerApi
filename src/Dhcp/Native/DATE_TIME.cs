@@ -13,15 +13,15 @@ namespace Dhcp.Native
         /// Specifies the lower 32 bits of the time value.
         /// </summary>
         [FieldOffset(0)]
-        public uint dwLowDateTime;
+        public readonly uint dwLowDateTime;
         /// <summary>
         /// Specifies the upper 32 bits of the time value.
         /// </summary>
         [FieldOffset(4)]
-        public uint dwHighDateTime;
+        public readonly uint dwHighDateTime;
 
         [FieldOffset(0)]
-        public long dwDateTime;
+        public readonly long dwDateTime;
 
         public DateTime ToDateTime()
         {
