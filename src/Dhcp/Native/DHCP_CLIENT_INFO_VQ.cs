@@ -44,7 +44,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Possible states of the IPv4 address given to the DHCPv4 client.
         /// </summary>
-        public readonly AddressStates AddressState;
+        public readonly byte AddressState;
         /// <summary>
         /// QuarantineStatus enumeration that specifies possible health status values for the DHCPv4 client, as validated at the NAP server.
         /// </summary>

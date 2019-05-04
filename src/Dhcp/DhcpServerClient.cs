@@ -49,6 +49,8 @@ namespace Dhcp
         public DhcpServerClientTypes Type { get; }
 
         public DhcpServerClientAddressStates AddressState { get; }
+        public DhcpServerClientNameProtectionStates NameProtectionState { get; }
+        public DhcpServerClientDnsStates DnsState { get; }
 
         public DhcpServerClientQuarantineStatuses QuarantineStatus { get; }
 
@@ -56,7 +58,7 @@ namespace Dhcp
 
         public bool QuarantineCapable { get; }
 
-        private DhcpServerClient(DhcpServer server, DHCP_IP_ADDRESS ipAddress, DHCP_IP_MASK subnetMask, byte[] hardwareAddress, string name, string comment, DateTime leaseExpires, DhcpServerClientTypes type, DhcpServerClientAddressStates addressState, DhcpServerClientQuarantineStatuses quarantineStatus, DateTime probationEnds, bool quarantineCapable)
+        private DhcpServerClient(DhcpServer server, DHCP_IP_ADDRESS ipAddress, DHCP_IP_MASK subnetMask, byte[] hardwareAddress, string name, string comment, DateTime leaseExpires, DhcpServerClientTypes type, DhcpServerClientAddressStates addressState, DhcpServerClientNameProtectionStates nameProtectionState, DhcpServerClientDnsStates dnsState, DhcpServerClientQuarantineStatuses quarantineStatus, DateTime probationEnds, bool quarantineCapable)
         {
             Server = server;
             this.ipAddress = ipAddress;
@@ -67,6 +69,8 @@ namespace Dhcp
             LeaseExpires = leaseExpires;
             Type = type;
             AddressState = addressState;
+            NameProtectionState = nameProtectionState;
+            DnsState = dnsState;
             QuarantineStatus = quarantineStatus;
             ProbationEnds = probationEnds;
             QuarantineCapable = quarantineCapable;
@@ -363,6 +367,8 @@ namespace Dhcp
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
                                         type: DhcpServerClientTypes.Unspecified,
                                         addressState: DhcpServerClientAddressStates.Unknown,
+                                        nameProtectionState: DhcpServerClientNameProtectionStates.Unknown,
+                                        dnsState: DhcpServerClientDnsStates.Unknown,
                                         quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
                                         probationEnds: DateTime.MaxValue,
                                         quarantineCapable: false);
@@ -379,6 +385,8 @@ namespace Dhcp
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
                                         type: (DhcpServerClientTypes)native.bClientType,
                                         addressState: DhcpServerClientAddressStates.Unknown,
+                                        nameProtectionState: DhcpServerClientNameProtectionStates.Unknown,
+                                        dnsState: DhcpServerClientDnsStates.Unknown,
                                         quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
                                         probationEnds: DateTime.MaxValue,
                                         quarantineCapable: false);
@@ -394,7 +402,9 @@ namespace Dhcp
                                         comment: native.ClientComment,
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
                                         type: (DhcpServerClientTypes)native.bClientType,
-                                        addressState: (DhcpServerClientAddressStates)native.AddressState,
+                                        addressState: (DhcpServerClientAddressStates)(native.AddressState & 0x03), // bits 0 & 1
+                                        nameProtectionState: (DhcpServerClientNameProtectionStates)((native.AddressState >> 2) & 0x03), // bits 2 & 3
+                                        dnsState: (DhcpServerClientDnsStates)((native.AddressState >> 4) & 0x0F), // bits 4-7
                                         quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
                                         probationEnds: DateTime.MaxValue,
                                         quarantineCapable: false);
@@ -410,7 +420,9 @@ namespace Dhcp
                                         comment: native.ClientComment,
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
                                         type: (DhcpServerClientTypes)native.bClientType,
-                                        addressState: (DhcpServerClientAddressStates)native.AddressState,
+                                        addressState: (DhcpServerClientAddressStates)(native.AddressState & 0x03), // bits 0 & 1
+                                        nameProtectionState: (DhcpServerClientNameProtectionStates)((native.AddressState >> 2) & 0x03), // bits 2 & 3
+                                        dnsState: (DhcpServerClientDnsStates)((native.AddressState >> 4) & 0x0F), // bits 4-7
                                         quarantineStatus: (DhcpServerClientQuarantineStatuses)native.Status,
                                         probationEnds: native.ProbationEnds.ToDateTime(),
                                         quarantineCapable: native.QuarantineCapable);

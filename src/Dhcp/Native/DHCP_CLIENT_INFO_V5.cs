@@ -45,6 +45,6 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the current state of the client IP address.
         /// </summary>
-        public readonly AddressStates AddressState;
+        public readonly byte AddressState;
     }
 }
