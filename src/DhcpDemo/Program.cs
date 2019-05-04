@@ -70,7 +70,7 @@ namespace DhcpDemo
             Console.WriteLine($"               Dynamic DNS Updates Always: {dnsSettings.DynamicDnsUpdatedAlways}");
             Console.WriteLine($"      Discard Records When Leases Deleted: {dnsSettings.DiscardRecordsWhenLeasesDeleted}");
             Console.WriteLine($"    Update Records for Down-Level Clients: {dnsSettings.UpdateRecordsForDownLevelClients}");
-            Console.WriteLine($"       Disable Dynamic PTR Record Updates: {dnsSettings.DisableDynamicPtrRecordUpdates}"); 
+            Console.WriteLine($"       Disable Dynamic PTR Record Updates: {dnsSettings.DisableDynamicPtrRecordUpdates}");
 
             // Binding Elements
             Console.ForegroundColor = ConsoleColor.White;
