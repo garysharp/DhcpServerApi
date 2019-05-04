@@ -9,38 +9,37 @@ namespace Dhcp
     public class DhcpServerScope
     {
         internal DHCP_IP_ADDRESS address;
-        private readonly Lazy<DHCP_SUBNET_INFO> info;
-        private readonly Lazy<TimeSpan> timeDelayOffer;
+        private DHCP_SUBNET_INFO? info;
+        private TimeSpan? timeDelayOffer;
         private DhcpServerIpRange ipRange;
         private List<DhcpServerIpRange> excludedIpRanges;
-        private readonly Lazy<TimeSpan> leaseDuration;
+        private TimeSpan? leaseDuration;
         private DhcpServerDnsSettings dnsSettings;
 
         public DhcpServer Server { get; }
 
         public IPAddress Address => address.ToIPAddress();
         public int AddressNative => (int)address;
-        public IPAddress Mask => info.Value.SubnetMask.ToIPAddress();
-        public int MaskNative => (int)info.Value.SubnetMask;
 
-        public string Name => info.Value.SubnetName;
-        public string Comment => info.Value.SubnetComment;
+        private DHCP_SUBNET_INFO Info => (DHCP_SUBNET_INFO)(info ??= GetInfo());
 
-        public IPAddress PrimaryHostIpAddress => info.Value.PrimaryHost.IpAddress.ToReverseOrder().ToIPAddress();
-        public int PrimaryHostIpAddressNative => (int)info.Value.PrimaryHost.IpAddress.ToReverseOrder();
+        public IPAddress Mask => Info.SubnetMask.ToIPAddress();
+        public int MaskNative => (int)Info.SubnetMask;
 
-        public DhcpServerScopeState State => (DhcpServerScopeState)info.Value.SubnetState;
+        public string Name => Info.SubnetName;
+        public string Comment => Info.SubnetComment;
 
-        public TimeSpan TimeDelayOffer => timeDelayOffer.Value;
+        public IPAddress PrimaryHostIpAddress => Info.PrimaryHost.IpAddress.ToReverseOrder().ToIPAddress();
+        public int PrimaryHostIpAddressNative => (int)Info.PrimaryHost.IpAddress.ToReverseOrder();
+
+        public DhcpServerScopeState State => (DhcpServerScopeState)Info.SubnetState;
+
+        public TimeSpan TimeDelayOffer => (TimeSpan)(timeDelayOffer ??= GetTimeDelayOffer());
 
         internal DhcpServerScope(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
         {
             Server = server;
             address = subnetAddress;
-
-            info = new Lazy<DHCP_SUBNET_INFO>(GetInfo);
-            timeDelayOffer = new Lazy<TimeSpan>(GetTimeDelayOffer);
-            leaseDuration = new Lazy<TimeSpan>(GetLeaseDuration);
         }
 
         /// <summary>
@@ -61,7 +60,7 @@ namespace Dhcp
 
         public IEnumerable<DhcpServerIpRange> ExcludedIpRanges => excludedIpRanges ??= GetExcludedIpRanges();
 
-        public TimeSpan LeaseDuration => leaseDuration.Value;
+        public TimeSpan LeaseDuration => (leaseDuration ??= GetLeaseDuration()).GetValueOrDefault();
 
         public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetScopeDnsSettings(this);
 
