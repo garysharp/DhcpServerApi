@@ -60,7 +60,7 @@ namespace Dhcp
 
         public IEnumerable<DhcpServerIpRange> ExcludedIpRanges => excludedIpRanges ??= GetExcludedIpRanges();
 
-        public TimeSpan LeaseDuration => (leaseDuration ??= GetLeaseDuration()).GetValueOrDefault();
+        public TimeSpan? LeaseDuration => leaseDuration ??= GetLeaseDuration();
 
         public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetScopeDnsSettings(this);
 
@@ -207,14 +207,15 @@ namespace Dhcp
             return TimeSpan.FromMilliseconds(timeDelay);
         }
 
-        private TimeSpan GetLeaseDuration()
+        private TimeSpan? GetLeaseDuration()
         {
             var option = DhcpServerOptionValue.GetScopeDefaultOptionValue(this, 51);
+            var optionValue = (option?.Values.FirstOrDefault() as DhcpServerOptionElementDWord)?.RawValue ?? -1;
 
-            if (option == null)
-                return default;
+            if (optionValue < 0)
+                return null;
             else
-                return TimeSpan.FromSeconds(((DhcpServerOptionElementDWord)option.Values.First()).RawValue);
+                return TimeSpan.FromSeconds(optionValue);
         }
 
         public override string ToString() => $"DHCP Scope: {Address} ({Server.Name} ({Server.IpAddress}))";
