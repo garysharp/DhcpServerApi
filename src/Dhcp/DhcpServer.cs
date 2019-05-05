@@ -12,30 +12,66 @@ namespace Dhcp
     /// </summary>
     public class DhcpServer
     {
-        internal readonly DHCP_IP_ADDRESS ipAddress;
-        private Tuple<int, int> version;
-        private DhcpServerConfiguration config;
-        private Tuple<string, string> specificStrings;
+        internal readonly DHCP_IP_ADDRESS address;
+        private DhcpServerConfiguration configuration;
         private DhcpServerAuditLog auditLog;
         private DhcpServerDnsSettings dnsSettings;
+        private DhcpServerSpecificStrings specificStrings;
 
-        internal DhcpServer(DHCP_IP_ADDRESS ipAddress, string name)
+        public IPAddress IpAddress => address.ToIPAddress();
+        public int IpAddressNative => (int)address;
+        public string Name { get; }
+        public int VersionMajor { get; }
+        public int VersionMinor { get; }
+        public DhcpServerVersions Version => (DhcpServerVersions)(((ulong)VersionMajor << 16) | (uint)VersionMinor);
+
+        public DhcpServerConfiguration Configuration => configuration ??= DhcpServerConfiguration.GetConfiguration(this);
+        /// <summary>
+        /// The audit log configuration settings from the DHCP server.
+        /// </summary>
+        public DhcpServerAuditLog AuditLog => auditLog ??= DhcpServerAuditLog.GetAuditLog(this);
+        public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
+        public DhcpServerSpecificStrings SpecificStrings => specificStrings ??= DhcpServerSpecificStrings.GetSpecificStrings(this);
+
+        internal DhcpServer(DHCP_IP_ADDRESS address, string name)
         {
-            this.ipAddress = ipAddress;
+            this.address = address;
             Name = name;
+
+            GetVersion(address, out var versionMajor, out var versionMinor);
+            VersionMajor = versionMajor;
+            VersionMinor = versionMinor;
         }
 
-        public IPAddress IpAddress => ipAddress.ToIPAddress();
-        public int IpAddressNative => (int)ipAddress;
-        public string Name { get; }
-        public int VersionMajor => (version ??= GetVersion()).Item1;
-        public int VersionMinor => (version ??= GetVersion()).Item2;
-        public DhcpServerVersions Version => (DhcpServerVersions)(((ulong)(version ??= GetVersion()).Item1 << 16) | (uint)version.Item2);
-        public DhcpServerConfiguration Configuration => config ??= DhcpServerConfiguration.GetConfiguration(this);
-        public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
+        /// <summary>
+        /// Enumerates a list of DHCP servers found in the directory service. 
+        /// </summary>
+        public static IEnumerable<DhcpServer> Servers
+        {
+            get
+            {
+                var result = Api.DhcpEnumServers(Flags: 0,
+                                                 IdInfo: IntPtr.Zero,
+                                                 Servers: out var serversPtr,
+                                                 CallbackFn: IntPtr.Zero,
+                                                 CallbackData: IntPtr.Zero);
 
-        public string DefaultVendorClassName => (specificStrings ??= GetSpecificStrings()).Item1;
-        public string DefaultUserClassName => (specificStrings ??= GetSpecificStrings()).Item2;
+                if (result != DhcpErrors.SUCCESS)
+                    throw new DhcpServerException(nameof(Api.DhcpEnumServers), result);
+
+                try
+                {
+                    var servers = serversPtr.MarshalToStructure<DHCPDS_SERVERS>();
+
+                    foreach (var server in servers.Servers)
+                        yield return FromNative(server);
+                }
+                finally
+                {
+                    Api.DhcpRpcFreeMemory(serversPtr);
+                }
+            }
+        }
 
         public bool IsCompatible(DhcpServerVersions version) => ((long)version <= (long)Version);
 
@@ -141,40 +177,6 @@ namespace Dhcp
         public DhcpServerOptionValue GetUserOptionValue(string className, int optionId)
             => DhcpServerOptionValue.GetGlobalUserOptionValue(this, optionId, className);
 
-        /// <summary>
-        /// The audit log configuration settings from the DHCP server.
-        /// </summary>
-        public DhcpServerAuditLog AuditLog => auditLog ??= DhcpServerAuditLog.GetParams(this);
-
-        /// <summary>
-        /// Enumerates a list of DHCP servers found in the directory service. 
-        /// </summary>
-        public static IEnumerable<DhcpServer> Servers
-        {
-            get
-            {
-                var result = Api.DhcpEnumServers(Flags: 0,
-                                                 IdInfo: IntPtr.Zero,
-                                                 Servers: out var serversPtr,
-                                                 CallbackFn: IntPtr.Zero,
-                                                 CallbackData: IntPtr.Zero);
-
-                if (result != DhcpErrors.SUCCESS)
-                    throw new DhcpServerException(nameof(Api.DhcpEnumServers), result);
-
-                try
-                {
-                    var servers = serversPtr.MarshalToStructure<DHCPDS_SERVERS>();
-
-                    foreach (var server in servers.Servers)
-                        yield return FromNative(server);
-                }
-                finally
-                {
-                    Api.DhcpRpcFreeMemory(serversPtr);
-                }
-            }
-        }
 
         /// <summary>
         /// Connects to a DHCP server
@@ -197,39 +199,17 @@ namespace Dhcp
             return new DhcpServer(address, dnsEntry.HostName);
         }
 
-        private Tuple<int, int> GetVersion()
+        private static DhcpServer FromNative(DHCPDS_SERVER native)
+            => new DhcpServer(native.ServerAddress, native.ServerName);
+
+        private static void GetVersion(DHCP_IP_ADDRESS address, out int versionMajor, out int versionMinor)
         {
-            var result = Api.DhcpGetVersion(ipAddress, out var major, out var minor);
+            var result = Api.DhcpGetVersion(ServerIpAddress: address,
+                                            MajorVersion: out versionMajor,
+                                            MinorVersion: out versionMinor);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetVersion), result);
-
-            return Tuple.Create(major, minor);
-        }
-
-        private Tuple<string, string> GetSpecificStrings()
-        {
-            var result = Api.DhcpGetServerSpecificStrings(ServerIpAddress: ipAddress,
-                                                          ServerSpecificStrings: out var stringsPtr);
-
-            if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException(nameof(Api.DhcpGetServerSpecificStrings), result);
-
-            try
-            {
-                var strings = stringsPtr.MarshalToStructure<DHCP_SERVER_SPECIFIC_STRINGS>();
-
-                return Tuple.Create(strings.DefaultVendorClassName, strings.DefaultUserClassName);
-            }
-            finally
-            {
-                Api.DhcpRpcFreeMemory(stringsPtr);
-            }
-        }
-
-        private static DhcpServer FromNative(DHCPDS_SERVER native)
-        {
-            return new DhcpServer(native.ServerAddress, native.ServerName);
         }
 
         public override string ToString() => $"DHCP Server: {Name} ({IpAddress})";

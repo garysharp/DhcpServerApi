@@ -213,7 +213,7 @@ namespace Dhcp
         {
             try
             {
-                var result = Api.DhcpGetAllOptionValues(ServerIpAddress: server.ipAddress,
+                var result = Api.DhcpGetAllOptionValues(ServerIpAddress: server.address,
                                                     Flags: 0,
                                                     ScopeInfo: scopeInfo,
                                                     Values: out var valuesPtr);
@@ -323,7 +323,7 @@ namespace Dhcp
             {
                 var resumeHandle = IntPtr.Zero;
 
-                var result = Api.DhcpEnumOptionValues(ServerIpAddress: server.ipAddress,
+                var result = Api.DhcpEnumOptionValues(ServerIpAddress: server.address,
                                                       ScopeInfo: scopeInfo,
                                                       ResumeHandle: ref resumeHandle,
                                                       PreferredMaximum: 0xFFFFFFFF,
@@ -365,7 +365,7 @@ namespace Dhcp
             {
                 var resumeHandle = IntPtr.Zero;
 
-                var result = Api.DhcpEnumOptionValuesV5(ServerIpAddress: server.ipAddress,
+                var result = Api.DhcpEnumOptionValuesV5(ServerIpAddress: server.address,
                                                         Flags: (vendorName == null) ? 0U : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
                                                         ClassName: className,
                                                         VendorName: vendorName,
@@ -422,7 +422,7 @@ namespace Dhcp
 
         private static DhcpServerOptionValue GetOptionValueV0(DhcpServer server, IntPtr scopeInfo, int optionId)
         {
-            var result = Api.DhcpGetOptionValue(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetOptionValue(ServerIpAddress: server.address,
                                             OptionID: optionId,
                                             ScopeInfo: scopeInfo,
                                             OptionValue: out var valuePtr);
@@ -443,7 +443,7 @@ namespace Dhcp
 
         private static DhcpServerOptionValue GetOptionValueV5(DhcpServer server, IntPtr scopeInfo, int optionId, string className, string vendorName)
         {
-            var result = Api.DhcpGetOptionValueV5(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetOptionValueV5(ServerIpAddress: server.address,
                                               Flags: (vendorName == null) ? 0U : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
                                               OptionID: optionId,
                                               ClassName: className,
@@ -466,6 +466,6 @@ namespace Dhcp
         }
 
         public override string ToString()
-            => $"{VendorName ?? ClassName ?? Server.DefaultVendorClassName}: {OptionId} [{Option.Name}]: {string.Join("; ", Values)}";
+            => $"{VendorName ?? ClassName ?? Server.SpecificStrings.DefaultVendorClassName}: {OptionId} [{Option.Name}]: {string.Join("; ", Values)}";
     }
 }

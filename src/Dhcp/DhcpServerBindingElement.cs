@@ -71,7 +71,7 @@ namespace Dhcp
 
         internal static IEnumerable<DhcpServerBindingElement> GetBindingInfo(DhcpServer server)
         {
-            var result = Api.DhcpGetServerBindingInfo(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetServerBindingInfo(ServerIpAddress: server.address,
                                                       Flags: 0,
                                                       BindElementsInfo: out var elementsPtr);
 

@@ -107,7 +107,7 @@ namespace Dhcp
 
         private static DhcpServerClient GetClientV0(DhcpServer server, IntPtr searchInfo)
         {
-            var result = Api.DhcpGetClientInfo(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetClientInfo(ServerIpAddress: server.address,
                                                SearchInfo: searchInfo,
                                                ClientInfo: out var clientPtr);
 
@@ -130,7 +130,7 @@ namespace Dhcp
 
         private static DhcpServerClient GetClientVQ(DhcpServer server, IntPtr searchInfo)
         {
-            var result = Api.DhcpGetClientInfoVQ(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetClientInfoVQ(ServerIpAddress: server.address,
                                                  SearchInfo: searchInfo,
                                                  ClientInfo: out var clientPtr);
 
@@ -174,7 +174,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerClient> GetClientsV0(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.address,
                                                    SubnetAddress: subnetAddress,
                                                    ResumeHandle: ref resultHandle,
                                                    PreferredMaximum: 0x10000,
@@ -206,7 +206,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.ipAddress,
+                result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.address,
                                                    SubnetAddress: subnetAddress,
                                                    ResumeHandle: ref resultHandle,
                                                    PreferredMaximum: 0x10000,
@@ -222,7 +222,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerClient> GetClientsV4(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.address,
                                                      SubnetAddress: subnetAddress,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -250,7 +250,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.ipAddress,
+                result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.address,
                                                      SubnetAddress: subnetAddress,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -266,7 +266,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerClient> GetClientsV5(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.address,
                                                      SubnetAddress: subnetAddress,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -294,7 +294,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.ipAddress,
+                result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.address,
                                                      SubnetAddress: subnetAddress,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -310,7 +310,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerClient> GetClientsVQ(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.address,
                                                      SubnetAddress: subnetAddress,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -343,7 +343,7 @@ namespace Dhcp
                 if (result == DhcpErrors.SUCCESS)
                     yield break; // Last results
 
-                result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.ipAddress,
+                result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.address,
                                                      SubnetAddress: subnetAddress,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,

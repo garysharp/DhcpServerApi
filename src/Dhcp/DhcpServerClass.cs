@@ -87,7 +87,7 @@ namespace Dhcp
                 ClassData = IntPtr.Zero
             };
 
-            var result = Api.DhcpGetClassInfo(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetClassInfo(ServerIpAddress: server.address,
                                               ReservedMustBeZero: 0,
                                               PartialClassInfo: query,
                                               FilledClassInfo: out var classIntoPtr);
@@ -109,7 +109,7 @@ namespace Dhcp
         internal static IEnumerable<DhcpServerClass> GetClasses(DhcpServer server)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumClasses(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumClasses(ServerIpAddress: server.address,
                                              ReservedMustBeZero: 0,
                                              ResumeHandle: ref resumeHandle,
                                              PreferredMaximum: 0xFFFFFFFF,

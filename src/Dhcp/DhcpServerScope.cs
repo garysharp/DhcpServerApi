@@ -112,7 +112,7 @@ namespace Dhcp
         internal static IEnumerable<DhcpServerScope> GetScopes(DhcpServer server)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnets(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumSubnets(ServerIpAddress: server.address,
                                              ResumeHandle: ref resumeHandle,
                                              PreferredMaximum: 0xFFFFFFFF,
                                              EnumInfo: out var enumInfoPtr,
@@ -170,7 +170,7 @@ namespace Dhcp
         private static IEnumerable<DHCP_SUBNET_ELEMENT_DATA_V5> EnumSubnetElements(DhcpServer server, DHCP_IP_ADDRESS address, DHCP_SUBNET_ELEMENT_TYPE_V5 enumElementType)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: server.address,
                                                       SubnetAddress: address,
                                                       EnumElementType: enumElementType,
                                                       ResumeHandle: ref resumeHandle,
@@ -203,7 +203,7 @@ namespace Dhcp
 
         private static TimeSpan GetTimeDelayOffer(DhcpServer server, DHCP_IP_ADDRESS address)
         {
-            var result = Api.DhcpGetSubnetDelayOffer(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetSubnetDelayOffer(ServerIpAddress: server.address,
                                                      SubnetAddress: address,
                                                      TimeDelayInMilliseconds: out var timeDelay);
 
@@ -226,7 +226,7 @@ namespace Dhcp
 
         private static DHCP_SUBNET_INFO GetInfo(DhcpServer server, DHCP_IP_ADDRESS address)
         {
-            var result = Api.DhcpGetSubnetInfo(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetSubnetInfo(ServerIpAddress: server.address,
                                                SubnetAddress: address,
                                                SubnetInfo: out var subnetInfoPtr);
 
@@ -245,7 +245,7 @@ namespace Dhcp
 
         private static DHCP_SUBNET_INFO_VQ GetInfoVQ(DhcpServer server, DHCP_IP_ADDRESS address)
         {
-            var result = Api.DhcpGetSubnetInfoVQ(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpGetSubnetInfoVQ(ServerIpAddress: server.address,
                                                  SubnetAddress: address,
                                                  SubnetInfo: out var subnetInfoPtr);
 

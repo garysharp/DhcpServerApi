@@ -38,9 +38,9 @@ namespace Dhcp
             MinSpaceOnDisk = minSpaceOnDisk;
         }
 
-        internal static DhcpServerAuditLog GetParams(DhcpServer server)
+        internal static DhcpServerAuditLog GetAuditLog(DhcpServer server)
         {
-            var result = Api.DhcpAuditLogGetParams(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpAuditLogGetParams(ServerIpAddress: server.address,
                                                    Flags: 0,
                                                    AuditLogDir: out var auditLogDir,
                                                    DiskCheckInterval: out var diskCheckInterval,

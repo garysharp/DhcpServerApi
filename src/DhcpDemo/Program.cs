@@ -96,7 +96,7 @@ namespace DhcpDemo
 
             // Enum Default Options
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($" Default Options ({dhcpServer.DefaultVendorClassName}):");
+            Console.WriteLine($" Default Options ({dhcpServer.SpecificStrings.DefaultVendorClassName}):");
             Console.ForegroundColor = ConsoleColor.Gray;
             foreach (var option in dhcpServer.Options.ToList())
             {
@@ -116,8 +116,8 @@ namespace DhcpDemo
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Classes:");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"  Default Vendor Class Name: {dhcpServer.DefaultVendorClassName}");
-            Console.WriteLine($"    Default User Class Name: {dhcpServer.DefaultUserClassName}");
+            Console.WriteLine($"  Default Vendor Class Name: {dhcpServer.SpecificStrings.DefaultVendorClassName}");
+            Console.WriteLine($"    Default User Class Name: {dhcpServer.SpecificStrings.DefaultUserClassName}");
 
             foreach (var c in dhcpServer.Classes.ToList())
             {

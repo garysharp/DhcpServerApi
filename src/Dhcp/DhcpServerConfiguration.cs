@@ -56,7 +56,7 @@ namespace Dhcp
 
         internal static DhcpServerConfiguration GetConfiguration(DhcpServer server)
         {
-            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.ipAddress,
+            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.address,
                                                  ConfigInfo: out var configInfoPtr);
 
             if (result != DhcpErrors.SUCCESS)

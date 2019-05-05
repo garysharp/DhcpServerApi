@@ -106,7 +106,7 @@ namespace Dhcp
         internal static IEnumerable<DhcpServerScopeReservation> GetReservations(DhcpServerScope scope)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: scope.Server.ipAddress,
+            var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: scope.Server.address,
                                                       SubnetAddress: scope.address,
                                                       EnumElementType: DHCP_SUBNET_ELEMENT_TYPE_V5.DhcpReservedIps,
                                                       ResumeHandle: ref resumeHandle, PreferredMaximum: 0xFFFFFFFF,
