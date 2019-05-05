@@ -77,11 +77,11 @@ namespace Dhcp
                 if (option.Values.FirstOrDefault() is DhcpServerOptionElementDWord value)
                     return new DhcpServerDnsSettings((uint)value.RawValue);
                 else
-                    return null;
+                    return GetGlobalDnsSettings(server);
             }
             catch (DhcpServerException e) when (e.ApiErrorId == (uint)DhcpErrors.ERROR_FILE_NOT_FOUND)
             {
-                return null;
+                return GetGlobalDnsSettings(server);
             }
         }
     }
