@@ -13,6 +13,10 @@ namespace Dhcp
         Windows2008 = 0x60000,
         Windows2008R2 = 0x60001,
         Windows2012 = 0x60002,
-        Windows2012R2 = 0x60003
+        Windows2012R2 = 0x60003,
+        /// <summary>
+        /// Represents Windows Server 2016 and greater
+        /// </summary>
+        WindowsServer = 0xA0000,
     }
 }

@@ -155,9 +155,10 @@ namespace DhcpDemo
                 Console.WriteLine($"               State: {scope.State}");
                 Console.WriteLine($"                Name: {scope.Name}");
                 Console.WriteLine($"             Comment: {scope.Comment}");
-                Console.WriteLine($"        Primary Host: {scope.PrimaryHostIpAddress}");
+                Console.WriteLine($"        Primary Host: {scope.PrimaryHost}");
                 Console.WriteLine($"      Lease Duration: {scope.LeaseDuration?.ToString() ?? "Unlimited"}");
                 Console.WriteLine($"         Delay Offer: {scope.TimeDelayOffer.TotalMilliseconds} milliseconds");
+                Console.WriteLine($"       Quarantine On: {scope.QuarantineOn}");
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Excluded IP Ranges:");
                 Console.ForegroundColor = ConsoleColor.Gray;

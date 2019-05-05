@@ -66,11 +66,14 @@ namespace Dhcp
         }
 
         internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServerScope scope)
+            => GetScopeDnsSettings(scope.Server, scope.address);
+
+        internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServer server, DHCP_IP_ADDRESS address)
         {
             // Flag is Option 81
             try
             {
-                var option = DhcpServerOptionValue.GetScopeDefaultOptionValue(scope, 81);
+                var option = DhcpServerOptionValue.GetScopeDefaultOptionValue(server, address, 81);
                 if (option.Values.FirstOrDefault() is DhcpServerOptionElementDWord value)
                     return new DhcpServerDnsSettings((uint)value.RawValue);
                 else

@@ -129,21 +129,28 @@ namespace Dhcp
             return EnumOptionValues(scope.Server, scopeInfoPtr, className, vendorName);
         }
 
+        internal static DhcpServerOptionValue GetScopeDefaultOptionValue(DhcpServer server, DHCP_IP_ADDRESS address, int optionId)
+            => GetScopeOptionValue(server, address, optionId, null, null);
         internal static DhcpServerOptionValue GetScopeDefaultOptionValue(DhcpServerScope scope, int optionId)
             => GetScopeOptionValue(scope, optionId, null, null);
-
+        internal static DhcpServerOptionValue GetScopeVendorOptionValue(DhcpServer server, DHCP_IP_ADDRESS address, int optionId, string vendorName)
+            => GetScopeOptionValue(server, address, optionId, null, vendorName);
         internal static DhcpServerOptionValue GetScopeVendorOptionValue(DhcpServerScope scope, int optionId, string vendorName)
             => GetScopeOptionValue(scope, optionId, null, vendorName);
-
+        internal static DhcpServerOptionValue GetScopeUserOptionValue(DhcpServer server, DHCP_IP_ADDRESS address, int optionId, string className)
+            => GetScopeOptionValue(server, address, optionId, className, null);
         internal static DhcpServerOptionValue GetScopeUserOptionValue(DhcpServerScope scope, int optionId, string className)
             => GetScopeOptionValue(scope, optionId, className, null);
 
         internal static DhcpServerOptionValue GetScopeOptionValue(DhcpServerScope scope, int optionId, string className, string vendorName)
+            => GetScopeOptionValue(scope.Server, scope.address, optionId, className, vendorName);
+
+        internal static DhcpServerOptionValue GetScopeOptionValue(DhcpServer server, DHCP_IP_ADDRESS address, int optionId, string className, string vendorName)
         {
             var scopeInfo = new DHCP_OPTION_SCOPE_INFO_SUBNET()
             {
                 ScopeType = DHCP_OPTION_SCOPE_TYPE.DhcpSubnetOptions,
-                SubnetScopeInfo = scope.address
+                SubnetScopeInfo = address
             };
 
             var scopeInfoPtr = Marshal.AllocHGlobal(Marshal.SizeOf(scopeInfo));
@@ -151,7 +158,7 @@ namespace Dhcp
             try
             {
                 Marshal.StructureToPtr(scopeInfo, scopeInfoPtr, true);
-                return GetOptionValue(scope.Server, scopeInfoPtr, optionId, className, vendorName);
+                return GetOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
             }
             finally
             {

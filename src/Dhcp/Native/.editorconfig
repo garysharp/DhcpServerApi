@@ -50,19 +50,12 @@ dotnet_style_prefer_conditional_expression_over_return = true:silent
 ############################### 
 # Style Definitions 
 dotnet_naming_style.pascal_case_style.capitalization             = pascal_case 
-dotnet_naming_style.camel_case_style.capitalization             = camel_case
 # Use PascalCase for public fields
 dotnet_naming_rule.constant_fields_should_be_pascal_case.severity = warning
 dotnet_naming_rule.constant_fields_should_be_pascal_case.symbols  = public_fields 
 dotnet_naming_rule.constant_fields_should_be_pascal_case.style    = pascal_case_style 
 dotnet_naming_symbols.public_fields.applicable_kinds            = field
 dotnet_naming_symbols.public_fields.applicable_accessibilities  = *
-# Use camelCase for parameters
-dotnet_naming_rule.parameters_should_be_pascal_case.severity = error 
-dotnet_naming_rule.parameters_should_be_pascal_case.symbols  = parameters
-dotnet_naming_rule.parameters_should_be_pascal_case.style    = camel_case_style 
-dotnet_naming_symbols.parameters.applicable_kinds            = parameter
-dotnet_naming_symbols.parameters.applicable_accessibilities  = *
 ############################### 
 # C# Coding Conventions       # 
 ############################### 

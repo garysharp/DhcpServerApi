@@ -21,7 +21,7 @@ namespace Dhcp
         }
 
         internal static DhcpServerHost FromNative(DHCP_HOST_INFO native) 
-            => new DhcpServerHost(native.IpAddress, native.NetBiosName, native.ServerName);
+            => new DhcpServerHost(native.IpAddress.ToReverseOrder(), native.NetBiosName, native.ServerName);
 
         public override string ToString()
         {
