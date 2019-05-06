@@ -51,7 +51,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.Byte;
         public override object Value => RawValue;
-        public override string ValueFormatted => RawValue.ToHexString();
+        public override string ValueFormatted => BitHelper.ReadHexString(RawValue);
 
         public byte RawValue { get; }
 
@@ -121,13 +121,13 @@ namespace Dhcp
         public override object Value => RawValue;
         public override string ValueFormatted => ipAddress;
 
-        private DHCP_IP_ADDRESS ipAddress;
+        private readonly DhcpServerIpAddress ipAddress;
 
-        public uint RawValue => (uint)ipAddress;
+        public uint RawValue => ipAddress.Native;
 
         private DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
         {
-            ipAddress = value;
+            ipAddress = value.AsNetworkToIpAddress();
         }
 
         internal static DhcpServerOptionElementIpAddress ReadNative(DHCP_OPTION_DATA_ELEMENT native)
@@ -157,7 +157,7 @@ namespace Dhcp
 
         public override DhcpServerOptionElementType Type => type;
         public override object Value => RawValue;
-        public override string ValueFormatted { get => RawValue.ToHexString(' '); }
+        public override string ValueFormatted => (RawValue == null) ? null : BitHelper.ReadHexString(RawValue, ' ');
 
         public byte[] RawValue { get; }
 

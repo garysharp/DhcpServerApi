@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Dhcp.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_UID
+    internal struct DHCP_CLIENT_UID : IDisposable
     {
         /// <summary>
         /// Specifies the size of Data, in bytes.
@@ -14,7 +14,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private readonly IntPtr DataPointer;
+        private IntPtr DataPointer;
 
         /// <summary>
         /// Blob of byte (binary) data.
@@ -32,18 +32,31 @@ namespace Dhcp.Native
             }
         }
 
-        public DHCP_IP_ADDRESS ClientIpAddressMask => (DHCP_IP_ADDRESS)Marshal.ReadInt32(DataPointer);
-
-        public byte[] ClientMacAddress
+        public DHCP_IP_ADDRESS ClientIpAddress
         {
             get
             {
-                var macAddress = new byte[6];
+                if (DataLength < 4)
+                    throw new ArgumentOutOfRangeException(nameof(DataLength));
 
-                Marshal.Copy(DataPointer + 5, macAddress, 0, 6);
-
-                return macAddress;
+                return (DHCP_IP_ADDRESS)Marshal.ReadInt32(DataPointer);
             }
+        }
+
+        public DhcpServerHardwareAddress ClientHardwareAddress
+        {
+            get
+            {
+                if (DataLength < 5)
+                    throw new ArgumentOutOfRangeException(nameof(DataLength));
+
+                return DhcpServerHardwareAddress.FromNative(DhcpServerHardwareType.Ethernet, DataPointer + 5, DataLength - 5);
+            }
+        }
+
+        public void Dispose()
+        {
+            Api.FreePointer(ref DataPointer);
         }
     }
 }

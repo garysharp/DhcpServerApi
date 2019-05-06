@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_CLASS_INFO_ARRAY structure defines an array of elements that contain DHCP class information.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLASS_INFO_ARRAY
+    internal struct DHCP_CLASS_INFO_ARRAY : IDisposable
     {
         /// <summary>
         /// Specifies the number of elements in Classes.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to an array of <see cref="DHCP_CLASS_INFO"/> structures that contain DHCP class information.
         /// </summary>
-        private readonly IntPtr ClassesPointer;
+        private IntPtr ClassesPointer;
 
         /// <summary>
         /// Pointer to an array of <see cref="DHCP_CLASS_INFO"/> structures that contain DHCP class information.
@@ -26,14 +26,25 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = ClassesPointer;
-                var instanceSize = Marshal.SizeOf(typeof(DHCP_CLASS_INFO));
+                if (NumElements == 0 || ClassesPointer == IntPtr.Zero)
+                    yield break;
+
+                var iter = ClassesPointer;
+                var size = Marshal.SizeOf(typeof(DHCP_CLASS_INFO));
                 for (var i = 0; i < NumElements; i++)
                 {
-                    yield return instanceIter.MarshalToStructure<DHCP_CLASS_INFO>();
-                    instanceIter += instanceSize;
+                    yield return iter.MarshalToStructure<DHCP_CLASS_INFO>();
+                    iter += size;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var @class in Classes)
+                @class.Dispose();
+            
+            Api.FreePointer(ref ClassesPointer);
         }
     }
 }

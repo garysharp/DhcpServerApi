@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_DATA structure defines a data container for one or more data elements associated with a DHCP option.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_DATA
+    internal struct DHCP_OPTION_DATA : IDisposable
     {
         /// <summary>
         /// Specifies the number of option data elements listed in Elements.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION_DATA_ELEMENT"/> structures that contain the data elements associated with this particular option element.
         /// </summary>
-        private readonly IntPtr ElementsPointer;
+        private IntPtr ElementsPointer;
 
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION_DATA_ELEMENT"/> structures that contain the data elements associated with this particular option element.
@@ -26,18 +26,27 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = ElementsPointer;
-                var instanceSize = IntPtr.Size == 8 ? 24 : 12;
+                if (NumElements == 0 || ElementsPointer == IntPtr.Zero)
+                    yield break;
+
+                var elementSize = IntPtr.Size * 3;
+                var iter = ElementsPointer;
                 for (var i = 0; i < NumElements; i++)
                 {
-                    yield return new DHCP_OPTION_DATA_ELEMENT()
-                    {
-                        OptionType = (DHCP_OPTION_DATA_TYPE)Marshal.ReadIntPtr(instanceIter),
-                        DataOffset = instanceIter + IntPtr.Size
-                    };
-                    instanceIter += instanceSize;
+                    yield return new DHCP_OPTION_DATA_ELEMENT(OptionType: (DHCP_OPTION_DATA_TYPE)Marshal.ReadInt32(iter),
+                                                              DataOffset: iter + IntPtr.Size);
+
+                    iter += elementSize;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var element in Elements)
+                element.Dispose();
+            
+            Api.FreePointer(ref ElementsPointer);
         }
     }
 }

@@ -66,9 +66,9 @@ namespace Dhcp
         }
 
         internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServerScope scope)
-            => GetScopeDnsSettings(scope.Server, scope.address);
+            => GetScopeDnsSettings(scope.Server, scope.Address);
 
-        internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServer server, DHCP_IP_ADDRESS address)
+        internal static DhcpServerDnsSettings GetScopeDnsSettings(DhcpServer server, DhcpServerIpAddress address)
         {
             // Flag is Option 81
             try

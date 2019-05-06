@@ -1,5 +1,4 @@
-﻿
-namespace Dhcp.Native
+﻿namespace Dhcp.Native
 {
     /// <summary>
     /// The DHCP_OPTION_TYPE enumeration defines the set of possible DHCP option types.

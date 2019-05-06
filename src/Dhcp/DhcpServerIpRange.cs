@@ -1,44 +1,58 @@
-﻿using System.Net;
+﻿using System;
+using System.ComponentModel;
+using System.Net;
 using Dhcp.Native;
 
 namespace Dhcp
 {
-    public class DhcpServerIpRange
+    public struct DhcpServerIpRange
     {
-        private DHCP_IP_ADDRESS startAddress;
-        private DHCP_IP_ADDRESS endAddress;
+        private readonly DhcpServerIpAddress startAddress;
+        private readonly DhcpServerIpAddress endAddress;
 
-        public IPAddress StartAddress => startAddress.ToIPAddress();
-        public int StartAddressNative => (int)startAddress;
-        public IPAddress EndAddress => endAddress.ToIPAddress();
-        public int EndAddressNative => (int)endAddress;
+        public DhcpServerIpAddress StartAddress => startAddress;
+        [Obsolete("Use StartAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int StartAddressNative => (int)startAddress.Native;
 
-        public int BootpClientsAllocated { get; }
-        public int MaxBootpAllowed { get; }
+        public DhcpServerIpAddress EndAddress => endAddress;
+        [Obsolete("Use EndAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int EndAddressNative => (int)endAddress.Native;
 
-        private DhcpServerIpRange(DHCP_IP_ADDRESS startAddress, DHCP_IP_ADDRESS endAddress, int bootpClientsAllocated, int maxBootpAllowed)
+        internal DhcpServerIpRange(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress)
         {
             this.startAddress = startAddress;
             this.endAddress = endAddress;
-            BootpClientsAllocated = bootpClientsAllocated;
-            MaxBootpAllowed = maxBootpAllowed;
         }
 
-        public bool Contains(IPAddress ipAddress) => Contains(DHCP_IP_ADDRESS.FromIPAddress(ipAddress));
+        internal DhcpServerIpRange(DhcpServerIpMask mask, DhcpServerIpAddress address)
+            :this (DhcpServerIpAddress.FromNative(address.Native & mask.Native),
+                 DhcpServerIpAddress.FromNative((address.Native & mask.Native) | ~address.Native))
+        {
+        }
 
-        public bool Contains(string ipAddress) => Contains(DHCP_IP_ADDRESS.FromString(ipAddress));
+        public DhcpServerIpMask GetSmallestIpMask()
+        {
+            var dif = startAddress.Native ^ endAddress.Native;
+            var bits = BitHelper.HighInsignificantBits(dif);
 
-        public bool Contains(int ipAddress) => Contains((DHCP_IP_ADDRESS)ipAddress);
+            return DhcpServerIpMask.FromSignificantBits(bits);
+        }
 
-        public bool Contains(uint ipAddress) => Contains((DHCP_IP_ADDRESS)ipAddress);
+        public bool Contains(IPAddress ipAddress) => Contains((DhcpServerIpAddress)ipAddress);
+        public bool Contains(string ipAddress) => Contains(DhcpServerIpAddress.FromString(ipAddress));
+        public bool Contains(int ipAddress) => Contains((DhcpServerIpAddress)ipAddress);
+        public bool Contains(uint ipAddress) => Contains((DhcpServerIpAddress)ipAddress);
 
-        internal bool Contains(DHCP_IP_ADDRESS ipAddress) => ipAddress >= startAddress && ipAddress <= endAddress;
+        internal bool Contains(DhcpServerIpAddress ipAddress) => ipAddress >= startAddress && ipAddress <= endAddress;
 
-        internal static DhcpServerIpRange FromNative(DHCP_IP_RANGE native)
-            => new DhcpServerIpRange(native.StartAddress, native.EndAddress, 0, 0);
+        internal static DhcpServerIpRange FromNative(ref DHCP_IP_RANGE native)
+        {
+            return new DhcpServerIpRange(startAddress: native.StartAddress.AsNetworkToIpAddress(),
+                                         endAddress: native.EndAddress.AsNetworkToIpAddress());
+        }
 
-        internal static DhcpServerIpRange FromNative(DHCP_BOOTP_IP_RANGE native)
-            => new DhcpServerIpRange(native.StartAddress, native.EndAddress, native.BootpAllocated, native.MaxBootpAllowed);
+        public static explicit operator DhcpServerIpRange(DhcpServerBootpIpRange range)
+            => new DhcpServerIpRange(range.StartAddress, range.EndAddress);
 
         public override string ToString() => $"{startAddress} - {endAddress}";
     }

@@ -18,7 +18,7 @@ namespace Dhcp
 
         internal static DhcpServerSpecificStrings GetSpecificStrings(DhcpServer server)
         {
-            var result = Api.DhcpGetServerSpecificStrings(ServerIpAddress: server.address,
+            var result = Api.DhcpGetServerSpecificStrings(ServerIpAddress: server.IpAddress,
                                                           ServerSpecificStrings: out var stringsPtr);
 
             if (result != DhcpErrors.SUCCESS)

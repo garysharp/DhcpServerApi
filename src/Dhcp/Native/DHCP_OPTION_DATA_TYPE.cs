@@ -1,6 +1,4 @@
-﻿
-using System;
-namespace Dhcp.Native
+﻿namespace Dhcp.Native
 {
     /// <summary>
     /// The DHCP_OPTION_DATA_TYPE enumeration defines the set of formats that represent DHCP option data.

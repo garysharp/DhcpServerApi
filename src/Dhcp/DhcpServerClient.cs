@@ -1,50 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Runtime.InteropServices;
+using System.ComponentModel;
 using Dhcp.Native;
 
 namespace Dhcp
 {
     public class DhcpServerClient
     {
-        internal readonly DHCP_IP_ADDRESS ipAddress;
-        internal readonly DHCP_IP_MASK subnetMask;
-        internal readonly byte[] hardwareAddress;
-
         public DhcpServer Server { get; }
 
-        public IPAddress IpAddress => ipAddress.ToIPAddress();
-        public int IpAddressNative => (int)ipAddress;
-        public IPAddress SubnetMask => subnetMask.ToIPAddress();
-        public int SubnetMaskNative => (int)subnetMask;
+        public DhcpServerIpAddress IpAddress { get; }
+        [Obsolete("Use IpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int IpAddressNative => (int)IpAddress.Native;
 
-        public string HardwareAddress => hardwareAddress.ToHexString(':');
-        public long HardwareAddressNative
-        {
-            get
-            {
-                if (hardwareAddress.Length == 6)
-                {
-                    return (long)hardwareAddress[0] << 40 |
-                        (long)hardwareAddress[1] << 32 |
-                        (long)hardwareAddress[2] << 24 |
-                        (long)hardwareAddress[3] << 16 |
-                        (long)hardwareAddress[4] << 08 |
-                        hardwareAddress[5];
-                }
-                else
-                    return -1;
-            }
-        }
-        public byte[] HardwareAddressBytes => hardwareAddress;
+        public DhcpServerIpMask SubnetMask { get; }
+        [Obsolete("Use SubnetMask.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int SubnetMaskNative => (int)SubnetMask.Native;
+
+        public DhcpServerHardwareAddress HardwareAddress { get; }
+        [Obsolete("Use HardwareAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public long HardwareAddressNative => throw new NotImplementedException("Use HardwareAddress.Native to access raw hardware address");
+        [Obsolete("Use HardwareAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public byte[] HardwareAddressBytes => HardwareAddress.Native;
 
         public string Name { get; }
         public string Comment { get; }
 
-        public DateTime LeaseExpires { get; }
+        [Obsolete("Caused confusion. Use LeaseExpiresUtc or LeaseExpiresLocal instead.")]
+        public DateTime LeaseExpires => LeaseExpiresUtc;
+        public DateTime LeaseExpiresUtc { get; }
+        public DateTime LeaseExpiresLocal => LeaseExpiresUtc.ToLocalTime();
 
-        public bool LeaseExpired => DateTime.Now > LeaseExpires;
+        public bool LeaseExpired => DateTime.UtcNow > LeaseExpiresUtc;
+        public bool LeaseHasExpiry => LeaseExpiresUtc != DateTime.MaxValue;
 
         public DhcpServerClientTypes Type { get; }
 
@@ -58,15 +46,15 @@ namespace Dhcp
 
         public bool QuarantineCapable { get; }
 
-        private DhcpServerClient(DhcpServer server, DHCP_IP_ADDRESS ipAddress, DHCP_IP_MASK subnetMask, byte[] hardwareAddress, string name, string comment, DateTime leaseExpires, DhcpServerClientTypes type, DhcpServerClientAddressStates addressState, DhcpServerClientNameProtectionStates nameProtectionState, DhcpServerClientDnsStates dnsState, DhcpServerClientQuarantineStatuses quarantineStatus, DateTime probationEnds, bool quarantineCapable)
+        private DhcpServerClient(DhcpServer server, DhcpServerIpAddress ipAddress, DhcpServerIpMask subnetMask, DhcpServerHardwareAddress hardwareAddress, string name, string comment, DateTime leaseExpires, DhcpServerClientTypes type, DhcpServerClientAddressStates addressState, DhcpServerClientNameProtectionStates nameProtectionState, DhcpServerClientDnsStates dnsState, DhcpServerClientQuarantineStatuses quarantineStatus, DateTime probationEnds, bool quarantineCapable)
         {
             Server = server;
-            this.ipAddress = ipAddress;
-            this.subnetMask = subnetMask;
-            this.hardwareAddress = hardwareAddress;
+            IpAddress = ipAddress;
+            SubnetMask = subnetMask;
+            HardwareAddress = hardwareAddress;
             Name = name;
             Comment = comment;
-            LeaseExpires = leaseExpires;
+            LeaseExpiresUtc = leaseExpires.ToUniversalTime();
             Type = type;
             AddressState = addressState;
             NameProtectionState = nameProtectionState;
@@ -76,63 +64,52 @@ namespace Dhcp
             QuarantineCapable = quarantineCapable;
         }
 
-        internal static DhcpServerClient GetClient(DhcpServer server, DHCP_IP_ADDRESS ipAddress)
+        internal static DhcpServerClient GetClient(DhcpServer server, DhcpServerIpAddress ipAddress)
         {
-            var searchInfo = new DHCP_SEARCH_INFO_IPADDRESS
+            var searchInfo = new DHCP_SEARCH_INFO_LocalIpAddress
             {
                 SearchType = DHCP_SEARCH_INFO_TYPE.DhcpClientIpAddress,
-                ClientIpAddress = ipAddress
+                ClientIpAddress = ipAddress.ToNativeAsNetwork()
             };
 
-            var searchInfoPtr = Marshal.AllocHGlobal(Marshal.SizeOf(searchInfo));
-
-            try
+            using (var searchInfoPtr = BitHelper.StructureToPtr(searchInfo))
             {
-                Marshal.StructureToPtr(searchInfo, searchInfoPtr, true);
-
                 if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
                     return GetClientVQ(server, searchInfoPtr);
                 else if (server.IsCompatible(DhcpServerVersions.Windows2000))
                     return GetClientV0(server, searchInfoPtr);
                 else
-                {
                     throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(searchInfoPtr);
             }
         }
 
         private static DhcpServerClient GetClientV0(DhcpServer server, IntPtr searchInfo)
         {
-            var result = Api.DhcpGetClientInfo(ServerIpAddress: server.address,
-                                               SearchInfo: searchInfo,
-                                               ClientInfo: out var clientPtr);
+            var result = Api.DhcpGetClientInfo(server.IpAddress, searchInfo, out var clientPtr);
 
             if (result == DhcpErrors.JET_ERROR)
                 return null;
 
             if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException(nameof(Api.DhcpGetClassInfo), result);
+                throw new DhcpServerException(nameof(Api.DhcpGetClientInfo), result);
 
             try
             {
-                var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO>();
-                return FromNative(server, client);
+                using (var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO>())
+                {
+                    var clientRef = client;
+                    return FromNative(server, ref clientRef);
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(clientPtr);
+                Api.FreePointer(clientPtr);
             }
         }
 
         private static DhcpServerClient GetClientVQ(DhcpServer server, IntPtr searchInfo)
         {
-            var result = Api.DhcpGetClientInfoVQ(ServerIpAddress: server.address,
-                                                 SearchInfo: searchInfo,
-                                                 ClientInfo: out var clientPtr);
+            var result = Api.DhcpGetClientInfoVQ(server.IpAddress, searchInfo, out var clientPtr);
 
             if (result == DhcpErrors.JET_ERROR)
                 return null;
@@ -142,21 +119,24 @@ namespace Dhcp
 
             try
             {
-                var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_VQ>();
-                return FromNative(server, client);
+                using (var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_VQ>())
+                {
+                    var clientRef = client;
+                    return FromNative(server, ref clientRef);
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(clientPtr);
+                Api.FreePointer(clientPtr);
             }
         }
 
         internal static IEnumerable<DhcpServerClient> GetClients(DhcpServer server)
         {
             if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
-                return GetClientsVQ(server, (DHCP_IP_ADDRESS)0);
+                return GetClientsVQ(server, (DhcpServerIpAddress)0);
             else if (server.IsCompatible(DhcpServerVersions.Windows2000))
-                return GetClientsV0(server, (DHCP_IP_ADDRESS)0);
+                return GetClientsV0(server, (DhcpServerIpAddress)0);
             else
                 throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
         }
@@ -164,18 +144,18 @@ namespace Dhcp
         internal static IEnumerable<DhcpServerClient> GetClients(DhcpServerScope scope)
         {
             if (scope.Server.IsCompatible(DhcpServerVersions.Windows2008R2))
-                return GetClientsVQ(scope.Server, scope.address);
+                return GetClientsVQ(scope.Server, scope.Address);
             else if (scope.Server.IsCompatible(DhcpServerVersions.Windows2000))
-                return GetClientsV0(scope.Server, scope.address);
+                return GetClientsV0(scope.Server, scope.Address);
             else
                 throw new PlatformNotSupportedException($"DHCP Server v{scope.Server.VersionMajor}.{scope.Server.VersionMinor} does not support this feature");
         }
 
-        private static IEnumerable<DhcpServerClient> GetClientsV0(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
+        private static IEnumerable<DhcpServerClient> GetClientsV0(DhcpServer server, DhcpServerIpAddress subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.address,
-                                                   SubnetAddress: subnetAddress,
+            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.IpAddress,
+                                                   SubnetAddress: subnetAddress.ToNativeAsNetwork(),
                                                    ResumeHandle: ref resultHandle,
                                                    PreferredMaximum: 0x10000,
                                                    ClientInfo: out var clientsPtr,
@@ -189,129 +169,152 @@ namespace Dhcp
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
 
-            while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+            try
             {
-                try
+                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
                 {
-                    var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY>();
+                    using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY>())
+                    {
+                        foreach (var client in clients.Clients)
+                        {
+                            var clientValue = client.Value;
+                            yield return FromNative(server, ref clientValue);
+                        }
+                    }
 
-                    foreach (var client in clients.Clients)
-                        yield return FromNative(server, client);
+                    if (result == DhcpErrors.SUCCESS)
+                        yield break; // Last results
+
+                    Api.FreePointer(ref clientsPtr);
+                    result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.IpAddress,
+                                                       SubnetAddress: subnetAddress.ToNativeAsNetwork(),
+                                                       ResumeHandle: ref resultHandle,
+                                                       PreferredMaximum: 0x10000,
+                                                       ClientInfo: out clientsPtr,
+                                                       ClientsRead: out _,
+                                                       ClientsTotal: out _);
+
+                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+                        throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
                 }
-                finally
-                {
-                    Api.DhcpRpcFreeMemory(clientsPtr);
-                }
-
-                if (result == DhcpErrors.SUCCESS)
-                    yield break; // Last results
-
-                result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.address,
-                                                   SubnetAddress: subnetAddress,
-                                                   ResumeHandle: ref resultHandle,
-                                                   PreferredMaximum: 0x10000,
-                                                   ClientInfo: out clientsPtr,
-                                                   ClientsRead: out _,
-                                                   ClientsTotal: out _);
-
-                if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
-                    throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
+            }
+            finally
+            {
+                Api.FreePointer(clientsPtr);
             }
         }
 
-        private static IEnumerable<DhcpServerClient> GetClientsV4(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
+        private static IEnumerable<DhcpServerClient> GetClientsV4(DhcpServer server, DhcpServerIpAddress subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.address,
-                                                     SubnetAddress: subnetAddress,
+            var result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.IpAddress,
+                                                     SubnetAddress: subnetAddress.ToNativeAsNetwork(),
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
                                                      ClientInfo: out var clientsPtr,
                                                      ClientsRead: out _,
                                                      ClientsTotal: out _);
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+            // shortcut if no subnet clients are returned
+            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+                yield break;
+
+            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsV4), result);
 
-            while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+            try
             {
-                try
+                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
                 {
-                    var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_V4>();
+                    using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_V4>())
+                    {
+                        foreach (var client in clients.Clients)
+                        {
+                            var clientValue = client.Value;
+                            yield return FromNative(server, ref clientValue);
+                        }
+                    }
 
-                    foreach (var client in clients.Clients)
-                        yield return FromNative(server, client);
+                    if (result == DhcpErrors.SUCCESS)
+                        yield break; // Last results
+
+                    Api.FreePointer(ref clientsPtr);
+                    result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.IpAddress,
+                                                         SubnetAddress: subnetAddress.ToNativeAsNetwork(),
+                                                         ResumeHandle: ref resultHandle,
+                                                         PreferredMaximum: 0x10000,
+                                                         ClientInfo: out clientsPtr,
+                                                         ClientsRead: out _,
+                                                         ClientsTotal: out _);
+
+                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+                        throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsV4), result);
                 }
-                finally
-                {
-                    Api.DhcpRpcFreeMemory(clientsPtr);
-                }
-
-                if (result == DhcpErrors.SUCCESS)
-                    yield break; // Last results
-
-                result = Api.DhcpEnumSubnetClientsV4(ServerIpAddress: server.address,
-                                                     SubnetAddress: subnetAddress,
-                                                     ResumeHandle: ref resultHandle,
-                                                     PreferredMaximum: 0x10000,
-                                                     ClientInfo: out clientsPtr,
-                                                     ClientsRead: out _,
-                                                     ClientsTotal: out _);
-
-                if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
-                    throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsV4), result);
+            }
+            finally
+            {
+                Api.FreePointer(clientsPtr);
             }
         }
 
-        private static IEnumerable<DhcpServerClient> GetClientsV5(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
+        private static IEnumerable<DhcpServerClient> GetClientsV5(DhcpServer server, DhcpServerIpAddress subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.address,
-                                                     SubnetAddress: subnetAddress,
+            var result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.IpAddress,
+                                                     SubnetAddress: subnetAddress.ToNativeAsNetwork(),
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
                                                      ClientInfo: out var clientsPtr,
                                                      ClientsRead: out _,
                                                      ClientsTotal: out _);
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+            // shortcut if no subnet clients are returned
+            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+                yield break;
+
+            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsV5), result);
 
-            while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+            try
             {
-                try
+                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
                 {
-                    var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_V5>();
+                    using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_V5>())
+                    {
+                        foreach (var client in clients.Clients)
+                        {
+                            var clientValue = client.Value;
+                            yield return FromNative(server, ref clientValue);
+                        }
+                    }
 
-                    foreach (var client in clients.Clients)
-                        yield return FromNative(server, client);
+                    if (result == DhcpErrors.SUCCESS)
+                        yield break; // Last results
+
+                    Api.FreePointer(ref clientsPtr);
+                    result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.IpAddress,
+                                                         SubnetAddress: subnetAddress.ToNativeAsNetwork(),
+                                                         ResumeHandle: ref resultHandle,
+                                                         PreferredMaximum: 0x10000,
+                                                         ClientInfo: out clientsPtr,
+                                                         ClientsRead: out _,
+                                                         ClientsTotal: out _);
+
+                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+                        throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsV5), result);
                 }
-                finally
-                {
-                    Api.DhcpRpcFreeMemory(clientsPtr);
-                }
-
-                if (result == DhcpErrors.SUCCESS)
-                    yield break; // Last results
-
-                result = Api.DhcpEnumSubnetClientsV5(ServerIpAddress: server.address,
-                                                     SubnetAddress: subnetAddress,
-                                                     ResumeHandle: ref resultHandle,
-                                                     PreferredMaximum: 0x10000,
-                                                     ClientInfo: out clientsPtr,
-                                                     ClientsRead: out _,
-                                                     ClientsTotal: out _);
-
-                if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
-                    throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsV5), result);
+            }
+            finally
+            {
+                Api.FreePointer(clientsPtr);
             }
         }
 
-        private static IEnumerable<DhcpServerClient> GetClientsVQ(DhcpServer server, DHCP_IP_ADDRESS subnetAddress)
+        private static IEnumerable<DhcpServerClient> GetClientsVQ(DhcpServer server, DhcpServerIpAddress subnetAddress)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.address,
-                                                     SubnetAddress: subnetAddress,
+            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.IpAddress,
+                                                     SubnetAddress: subnetAddress.ToNativeAsNetwork(),
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
                                                      ClientInfo: out var clientsPtr,
@@ -325,43 +328,47 @@ namespace Dhcp
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
 
-            while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+            try
             {
-                try
+                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
                 {
-                    using (var clients = DHCP_CLIENT_INFO_ARRAY_VQ.Read(clientsPtr))
+                    using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_VQ>())
                     {
                         foreach (var client in clients.Clients)
-                            yield return FromNative(server, client.Item2);
+                        {
+                            var clientValue = client.Value;
+                            yield return FromNative(server, ref clientValue);
+                        }
                     }
+
+                    if (result == DhcpErrors.SUCCESS)
+                        yield break; // Last results
+
+                    Api.FreePointer(ref clientsPtr);
+                    result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.IpAddress,
+                                                         SubnetAddress: subnetAddress.ToNativeAsNetwork(),
+                                                         ResumeHandle: ref resultHandle,
+                                                         PreferredMaximum: 0x10000,
+                                                         ClientInfo: out clientsPtr,
+                                                         ClientsRead: out _,
+                                                         ClientsTotal: out _);
+
+                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+                        throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
                 }
-                finally
-                {
-                    Api.DhcpRpcFreeMemory(clientsPtr);
-                }
-
-                if (result == DhcpErrors.SUCCESS)
-                    yield break; // Last results
-
-                result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.address,
-                                                     SubnetAddress: subnetAddress,
-                                                     ResumeHandle: ref resultHandle,
-                                                     PreferredMaximum: 0x10000,
-                                                     ClientInfo: out clientsPtr,
-                                                     ClientsRead: out _,
-                                                     ClientsTotal: out _);
-
-                if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
-                    throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
+            }
+            finally
+            {
+                Api.FreePointer(clientsPtr);
             }
         }
 
-        private static DhcpServerClient FromNative(DhcpServer server, DHCP_CLIENT_INFO native)
+        private static DhcpServerClient FromNative(DhcpServer server, ref DHCP_CLIENT_INFO native)
         {
             return new DhcpServerClient(server: server,
-                                        ipAddress: native.ClientIpAddress,
-                                        subnetMask: native.SubnetMask,
-                                        hardwareAddress: native.ClientHardwareAddress.Data,
+                                        ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
+                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
+                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
                                         name: native.ClientName,
                                         comment: native.ClientComment,
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
@@ -374,12 +381,12 @@ namespace Dhcp
                                         quarantineCapable: false);
         }
 
-        private static DhcpServerClient FromNative(DhcpServer server, DHCP_CLIENT_INFO_V4 native)
+        private static DhcpServerClient FromNative(DhcpServer server, ref DHCP_CLIENT_INFO_V4 native)
         {
             return new DhcpServerClient(server: server,
-                                        ipAddress: native.ClientIpAddress,
-                                        subnetMask: native.SubnetMask,
-                                        hardwareAddress: native.ClientHardwareAddress.Data,
+                                        ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
+                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
+                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
                                         name: native.ClientName,
                                         comment: native.ClientComment,
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
@@ -392,12 +399,12 @@ namespace Dhcp
                                         quarantineCapable: false);
         }
 
-        private static DhcpServerClient FromNative(DhcpServer server, DHCP_CLIENT_INFO_V5 native)
+        private static DhcpServerClient FromNative(DhcpServer server, ref DHCP_CLIENT_INFO_V5 native)
         {
             return new DhcpServerClient(server: server,
-                                        ipAddress: native.ClientIpAddress,
-                                        subnetMask: native.SubnetMask,
-                                        hardwareAddress: native.ClientHardwareAddress.Data,
+                                        ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
+                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
+                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
                                         name: native.ClientName,
                                         comment: native.ClientComment,
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
@@ -410,12 +417,12 @@ namespace Dhcp
                                         quarantineCapable: false);
         }
 
-        private static DhcpServerClient FromNative(DhcpServer server, DHCP_CLIENT_INFO_VQ native)
+        private static DhcpServerClient FromNative(DhcpServer server, ref DHCP_CLIENT_INFO_VQ native)
         {
             return new DhcpServerClient(server: server,
-                                        ipAddress: native.ClientIpAddress,
-                                        subnetMask: native.SubnetMask,
-                                        hardwareAddress: native.ClientHardwareAddress.Data,
+                                        ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
+                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
+                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
                                         name: native.ClientName,
                                         comment: native.ClientComment,
                                         leaseExpires: native.ClientLeaseExpires.ToDateTime(),
@@ -428,6 +435,9 @@ namespace Dhcp
                                         quarantineCapable: native.QuarantineCapable);
         }
 
-        public override string ToString() => $"{ipAddress}/{subnetMask.SignificantBits} [{HardwareAddress}]: {Name} ({Comment})";
+        public override string ToString()
+        {
+            return $"[{HardwareAddress}] {AddressState} {IpAddress}/{SubnetMask.SignificantBits} ({(LeaseHasExpiry ? (LeaseExpired ? "expired" : LeaseExpiresLocal.ToString()) : "no expiry")}): {Name}{(string.IsNullOrEmpty(Comment) ? null : $" ({Comment})")}";
+        }
     }
 }

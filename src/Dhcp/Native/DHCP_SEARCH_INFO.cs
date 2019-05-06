@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_SEARCH_INFO structure defines the DHCP client record data used to search against for particular server operations.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SEARCH_INFO_IPADDRESS
+    internal struct DHCP_SEARCH_INFO_LocalIpAddress
     {
         private IntPtr searchType;
 
@@ -30,7 +30,7 @@ namespace Dhcp.Native
     /// The DHCP_SEARCH_INFO structure defines the DHCP client record data used to search against for particular server operations.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SEARCH_INFO_HARDWAREADDRESS
+    internal struct DHCP_SEARCH_INFO_LocalHardwareAddress
     {
         private IntPtr searchType;
 
@@ -53,7 +53,7 @@ namespace Dhcp.Native
     /// The DHCP_SEARCH_INFO structure defines the DHCP client record data used to search against for particular server operations.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SEARCH_INFO_NAME
+    internal struct DHCP_SEARCH_INFO_LocalName
     {
         private IntPtr searchType;
 

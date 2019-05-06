@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Dhcp.Native
 {
@@ -6,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO_V5 structure defines a client information record used by the DHCP server, extending the definition provided in DHCP_CLIENT_INFO by including client type and address state information.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_V5
+    internal struct DHCP_CLIENT_INFO_V5 : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the assigned IP address of the DHCP client.
@@ -23,13 +24,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a Unicode string that specifies the network name of the DHCP client. This member is optional.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string ClientName;
+        private IntPtr ClientNamePointer;
         /// <summary>
         /// Pointer to a Unicode string that contains a comment associated with the DHCP client. This member is optional.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string ClientComment;
+        private IntPtr ClientCommentPointer;
         /// <summary>
         /// DATE_TIME structure that contains the date and time the DHCP client lease will expire, in UTC time.
         /// </summary>
@@ -46,5 +45,23 @@ namespace Dhcp.Native
         /// Specifies the current state of the client IP address.
         /// </summary>
         public readonly byte AddressState;
+
+        /// <summary>
+        /// Pointer to a Unicode string that specifies the network name of the DHCP client. This member is optional.
+        /// </summary>
+        public string ClientName => Marshal.PtrToStringUni(ClientNamePointer);
+
+        /// <summary>
+        /// Pointer to a Unicode string that contains a comment associated with the DHCP client. This member is optional.
+        /// </summary>
+        public string ClientComment => Marshal.PtrToStringUni(ClientCommentPointer);
+
+        public void Dispose()
+        {
+            ClientHardwareAddress.Dispose();
+            Api.FreePointer(ref ClientNamePointer);
+            Api.FreePointer(ref ClientCommentPointer);
+            OwnerHost.Dispose();
+        }
     }
 }

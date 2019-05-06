@@ -1,9 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Dhcp.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_INFO_VQ
+    internal struct DHCP_SUBNET_INFO_VQ : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet ID.
@@ -16,13 +17,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that specifies the network name of the subnet.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string SubnetName;
+        private IntPtr SubnetNamePointer;
         /// <summary>
         /// Unicode string that contains an optional comment particular to this subnet.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string SubnetComment;
+        private IntPtr SubnetCommentPointer;
         /// <summary>
         /// DHCP_HOST_INFO structure that contains information about the DHCP server servicing this subnet.
         /// </summary>
@@ -52,5 +51,24 @@ namespace Dhcp.Native
         /// Reserved for future use.
         /// </summary>
         private readonly ulong Reserved4;
+
+        /// <summary>
+        /// Unicode string that specifies the network name of the subnet.
+        /// </summary>
+        public string SubnetName => Marshal.PtrToStringUni(SubnetNamePointer);
+        /// <summary>
+        /// Unicode string that contains an optional comment particular to this subnet.
+        /// </summary>
+        public string SubnetComment => Marshal.PtrToStringUni(SubnetCommentPointer);
+
+        public void Dispose()
+        {
+            Api.FreePointer(ref SubnetNamePointer);
+
+            // Freeing SubnetComment causes heap corruption ?!?!?
+            // Api.FreePointer(ref SubnetCommentPointer);
+
+            PrimaryHost.Dispose();
+        }
     }
 }

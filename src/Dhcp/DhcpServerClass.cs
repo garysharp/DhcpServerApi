@@ -73,21 +73,27 @@ namespace Dhcp
             }
         }
 
+        public DhcpServerClass Value { get; internal set; }
+
         private DhcpServerClass(DhcpServer server, string name, string comment, bool isVendorClass, byte[] data)
         {
             Server = server;
+            Name = name;
+            Comment = comment;
+            IsVendorClass = isVendorClass;
+            Data = data;
         }
 
         internal static DhcpServerClass GetClass(DhcpServer server, string name)
         {
-            var query = new DHCP_CLASS_INFO()
+            var query = new DHCP_CLASS_INFO_Local()
             {
                 ClassName = name,
                 ClassDataLength = 0,
                 ClassData = IntPtr.Zero
             };
 
-            var result = Api.DhcpGetClassInfo(ServerIpAddress: server.address,
+            var result = Api.DhcpGetClassInfo(ServerIpAddress: server.IpAddress,
                                               ReservedMustBeZero: 0,
                                               PartialClassInfo: query,
                                               FilledClassInfo: out var classIntoPtr);
@@ -97,19 +103,22 @@ namespace Dhcp
 
             try
             {
-                var classInfo = classIntoPtr.MarshalToStructure<DHCP_CLASS_INFO>();
-                return FromNative(server, classInfo);
+                using (var classInfo = classIntoPtr.MarshalToStructure<DHCP_CLASS_INFO>())
+                {
+                    var classInfoRef = classInfo;
+                    return FromNative(server, ref classInfoRef);
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(classIntoPtr);
+                Api.FreePointer(classIntoPtr);
             }
         }
 
         internal static IEnumerable<DhcpServerClass> GetClasses(DhcpServer server)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumClasses(ServerIpAddress: server.address,
+            var result = Api.DhcpEnumClasses(ServerIpAddress: server.IpAddress,
                                              ReservedMustBeZero: 0,
                                              ResumeHandle: ref resumeHandle,
                                              PreferredMaximum: 0xFFFFFFFF,
@@ -123,31 +132,36 @@ namespace Dhcp
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumClasses), result);
 
-            if (elementsRead > 0)
+            try
             {
-                var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_CLASS_INFO_ARRAY>();
-                try
+                if (elementsRead == 0)
+                    yield break;
+
+                using (var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_CLASS_INFO_ARRAY>())
                 {
                     foreach (var element in enumInfo.Classes)
-                        yield return FromNative(server, element);
+                    {
+                        var elementRef = element;
+                        yield return FromNative(server, ref elementRef);
+                    }
                 }
-                finally
-                {
-                    Api.DhcpRpcFreeMemory(enumInfoPtr);
-                }
+            }
+            finally
+            {
+                Api.FreePointer(enumInfoPtr);
             }
         }
 
-        internal static DhcpServerClass FromNative(DhcpServer server, DHCP_CLASS_INFO native)
+        internal static DhcpServerClass FromNative(DhcpServer server, ref DHCP_CLASS_INFO native)
         {
             var data = new byte[native.ClassDataLength];
             Marshal.Copy(native.ClassData, data, 0, native.ClassDataLength);
 
-            return new DhcpServerClass(server,
-                name: native.ClassName,
-                comment: native.ClassComment,
-                isVendorClass: native.IsVendor,
-                data: data);
+            return new DhcpServerClass(server: server,
+                                       name: native.ClassName,
+                                       comment: native.ClassComment,
+                                       isVendorClass: native.IsVendor,
+                                       data: data);
         }
     }
 }

@@ -24,11 +24,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the DHCPv4 client's machine name.
         /// </summary>
-        private readonly IntPtr ClientNamePointer;
+        private IntPtr ClientNamePointer;
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the description given to the DHCPv4 client.
         /// </summary>
-        private readonly IntPtr ClientCommentPointer;
+        private IntPtr ClientCommentPointer;
         /// <summary>
         /// DATE_TIME structure that contains the lease expiry time for the DHCPv4 client. This is UTC time represented in the FILETIME format.
         /// </summary>
@@ -61,23 +61,19 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the DHCPv4 client's machine name.
         /// </summary>
-        public string ClientName => (ClientNamePointer == IntPtr.Zero) ? null : Marshal.PtrToStringUni(ClientNamePointer);
+        public string ClientName => Marshal.PtrToStringUni(ClientNamePointer);
 
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the description given to the DHCPv4 client.
         /// </summary>
-        public string ClientComment => (ClientCommentPointer == IntPtr.Zero) ? null : Marshal.PtrToStringUni(ClientCommentPointer);
+        public string ClientComment => Marshal.PtrToStringUni(ClientCommentPointer);
 
         public void Dispose()
         {
             ClientHardwareAddress.Dispose();
+            Api.FreePointer(ref ClientNamePointer);
+            Api.FreePointer(ref ClientCommentPointer);
             OwnerHost.Dispose();
-
-            if (ClientNamePointer != IntPtr.Zero)
-                Api.DhcpRpcFreeMemory(ClientNamePointer);
-
-            if (ClientCommentPointer != IntPtr.Zero)
-                Api.DhcpRpcFreeMemory(ClientCommentPointer);
         }
     }
 }

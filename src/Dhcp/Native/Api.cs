@@ -170,7 +170,7 @@ namespace Dhcp.Native
         /// <param name="FilledClassInfo">DHCP_CLASS_INFO structure returned after lookup that contains the complete class information.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO PartialClassInfo, out IntPtr FilledClassInfo);
+        public static extern DhcpErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO_Local PartialClassInfo, out IntPtr FilledClassInfo);
 
         /// <summary>
         /// The DhcpEnumClasses function enumerates the user or vendor classes configured for the DHCP server.
@@ -408,5 +408,28 @@ namespace Dhcp.Native
         /// <remarks>This function should be called to release the memory consumed by any structures.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true)]
         public static extern void DhcpRpcFreeMemory(IntPtr BufferPointer);
+
+        /// <summary>
+        /// Helper which calls <see cref="DhcpRpcFreeMemory(IntPtr)"/> and clears the pointer if != <see cref="IntPtr.Zero"/>
+        /// </summary>
+        public static void FreePointer(ref IntPtr Pointer)
+        {
+            if (Pointer != IntPtr.Zero)
+            {
+                DhcpRpcFreeMemory(Pointer);
+                Pointer = IntPtr.Zero;
+            }
+        }
+
+        /// <summary>
+        /// Helper which calls <see cref="DhcpRpcFreeMemory(IntPtr)"/> if the pointer != <see cref="IntPtr.Zero"/>
+        /// </summary>
+        public static void FreePointer(IntPtr Pointer)
+        {
+            if (Pointer != IntPtr.Zero)
+            {
+                DhcpRpcFreeMemory(Pointer);
+            }
+        }
     }
 }

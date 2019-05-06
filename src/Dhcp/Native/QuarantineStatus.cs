@@ -33,6 +33,6 @@ namespace Dhcp.Native
         /// <summary>
         /// No quarantine.
         /// </summary>
-        NOQUARINFO = 6
+        NOQUARINFO = 6,
     }
 }

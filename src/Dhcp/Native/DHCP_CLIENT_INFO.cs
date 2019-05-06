@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Dhcp.Native
 {
@@ -6,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO structure defines a client information record used by the DHCP server.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO
+    internal struct DHCP_CLIENT_INFO : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the assigned IP address of the DHCP client.
@@ -23,13 +24,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that specifies the network name of the DHCP client. This member is optional.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string ClientName;
+        private IntPtr ClientNamePointer;
         /// <summary>
         /// Unicode string that contains a comment associated with the DHCP client. This member is optional.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string ClientComment;
+        private IntPtr ClientCommentPointer;
         /// <summary>
         /// DATE_TIME structure that contains the date and time the DHCP client lease will expire, in UTC time.
         /// </summary>
@@ -38,5 +37,22 @@ namespace Dhcp.Native
         /// DHCP_HOST_INFO structure that contains information on the DHCP server that assigned the IP address to the client. 
         /// </summary>
         public readonly DHCP_HOST_INFO OwnerHost;
+
+        /// <summary>
+        /// Unicode string that specifies the network name of the DHCP client. This member is optional.
+        /// </summary>
+        public string ClientName => Marshal.PtrToStringUni(ClientNamePointer);
+        /// <summary>
+        /// Unicode string that contains a comment associated with the DHCP client. This member is optional.
+        /// </summary>
+        public string ClientComment => Marshal.PtrToStringUni(ClientCommentPointer);
+
+        public void Dispose()
+        {
+            ClientHardwareAddress.Dispose();
+            Api.FreePointer(ref ClientNamePointer);
+            Api.FreePointer(ref ClientCommentPointer);
+            OwnerHost.Dispose();
+        }
     }
 }

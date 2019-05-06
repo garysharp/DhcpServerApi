@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_BIND_ELEMENT_ARRAY structure defines an array of network binding elements used by a DHCP server.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BIND_ELEMENT_ARRAY
+    internal struct DHCP_BIND_ELEMENT_ARRAY : IDisposable
     {
         /// <summary>
         /// Specifies the number of network binding elements listed in Elements.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies an array of DHCP_BIND_ELEMENT structures
         /// </summary>
-        private readonly IntPtr ElementsPointer;
+        private IntPtr ElementsPointer;
 
         /// <summary>
         /// Specifies an array of DHCP_BIND_ELEMENT structures
@@ -26,14 +26,25 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = ElementsPointer;
-                var instanceSize = Marshal.SizeOf(typeof(DHCP_BIND_ELEMENT));
+                if (NumElements == 0 || ElementsPointer == IntPtr.Zero)
+                    yield break;
+
+                var iter = ElementsPointer;
+                var size = Marshal.SizeOf(typeof(DHCP_BIND_ELEMENT));
                 for (var i = 0; i < NumElements; i++)
                 {
-                    yield return instanceIter.MarshalToStructure<DHCP_BIND_ELEMENT>();
-                    instanceIter += instanceSize;
+                    yield return iter.MarshalToStructure<DHCP_BIND_ELEMENT>();
+                    iter += size;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var element in Elements)
+                element.Dispose();
+            
+            Api.FreePointer(ref ElementsPointer);
         }
     }
 }

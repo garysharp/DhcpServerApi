@@ -1,5 +1,4 @@
-﻿
-namespace Dhcp
+﻿namespace Dhcp
 {
     /// <summary>
     /// Defines the set of formats that represent DHCP option data

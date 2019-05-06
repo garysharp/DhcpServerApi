@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_ALL_OPTIONS structure defines the set of all options available on a DHCP server.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_ALL_OPTIONS
+    internal struct DHCP_ALL_OPTIONS : IDisposable
     {
         /// <summary>
         /// Reserved. This value should be set to 0.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_OPTION_ARRAY structure that contains the set of non-vendor options.
         /// </summary>
-        public readonly IntPtr NonVendorOptionsPointer;
+        public IntPtr NonVendorOptionsPointer;
         /// <summary>
         /// Specifies the number of vendor options listed in VendorOptions.
         /// </summary>
@@ -28,7 +28,7 @@ namespace Dhcp.Native
         /// - VendorName: Unicode string that contains the name of the vendor for the option.
         /// - ClassName: Unicode string that contains the name of the DHCP class for the option.
         /// </summary>
-        public readonly IntPtr VendorOptionsPointer;
+        public IntPtr VendorOptionsPointer;
 
         /// <summary>
         /// DHCP_OPTION_ARRAY structure that contains the set of non-vendor options.
@@ -42,13 +42,29 @@ namespace Dhcp.Native
         {
             get
             {
-                var instanceIter = VendorOptionsPointer;
-                var instanceSize = Marshal.SizeOf(typeof(DHCP_VENDOR_OPTION));
+                if (NumVendorOptions == 0 || VendorOptionsPointer == IntPtr.Zero)
+                    yield break;
+
+                var size = Marshal.SizeOf(typeof(DHCP_VENDOR_OPTION));
+                var iter = VendorOptionsPointer;
                 for (var i = 0; i < NumVendorOptions; i++)
                 {
-                    yield return instanceIter.MarshalToStructure<DHCP_VENDOR_OPTION>();
-                    instanceIter += instanceSize;
+                    yield return iter.MarshalToStructure<DHCP_VENDOR_OPTION>();
+                    iter += size;
                 }
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var option in VendorOptions)
+                option.Dispose();
+            Api.FreePointer(ref VendorOptionsPointer);
+
+            if (NonVendorOptionsPointer != IntPtr.Zero)
+            {
+                NonVendorOptions.Dispose();
+                Api.FreePointer(ref NonVendorOptionsPointer);
             }
         }
     }

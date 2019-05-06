@@ -19,29 +19,28 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the NetBIOS name of the DHCP server.
         /// </summary>
-        private readonly IntPtr NetBiosNamePointer;
+        private IntPtr NetBiosNamePointer;
         /// <summary>
         /// Unicode string that contains the network name of the DHCP server.
         /// </summary>
-        private readonly IntPtr ServerNamePointer;
+        private IntPtr ServerNamePointer;
 
         /// <summary>
         /// Unicode string that contains the NetBIOS name of the DHCP server.
         /// </summary>
-        public string NetBiosName => (NetBiosNamePointer == IntPtr.Zero) ? null : Marshal.PtrToStringUni(NetBiosNamePointer);
+        public string NetBiosName => Marshal.PtrToStringUni(NetBiosNamePointer);
 
         /// <summary>
         /// Unicode string that contains the network name of the DHCP server.
         /// </summary>
-        public string ServerName => (ServerNamePointer == IntPtr.Zero) ? null : Marshal.PtrToStringUni(ServerNamePointer);
+        public string ServerName => Marshal.PtrToStringUni(ServerNamePointer);
 
         public void Dispose()
         {
-            if (NetBiosNamePointer != IntPtr.Zero)
-                Api.DhcpRpcFreeMemory(NetBiosNamePointer);
+            Api.FreePointer(ref NetBiosNamePointer);
 
-            if (ServerNamePointer != IntPtr.Zero)
-                Api.DhcpRpcFreeMemory(ServerNamePointer);
+            // Freeing ServerName causes heap corruption ?!?!?
+            // Api.FreePointer(ref ServerNamePointer);
         }
     }
 }

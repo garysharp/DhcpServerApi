@@ -40,7 +40,7 @@ namespace Dhcp
 
         internal static DhcpServerAuditLog GetAuditLog(DhcpServer server)
         {
-            var result = Api.DhcpAuditLogGetParams(ServerIpAddress: server.address,
+            var result = Api.DhcpAuditLogGetParams(ServerIpAddress: server.IpAddress,
                                                    Flags: 0,
                                                    AuditLogDir: out var auditLogDir,
                                                    DiskCheckInterval: out var diskCheckInterval,

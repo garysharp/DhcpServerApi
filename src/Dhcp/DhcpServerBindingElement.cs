@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Runtime.InteropServices;
+using System.ComponentModel;
 using Dhcp.Native;
 
 namespace Dhcp
 {
     public class DhcpServerBindingElement
     {
-        private readonly DHCP_IP_ADDRESS adapterPrimaryIpAddress;
-        private readonly DHCP_IP_MASK adapterSubnetAddress;
+        private readonly byte[] interfaceId;
 
         /// <summary>
         /// The associated DHCP Server
@@ -29,22 +27,24 @@ namespace Dhcp
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the IP address assigned to the ethernet adapter of the DHCP server.
         /// </summary>
-        public IPAddress AdapterPrimaryIpAddress => adapterPrimaryIpAddress.ToIPAddress();
+        public DhcpServerIpAddress AdapterPrimaryIpAddress { get; }
 
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the IP address assigned to the ethernet adapter of the DHCP server.
         /// </summary>
-        public int AdapterPrimaryIpAddressNative => (int)adapterPrimaryIpAddress;
+        [Obsolete("Use AdapterPrimaryIpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int AdapterPrimaryIpAddressNative => (int)AdapterPrimaryIpAddress.Native;
 
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet IP mask used by this ethernet adapter.
         /// </summary>
-        public IPAddress AdapterSubnetAddress => adapterSubnetAddress.ToIPAddress();
+        public DhcpServerIpMask AdapterSubnetAddress { get; }
 
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet IP mask used by this ethernet adapter.
         /// </summary>
-        public int AdapterSubnetAddressNative => (int)adapterSubnetAddress;
+        [Obsolete("Use AdapterSubnetAddressNative.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int AdapterSubnetAddressNative => (int)AdapterSubnetAddress.Native;
 
         /// <summary>
         /// Unicode string that specifies the name assigned to this network interface device.
@@ -54,24 +54,34 @@ namespace Dhcp
         /// <summary>
         /// Specifies the network interface device ID.
         /// </summary>
-        public byte[] InterfaceId { get; }
+        public byte[] InterfaceId
+        {
+            get
+            {
+                if (interfaceId == null)
+                    return InterfaceGuidId.ToByteArray();
+                else
+                    return interfaceId;
+            }
+        }
 
-        public Guid InterfaceGuidId => (InterfaceId.Length == 16) ? new Guid(InterfaceId) : Guid.Empty;
+        public Guid InterfaceGuidId { get; }
 
-        private DhcpServerBindingElement(DhcpServer server, bool cantModify, bool isBound, DHCP_IP_ADDRESS adapterPrimaryIpAddress, DHCP_IP_MASK adapterSubnetAddress, string interfaceDescription, byte[] interfaceId)
+        private DhcpServerBindingElement(DhcpServer server, bool cantModify, bool isBound, DhcpServerIpAddress adapterPrimaryIpAddress, DhcpServerIpMask adapterSubnetAddress, string interfaceDescription, Guid interfaceGuidId, byte[] interfaceId)
         {
             Server = server;
             CantModify = cantModify;
             IsBound = isBound;
-            this.adapterPrimaryIpAddress = adapterPrimaryIpAddress;
-            this.adapterSubnetAddress = adapterSubnetAddress;
+            AdapterPrimaryIpAddress = adapterPrimaryIpAddress;
+            AdapterSubnetAddress = adapterSubnetAddress;
             InterfaceDescription = interfaceDescription;
-            InterfaceId = interfaceId;
+            this.interfaceId = interfaceId;
+            InterfaceGuidId = interfaceGuidId;
         }
 
         internal static IEnumerable<DhcpServerBindingElement> GetBindingInfo(DhcpServer server)
         {
-            var result = Api.DhcpGetServerBindingInfo(ServerIpAddress: server.address,
+            var result = Api.DhcpGetServerBindingInfo(ServerIpAddress: server.IpAddress,
                                                       Flags: 0,
                                                       BindElementsInfo: out var elementsPtr);
 
@@ -80,29 +90,31 @@ namespace Dhcp
 
             try
             {
-                var elements = elementsPtr.MarshalToStructure<DHCP_BIND_ELEMENT_ARRAY>();
-
-                foreach (var element in elements.Elements)
-                    yield return FromNative(server, element);
+                using (var elements = elementsPtr.MarshalToStructure<DHCP_BIND_ELEMENT_ARRAY>())
+                {
+                    foreach (var element in elements.Elements)
+                    {
+                        var elementRef = element;
+                        yield return FromNative(server, ref elementRef);
+                    }
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(elementsPtr);
+                Api.FreePointer(elementsPtr);
             }
         }
 
-        private static DhcpServerBindingElement FromNative(DhcpServer server, DHCP_BIND_ELEMENT native)
+        private static DhcpServerBindingElement FromNative(DhcpServer server, ref DHCP_BIND_ELEMENT native)
         {
-            var interfaceId = new byte[native.IfIdSize];
-            Marshal.Copy(native.IfId, interfaceId, 0, native.IfIdSize);
-
             return new DhcpServerBindingElement(server: server,
-                                                cantModify: (native.Flags & Constants.DHCP_ENDPOINT_FLAG_CANT_MODIFY) > 0,
+                                                cantModify: (native.Flags & Constants.DHCP_ENDPOINT_FLAG_CANT_MODIFY) == Constants.DHCP_ENDPOINT_FLAG_CANT_MODIFY,
                                                 isBound: native.fBoundToDHCPServer,
-                                                adapterPrimaryIpAddress: native.AdapterPrimaryAddress.ToReverseOrder(),
-                                                adapterSubnetAddress: native.AdapterSubnetAddress.ToReverseOrder(),
+                                                adapterPrimaryIpAddress: native.AdapterPrimaryAddress.AsHostToIpAddress(),
+                                                adapterSubnetAddress: native.AdapterSubnetAddress.AsHostToIpMask(),
                                                 interfaceDescription: native.IfDescription,
-                                                interfaceId: interfaceId);
+                                                interfaceGuidId: native.IfIdGuid,
+                                                interfaceId: native.IfIdIsGuid ? null : native.IfId);
         }
     }
 }

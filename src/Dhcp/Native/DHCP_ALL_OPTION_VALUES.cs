@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_ALL_OPTION_VALUES structure defines the set of all option values defined on a DHCP server, organized according to class/vendor pairing.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_ALL_OPTION_VALUES
+    internal struct DHCP_ALL_OPTION_VALUES : IDisposable
     {
         /// <summary>
         /// Reserved. This value should be set to 0.
@@ -21,23 +21,34 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of structures that contain the option values for specific class/vendor pairs.
         /// </summary>
-        public readonly IntPtr OptionsPointer;
+        private IntPtr OptionsPointer;
 
         /// <summary>
-        /// Pointer to a list of <see cref="DHCP_ALL_OPTION_VALUE_ITEM"/> structures containing the option values for specific class/vendor pairs.
+        /// A list of <see cref="DHCP_ALL_OPTION_VALUE_ITEM"/> structures containing the option values for specific class/vendor pairs.
         /// </summary>
         public IEnumerable<DHCP_ALL_OPTION_VALUE_ITEM> Options
         {
             get
             {
-                var instanceIter = OptionsPointer;
-                var instanceSize = Marshal.SizeOf(typeof(DHCP_ALL_OPTION_VALUE_ITEM));
+                if (NumElements == 0 || OptionsPointer == IntPtr.Zero)
+                    yield break;
+
+                var iter = OptionsPointer;
+                var size = Marshal.SizeOf(typeof(DHCP_ALL_OPTION_VALUE_ITEM));
                 for (var i = 0; i < NumElements; i++)
                 {
-                    yield return instanceIter.MarshalToStructure<DHCP_ALL_OPTION_VALUE_ITEM>();
-                    instanceIter += instanceSize;
+                    yield return iter.MarshalToStructure<DHCP_ALL_OPTION_VALUE_ITEM>();
+                    iter += size;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var option in Options)
+                option.Dispose();
+
+            Api.FreePointer(ref OptionsPointer);
         }
     }
 }

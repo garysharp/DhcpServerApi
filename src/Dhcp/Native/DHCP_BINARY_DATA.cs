@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private readonly IntPtr DataPointer;
+        private IntPtr DataPointer;
 
         /// <summary>
         /// Blob of byte (binary) data.
@@ -27,7 +27,9 @@ namespace Dhcp.Native
             get
             {
                 if (DataPointer == IntPtr.Zero)
+                {
                     return null;
+                }
                 else
                 {
                     var blob = new byte[DataLength];
@@ -40,10 +42,24 @@ namespace Dhcp.Native
             }
         }
 
+        public DhcpServerHardwareAddress DataAsHardwareAddress
+        {
+            get
+            {
+                if (DataPointer == IntPtr.Zero || DataLength > DhcpServerHardwareAddress.MaximumLength)
+                {
+                    return default;
+                }
+                else
+                {
+                    return DhcpServerHardwareAddress.FromNative(DhcpServerHardwareType.Ethernet, DataPointer, DataLength);
+                }
+            }
+        }
+
         public void Dispose()
         {
-            if (DataPointer != IntPtr.Zero)
-                Api.DhcpRpcFreeMemory(DataPointer);
+            Api.FreePointer(ref DataPointer);
         }
     }
 }

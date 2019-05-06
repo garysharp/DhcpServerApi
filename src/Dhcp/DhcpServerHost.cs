@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.ComponentModel;
 using System.Text;
 using Dhcp.Native;
 
@@ -6,26 +7,37 @@ namespace Dhcp
 {
     public class DhcpServerHost
     {
-        private DHCP_IP_ADDRESS ipAddress;
+        public DhcpServerIpAddress IpAddress { get; }
+        [Obsolete("Use IpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int IpAddressNative => (int)IpAddress.Native;
 
-        public IPAddress IpAddress => ipAddress.ToIPAddress();
-        public int IpAddressNative => (int)ipAddress;
         public string NetBiosName { get; }
         public string ServerName { get; }
 
-        private DhcpServerHost(DHCP_IP_ADDRESS ipAddress, string netBiosName, string serverName)
+        private DhcpServerHost(DhcpServerIpAddress ipAddress, string netBiosName, string serverName)
         {
-            this.ipAddress = ipAddress;
+            IpAddress = ipAddress;
             NetBiosName = netBiosName;
             ServerName = serverName;
         }
 
-        internal static DhcpServerHost FromNative(DHCP_HOST_INFO native) 
-            => new DhcpServerHost(native.IpAddress.ToReverseOrder(), native.NetBiosName, native.ServerName);
+        internal static DhcpServerHost FromNative(ref DHCP_HOST_INFO native)
+        {
+            return new DhcpServerHost(ipAddress: native.IpAddress.AsNetworkToIpAddress(),
+                                      netBiosName: native.NetBiosName,
+                                      serverName: native.ServerName);
+        }
+
+        internal static DhcpServerHost FromNative(DHCP_HOST_INFO native)
+        {
+            return new DhcpServerHost(ipAddress: native.IpAddress.AsNetworkToIpAddress(),
+                                      netBiosName: native.NetBiosName,
+                                      serverName: native.ServerName);
+        }
 
         public override string ToString()
         {
-            var builder = new StringBuilder(ipAddress);
+            var builder = new StringBuilder(IpAddress);
 
             if (!string.IsNullOrEmpty(ServerName))
                 builder.Append(" [").Append(ServerName).Append("]");

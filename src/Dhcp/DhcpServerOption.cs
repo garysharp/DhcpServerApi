@@ -7,7 +7,7 @@ namespace Dhcp
 {
     public class DhcpServerOption
     {
-        private DhcpServerClass openClass;
+        private DhcpServerClass optionClass;
 
         /// <summary>
         /// The associated DHCP Server
@@ -52,7 +52,7 @@ namespace Dhcp
 
         public bool IsUserClassOption => ClassName != null;
 
-        public DhcpServerClass Class => openClass ??= GetClass();
+        public DhcpServerClass Class => optionClass ??= GetClass();
 
         private DhcpServerOption(DhcpServer server, int optionId, string name, string comment, IEnumerable<DhcpServerOptionElement> defaultValue, bool isUnaryOption, string vendorName, string className)
         {
@@ -111,16 +111,15 @@ namespace Dhcp
             else
             {
                 if (vendorName != null || className != null)
-                {
                     throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
-                }
+
                 return GetOptionV0(server, optionId);
             }
         }
 
         private static DhcpServerOption GetOptionV0(DhcpServer server, int optionId)
         {
-            var result = Api.DhcpGetOptionInfo(ServerIpAddress: server.address,
+            var result = Api.DhcpGetOptionInfo(ServerIpAddress: server.IpAddress,
                                                OptionID: optionId,
                                                OptionInfo: out var optionPtr);
 
@@ -129,18 +128,21 @@ namespace Dhcp
 
             try
             {
-                var option = optionPtr.MarshalToStructure<DHCP_OPTION>();
-                return FromNative(server, option, null, null);
+                using (var option = optionPtr.MarshalToStructure<DHCP_OPTION>())
+                {
+                    var optionRef = option;
+                    return FromNative(server, ref optionRef, null, null);
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(optionPtr);
+                Api.FreePointer(optionPtr);
             }
         }
 
         private static DhcpServerOption GetOptionV5(DhcpServer server, int optionId, string className, string vendorName)
         {
-            var result = Api.DhcpGetOptionInfoV5(ServerIpAddress: server.address,
+            var result = Api.DhcpGetOptionInfoV5(ServerIpAddress: server.IpAddress,
                                                  Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
                                                  OptionID: optionId,
                                                  ClassName: className,
@@ -152,18 +154,21 @@ namespace Dhcp
 
             try
             {
-                var option = optionPtr.MarshalToStructure<DHCP_OPTION>();
-                return FromNative(server, option, className, vendorName);
+                using (var option = optionPtr.MarshalToStructure<DHCP_OPTION>())
+                {
+                    var optionRef = option;
+                    return FromNative(server, ref optionRef, className, vendorName);
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(optionPtr);
+                Api.FreePointer(optionPtr);
             }
         }
 
         internal static IEnumerable<DhcpServerOption> GetAllOptions(DhcpServer server)
         {
-            var result = Api.DhcpGetAllOptions(ServerIpAddress: server.address,
+            var result = Api.DhcpGetAllOptions(ServerIpAddress: server.IpAddress,
                                                Flags: 0,
                                                OptionStruct: out var optionsPtr);
 
@@ -172,17 +177,24 @@ namespace Dhcp
 
             try
             {
-                var options = optionsPtr.MarshalToStructure<DHCP_ALL_OPTIONS>();
+                using (var options = optionsPtr.MarshalToStructure<DHCP_ALL_OPTIONS>())
+                {
+                    foreach (var option in options.NonVendorOptions.Options)
+                    {
+                        var optionRef = option;
+                        yield return FromNative(server, ref optionRef, null, null);
+                    }
 
-                foreach (var option in options.NonVendorOptions.Options)
-                    yield return FromNative(server, option, null, null);
-
-                foreach (var option in options.VendorOptions)
-                    yield return FromNative(server, option);
+                    foreach (var option in options.VendorOptions)
+                    {
+                        var optionRef = option;
+                        yield return FromNative(server, ref optionRef);
+                    }
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(optionsPtr);
+                Api.FreePointer(optionsPtr);
             }
         }
 
@@ -216,8 +228,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerOption> EnumOptionsV0(DhcpServer server)
         {
             var resumeHandle = IntPtr.Zero;
-
-            var result = Api.DhcpEnumOptions(ServerIpAddress: server.address,
+            var result = Api.DhcpEnumOptions(ServerIpAddress: server.IpAddress,
                                              ResumeHandle: ref resumeHandle,
                                              PreferredMaximum: 0xFFFFFFFF,
                                              Options: out var enumInfoPtr,
@@ -230,27 +241,30 @@ namespace Dhcp
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumOptions), result);
 
-            if (elementsRead == 0)
-                yield break;
-
             try
             {
-                var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_OPTION_ARRAY>();
+                if (elementsRead == 0)
+                    yield break;
 
-                foreach (var option in enumInfo.Options)
-                    yield return FromNative(server, option, null, null);
+                using (var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_OPTION_ARRAY>())
+                {
+                    foreach (var option in enumInfo.Options)
+                    {
+                        var optionRef = option;
+                        yield return FromNative(server, ref optionRef, null, null);
+                    }
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(enumInfoPtr);
+                Api.FreePointer(enumInfoPtr);
             }
         }
 
         private static IEnumerable<DhcpServerOption> EnumOptionsV5(DhcpServer server, string className, string vendorName)
         {
             var resumeHandle = IntPtr.Zero;
-
-            var result = Api.DhcpEnumOptionsV5(ServerIpAddress: server.address,
+            var result = Api.DhcpEnumOptionsV5(ServerIpAddress: server.IpAddress,
                                                Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
                                                ClassName: className,
                                                VendorName: vendorName,
@@ -266,23 +280,27 @@ namespace Dhcp
             if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumOptionsV5), result);
 
-            if (elementsRead == 0)
-                yield break;
-
             try
             {
-                var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_OPTION_ARRAY>();
+                if (elementsRead == 0)
+                    yield break;
 
-                foreach (var option in enumInfo.Options)
-                    yield return FromNative(server, option, vendorName, className);
+                using (var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_OPTION_ARRAY>())
+                {
+                    foreach (var option in enumInfo.Options)
+                    {
+                        var optionRef = option;
+                        yield return FromNative(server, ref optionRef, vendorName, className);
+                    }
+                }
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(enumInfoPtr);
+                Api.FreePointer(enumInfoPtr);
             }
         }
 
-        private static DhcpServerOption FromNative(DhcpServer server, DHCP_OPTION native, string vendorName, string className)
+        private static DhcpServerOption FromNative(DhcpServer server, ref DHCP_OPTION native, string vendorName, string className)
         {
             return new DhcpServerOption(server: server,
                                         optionId: native.OptionID,
@@ -294,7 +312,7 @@ namespace Dhcp
                                         className: className);
         }
 
-        private static DhcpServerOption FromNative(DhcpServer server, DHCP_VENDOR_OPTION native)
+        private static DhcpServerOption FromNative(DhcpServer server, ref DHCP_VENDOR_OPTION native)
         {
             return new DhcpServerOption(server: server,
                                         optionId: native.OptionID,

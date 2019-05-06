@@ -9,57 +9,52 @@ namespace Dhcp.Native
     /// </summary>
     internal struct DHCP_CLIENT_INFO_ARRAY_VQ : IDisposable
     {
-        public int NumElements;
+        /// <summary>
+        /// The number of elements in the array.
+        /// </summary>
+        public readonly int NumElements;
+
+        /// <summary>
+        /// Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
+        /// </summary>
         private IntPtr ClientsPointer;
 
-        public List<Tuple<IntPtr, DHCP_CLIENT_INFO_VQ>> Clients;
-
-        public static DHCP_CLIENT_INFO_ARRAY_VQ Read(IntPtr ptr)
+        public IEnumerable<ClientTuple> Clients
         {
-            // Number of elements in the array
-            var numElements = Marshal.ReadIntPtr(ptr).ToInt32();
-
-            var clients = new List<Tuple<IntPtr, DHCP_CLIENT_INFO_VQ>>(numElements);
-
-            // Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
-            var clientsPointer = Marshal.ReadIntPtr(ptr, IntPtr.Size);
-
-            var iter = clientsPointer;
-            for (var i = 0; i < numElements; i++)
+            get
             {
-                var clientPtr = Marshal.ReadIntPtr(iter);
-                var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_VQ>();
+                if (NumElements == 0 || ClientsPointer == IntPtr.Zero)
+                    yield break;
 
-                clients.Add(Tuple.Create(clientPtr, client));
-
-                iter += IntPtr.Size;
+                var iter = ClientsPointer;
+                for (var i = 0; i < NumElements; i++)
+                {
+                    var clientPtr = Marshal.ReadIntPtr(iter);
+                    yield return new ClientTuple()
+                    {
+                        Pointer = clientPtr,
+                        Value = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_VQ>()
+                    };
+                    iter += IntPtr.Size;
+                }
             }
-
-            return new DHCP_CLIENT_INFO_ARRAY_VQ()
-            {
-                NumElements = numElements,
-                ClientsPointer = clientsPointer,
-                Clients = clients
-            };
         }
 
         public void Dispose()
         {
-            if (Clients != null)
+            foreach (var client in Clients)
             {
-                foreach (var client in Clients)
-                {
-                    client.Item2.Dispose();
-                    Api.DhcpRpcFreeMemory(client.Item1);
-                }
-                Clients = null;
+                client.Value.Dispose();
+                Api.FreePointer(client.Pointer);
             }
 
-            if (ClientsPointer != IntPtr.Zero)
-            {
-                Api.DhcpRpcFreeMemory(ClientsPointer);
-                ClientsPointer = IntPtr.Zero;
-            }
+            Api.FreePointer(ref ClientsPointer);
+        }
+
+        internal struct ClientTuple
+        {
+            public IntPtr Pointer;
+            public DHCP_CLIENT_INFO_VQ Value;
         }
     }
 }

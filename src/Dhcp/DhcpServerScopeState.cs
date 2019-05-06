@@ -1,5 +1,4 @@
-﻿
-namespace Dhcp
+﻿namespace Dhcp
 {
     public enum DhcpServerScopeState : uint
     {

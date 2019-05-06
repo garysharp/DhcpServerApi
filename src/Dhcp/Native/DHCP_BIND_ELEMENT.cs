@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_BIND_ELEMENT structure defines an individual network binding for the DHCP server. A single DHCP server can contain multiple bindings and serve multiple networks.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BIND_ELEMENT
+    internal struct DHCP_BIND_ELEMENT : IDisposable
     {
         /// <summary>
         /// Specifies a set of bit flags indicating properties of the network binding.
@@ -29,8 +29,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that specifies the name assigned to this network interface device.
         /// </summary>
-        [MarshalAs( UnmanagedType.LPWStr)]
-        public readonly string IfDescription;
+        private IntPtr IfDescriptionPointer;
         /// <summary>
         /// Specifies the size of the network interface device ID, in bytes.
         /// </summary>
@@ -38,6 +37,45 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the network interface device ID.
         /// </summary>
-        public readonly IntPtr IfId;
+        private IntPtr IfIdPointer;
+
+        /// <summary>
+        /// Unicode string that specifies the name assigned to this network interface device.
+        /// </summary>
+        public string IfDescription => Marshal.PtrToStringUni(IfDescriptionPointer);
+        /// <summary>
+        /// Specifies the network interface device ID.
+        /// </summary>
+        public byte[] IfId
+        {
+            get
+            {
+                if (IfIdPointer == IntPtr.Zero)
+                    return null;
+
+                var buffer = new byte[IfIdSize];
+                Marshal.Copy(IfIdPointer, buffer, 0, buffer.Length);
+                return buffer;
+            }
+        }
+
+        public bool IfIdIsGuid => IfIdSize == 16 && IfIdPointer != IntPtr.Zero;
+
+        public Guid IfIdGuid
+        {
+            get
+            {
+                if (!IfIdIsGuid)
+                    return Guid.Empty;
+
+                return (Guid)Marshal.PtrToStructure(IfIdPointer, typeof(Guid));
+            }
+        }
+
+        public void Dispose()
+        {
+            Api.FreePointer(ref IfDescriptionPointer);
+            Api.FreePointer(ref IfIdPointer);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -12,14 +13,14 @@ namespace Dhcp
     /// </summary>
     public class DhcpServer
     {
-        internal readonly DHCP_IP_ADDRESS address;
         private DhcpServerConfiguration configuration;
         private DhcpServerAuditLog auditLog;
         private DhcpServerDnsSettings dnsSettings;
         private DhcpServerSpecificStrings specificStrings;
 
-        public IPAddress IpAddress => address.ToIPAddress();
-        public int IpAddressNative => (int)address;
+        public DhcpServerIpAddress IpAddress { get; }
+        [Obsolete("Use IpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
+        public int IpAddressNative => (int)IpAddress.Native;
         public string Name { get; }
         public int VersionMajor { get; }
         public int VersionMinor { get; }
@@ -33,9 +34,9 @@ namespace Dhcp
         public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
         public DhcpServerSpecificStrings SpecificStrings => specificStrings ??= DhcpServerSpecificStrings.GetSpecificStrings(this);
 
-        internal DhcpServer(DHCP_IP_ADDRESS address, string name)
+        internal DhcpServer(DhcpServerIpAddress address, string name)
         {
-            this.address = address;
+            IpAddress = address;
             Name = name;
 
             GetVersion(address, out var versionMajor, out var versionMinor);
@@ -194,15 +195,15 @@ namespace Dhcp
             if (dnsAddress == null)
                 throw new NotSupportedException("Unable to resolve an IPv4 address for the DHCP Server");
 
-            var address = DHCP_IP_ADDRESS.FromIPAddress(dnsAddress);
+            var address = (DhcpServerIpAddress)dnsAddress;
 
             return new DhcpServer(address, dnsEntry.HostName);
         }
 
         private static DhcpServer FromNative(DHCPDS_SERVER native)
-            => new DhcpServer(native.ServerAddress, native.ServerName);
+            => new DhcpServer(native.ServerAddress.AsNetworkToIpAddress(), native.ServerName);
 
-        private static void GetVersion(DHCP_IP_ADDRESS address, out int versionMajor, out int versionMinor)
+        private static void GetVersion(DhcpServerIpAddress address, out int versionMajor, out int versionMinor)
         {
             var result = Api.DhcpGetVersion(ServerIpAddress: address,
                                             MajorVersion: out versionMajor,

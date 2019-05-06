@@ -56,7 +56,7 @@ namespace Dhcp
 
         internal static DhcpServerConfiguration GetConfiguration(DhcpServer server)
         {
-            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.address,
+            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.IpAddress,
                                                  ConfigInfo: out var configInfoPtr);
 
             if (result != DhcpErrors.SUCCESS)
@@ -65,15 +65,15 @@ namespace Dhcp
             try
             {
                 var configInfo = configInfoPtr.MarshalToStructure<DHCP_SERVER_CONFIG_INFO>();
-                return FromNative(server, configInfo);
+                return FromNative(server, ref configInfo);
             }
             finally
             {
-                Api.DhcpRpcFreeMemory(configInfoPtr);
+                Api.FreePointer(configInfoPtr);
             }
         }
 
-        private static DhcpServerConfiguration FromNative(DhcpServer server, DHCP_SERVER_CONFIG_INFO native)
+        private static DhcpServerConfiguration FromNative(DhcpServer server, ref DHCP_SERVER_CONFIG_INFO native)
         {
             return new DhcpServerConfiguration(server,
                 apiProtocolSupport: (DhcpServerApiProtocol)native.APIProtocolSupport,

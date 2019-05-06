@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Dhcp.Native
 {
@@ -7,7 +8,7 @@ namespace Dhcp.Native
     /// Additional fields are added to support Vendor Options in DHCP_ALL_OPTIONS
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_VENDOR_OPTION
+    internal struct DHCP_VENDOR_OPTION : IDisposable
     {
         /// <summary>
         /// DHCP_OPTION_ID value that specifies a unique ID number (also called a "code") for this option.
@@ -16,13 +17,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the name of this option.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string OptionName;
+        private IntPtr OptionNamePointer;
         /// <summary>
         /// Unicode string that contains a comment about this option.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string OptionComment;
+        private IntPtr OptionCommentPointer;
         /// <summary>
         /// <see cref="DHCP_OPTION_DATA"/> structure that contains the data associated with this option.
         /// </summary>
@@ -34,12 +33,38 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the name of the vendor for the option.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string VendorName;
+        private IntPtr VendorNamePointer;
         /// <summary>
         /// Unicode string that contains the name of the DHCP class for the option.
         /// </summary>
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public readonly string ClassName;
+        private IntPtr ClassNamePointer;
+
+        /// <summary>
+        /// Unicode string that contains the name of this option.
+        /// </summary>
+        public string OptionName => Marshal.PtrToStringUni(OptionNamePointer);
+        /// <summary>
+        /// Unicode string that contains a comment about this option.
+        /// </summary>
+        public string OptionComment => Marshal.PtrToStringUni(OptionCommentPointer);
+        /// <summary>
+        /// Unicode string that contains the name of the vendor for the option.
+        /// </summary>
+        public string VendorName => Marshal.PtrToStringUni(VendorNamePointer);
+        /// <summary>
+        /// Unicode string that contains the name of the DHCP class for the option.
+        /// </summary>
+        public string ClassName => Marshal.PtrToStringUni(ClassNamePointer);
+
+        public void Dispose()
+        {
+            Api.FreePointer(ref OptionNamePointer);
+            Api.FreePointer(ref OptionCommentPointer);
+
+            DefaultValue.Dispose();
+
+            Api.FreePointer(ref VendorNamePointer);
+            Api.FreePointer(ref ClassNamePointer);
+        }
     }
 }
