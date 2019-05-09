@@ -158,6 +158,59 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpGetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, out IntPtr OptionValue);
 
         /// <summary>
+        /// The DhcpSetOptionValue function sets information for a specific option value on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that specifies the unique code for a DHCP option.</param>
+        /// <param name="ScopeInfo">Pointer to a DHCP_OPTION_SCOPE_INFO structure that contains information describing the level (default, server, scope, or IPv4 reservation) at which this option value will be set.</param>
+        /// <param name="OptionValue">Pointer to a DHCP_OPTION_DATA structure that contains the data value corresponding to the DHCP option code specified by OptionID.</param>
+        /// <remarks>
+        ///     When this function is called for the first time, it creates the supplied option value in the DHCP server database.
+        ///     Otherwise, it modifies the option value for a specific option associated with the default user class and vendor class.
+        ///     These values can be set for the default, server, scope, or IPv4 reservation level on the DHCP server.
+        /// </remarks>
+        /// <returns></returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, IntPtr OptionValue);
+
+        /// <summary>
+        /// The DhcpSetOptionValueV5 function sets information for a specific option value on the DHCP server. This function extends the functionality provided by DhcpSetOptionValue by allowing the caller to specify a class and/or vendor for the option.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a bit flag that indicates whether or not the options are vendor-specific. If the qualification of vendor options is not necessary, this parameter should be 0. DHCP_FLAGS_OPTION_IS_VENDOR = This flag should be set if vendor-specific options are desired.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that contains the unique option ID number (also called an "option code") of the option being set. Many of these option ID numbers are defined; a complete list of standard DHCP and BOOTP option codes can be found at http://www.ietf.org/rfc/rfc2132.txt.</param>
+        /// <param name="ClassName">Unicode string that specifies the DHCP class of the option. This parameter is optional.</param>
+        /// <param name="VendorName">Unicode string that specifies the vendor of the option. This parameter is optional, and should be NULL when Flags is not set to DHCP_FLAGS_OPTION_IS_VENDOR.</param>
+        /// <param name="ScopeInfo">Pointer to a DHCP_OPTION_SCOPE_INFO structure that contains information describing the DHCP scope this option value will be set on.</param>
+        /// <param name="OptionValue">Pointer to a DHCP_OPTION_DATA structure that contains the data value corresponding to the DHCP option code specified by OptionID.</param>
+        /// <returns></returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, int Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, IntPtr OptionValue);
+
+        /// <summary>
+        /// The DhcpRemoveOptionValue function removes the option value for a specific option on the DHCP4 server for the default user class and vendor class, for the specified scope.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that contains the code uniquely identifying the specific option to remove from the DHCP server.</param>
+        /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains information describing the specific scope (default, server, scope, or IPv4 reservation level) from which to remove the option value.</param>
+        /// <returns></returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpRemoveOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo);
+
+        /// <summary>
+        /// The DhcpRemoveOptionValueV5 function removes an option value from a scope defined on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">Specifies a bit flag that indicates whether or not the options are vendor-specific. If the qualification of vendor options is not necessary, this parameter should be 0. DHCP_FLAGS_OPTION_IS_VENDOR = This flag should be set if vendor-specific options are desired.</param>
+        /// <param name="OptionID">DHCP_OPTION_ID value that specifies the code for the option value to remove.</param>
+        /// <param name="ClassName">Unicode string that specifies the DHCP class name of the option value. This parameter is optional.</param>
+        /// <param name="VendorName">Unicode string that specifies the vendor of the option. This parameter is optional, and should be NULL when Flags is not set to DHCP_FLAGS_OPTION_IS_VENDOR.</param>
+        /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains information describing the specific scope to remove the option value from.</param>
+        /// <returns></returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpRemoveOptionValueV5(string ServerIpAddress, int Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo);
+
+        /// <summary>
         /// The DhcpGetClassInfo function returns the user or vendor class information configured on a specific DHCP server.
         /// </summary>
         /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
