@@ -62,4 +62,44 @@ namespace Dhcp.Native
             Api.FreePointer(ref DataPointer);
         }
     }
+
+    /// <summary>
+    /// The DHCP_BINARY_DATA structure defines an opaque blob of binary data.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DHCP_BINARY_DATA_Managed : IDisposable
+    {
+        /// <summary>
+        /// Specifies the size of Data, in bytes.
+        /// </summary>
+        public readonly int DataLength;
+
+        /// <summary>
+        /// Pointer to an opaque blob of byte (binary) data.
+        /// </summary>
+        private IntPtr DataPointer;
+
+        public DHCP_BINARY_DATA_Managed(byte[] data)
+        {
+            if (data == null || data.Length == 0)
+            {
+                DataLength = 0;
+                DataPointer = IntPtr.Zero;
+            }
+            else
+            {
+                DataLength = data.Length;
+                DataPointer = Marshal.AllocHGlobal(data.Length);
+                Marshal.Copy(data, 0, DataPointer, data.Length);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (DataPointer != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(DataPointer);
+            }
+        }
+    }
 }

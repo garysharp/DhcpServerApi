@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Dhcp.Native;
 
@@ -16,6 +17,11 @@ namespace Dhcp
         {
             foreach (var element in elementArray.Elements)
                 yield return ReadNative(element);
+        }
+
+        internal static DHCP_OPTION_DATA_Managed WriteNative(IEnumerable<DhcpServerOptionElement> elements)
+        {
+            return new DHCP_OPTION_DATA_Managed(elements.Select(e => e.ToNative()).ToArray());
         }
 
         private static DhcpServerOptionElement ReadNative(DHCP_OPTION_DATA_ELEMENT element)
@@ -44,6 +50,8 @@ namespace Dhcp
             }
         }
 
+        internal abstract DHCP_OPTION_DATA_ELEMENT_Managed ToNative();
+
         public override string ToString() => $"{Type}: {ValueFormatted}";
     }
 
@@ -55,13 +63,16 @@ namespace Dhcp
 
         public byte RawValue { get; }
 
-        private DhcpServerOptionElementByte(byte value)
+        internal DhcpServerOptionElementByte(byte value)
         {
             RawValue = value;
         }
 
         internal static DhcpServerOptionElementByte ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementByte(native.ByteOption);
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
     }
 
     public class DhcpServerOptionElementWord : DhcpServerOptionElement
@@ -72,13 +83,16 @@ namespace Dhcp
 
         public short RawValue { get; }
 
-        private DhcpServerOptionElementWord(short value)
+        internal DhcpServerOptionElementWord(short value)
         {
             RawValue = value;
         }
 
-        internal static DhcpServerOptionElementWord ReadNative(DHCP_OPTION_DATA_ELEMENT native) 
+        internal static DhcpServerOptionElementWord ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementWord(native.WordOption);
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
     }
 
     public class DhcpServerOptionElementDWord : DhcpServerOptionElement
@@ -89,13 +103,16 @@ namespace Dhcp
 
         public int RawValue { get; }
 
-        private DhcpServerOptionElementDWord(int value)
+        internal DhcpServerOptionElementDWord(int value)
         {
             RawValue = value;
         }
 
         internal static DhcpServerOptionElementDWord ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementDWord(native.DWordOption);
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
     }
 
     public class DhcpServerOptionElementDWordDWord : DhcpServerOptionElement
@@ -106,13 +123,16 @@ namespace Dhcp
 
         public long RawValue { get; }
 
-        private DhcpServerOptionElementDWordDWord(long value)
+        internal DhcpServerOptionElementDWordDWord(long value)
         {
             RawValue = value;
         }
 
         internal static DhcpServerOptionElementDWordDWord ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementDWordDWord(native.DWordDWordOption);
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
     }
 
     public class DhcpServerOptionElementIpAddress : DhcpServerOptionElement
@@ -125,13 +145,16 @@ namespace Dhcp
 
         public uint RawValue => ipAddress.Native;
 
-        private DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
+        internal DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
         {
             ipAddress = value.AsNetworkToIpAddress();
         }
 
         internal static DhcpServerOptionElementIpAddress ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementIpAddress(native.IpAddressOption);
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed(new DHCP_IP_ADDRESS(RawValue));
     }
 
     public class DhcpServerOptionElementString : DhcpServerOptionElement
@@ -142,13 +165,16 @@ namespace Dhcp
 
         public string RawValue { get; }
 
-        private DhcpServerOptionElementString(string value)
+        internal DhcpServerOptionElementString(string value)
         {
             RawValue = value;
         }
 
         internal static DhcpServerOptionElementString ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementString(Marshal.PtrToStringUni(native.StringDataOption));
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, RawValue);
     }
 
     public class DhcpServerOptionElementBinary : DhcpServerOptionElement
@@ -161,7 +187,7 @@ namespace Dhcp
 
         public byte[] RawValue { get; }
 
-        private DhcpServerOptionElementBinary(DhcpServerOptionElementType type, byte[] value)
+        internal DhcpServerOptionElementBinary(DhcpServerOptionElementType type, byte[] value)
         {
             this.type = type;
             RawValue = value;
@@ -169,6 +195,9 @@ namespace Dhcp
 
         internal static DhcpServerOptionElementBinary ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementBinary((DhcpServerOptionElementType)native.OptionType, native.BinaryDataOption.Data);
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, new DHCP_BINARY_DATA_Managed(RawValue));
     }
 
     public class DhcpServerOptionElementIpv6Address : DhcpServerOptionElement
@@ -179,12 +208,15 @@ namespace Dhcp
 
         public string RawValue { get; }
 
-        private DhcpServerOptionElementIpv6Address(string value)
+        internal DhcpServerOptionElementIpv6Address(string value)
         {
             RawValue = value;
         }
 
         internal static DhcpServerOptionElementIpv6Address ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementIpv6Address(Marshal.PtrToStringUni(native.Ipv6AddressDataOption));
+
+        internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
+            => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, RawValue);
     }
 }

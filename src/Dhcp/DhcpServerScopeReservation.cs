@@ -81,7 +81,7 @@ namespace Dhcp
             var resumeHandle = IntPtr.Zero;
             var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: scope.Server.IpAddress,
                                                       SubnetAddress: scope.Address.ToNativeAsNetwork(),
-                                                      EnumElementType: DHCP_SUBNET_ELEMENT_TYPE_V5.DhcpReservedIps,
+                                                      EnumElementType: DHCP_SUBNET_ELEMENT_TYPE.DhcpReservedIps,
                                                       ResumeHandle: ref resumeHandle,
                                                       PreferredMaximum: 0xFFFFFFFF,
                                                       EnumElementInfo: out var reservationsPtr,

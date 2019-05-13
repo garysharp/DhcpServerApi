@@ -38,42 +38,11 @@ namespace Dhcp
         public static T MarshalToStructure<T>(this IntPtr ptr)
             => (T)Marshal.PtrToStructure(ptr, typeof(T));
 
+        public static V MarshalToStructure<T, V>(this UnmanagedDisposer<T> ptr)
+            => (V)Marshal.PtrToStructure(ptr, typeof(V));
+
         public static UnmanagedDisposer<T> StructureToPtr<T>(T structure)
             => new UnmanagedDisposer<T>(structure);
-
-        public class UnmanagedDisposer<T> : IDisposable
-        {
-            public IntPtr Pointer { get; }
-
-            public UnmanagedDisposer(T structure)
-            {
-                var size = Marshal.SizeOf(structure);
-                Pointer = Marshal.AllocHGlobal(size);
-                try
-                {
-                    Marshal.StructureToPtr(structure, Pointer, false);
-                }
-                catch (Exception)
-                {
-                    Marshal.FreeHGlobal(Pointer);
-                    throw;
-                }
-            }
-
-            public void Dispose()
-            {
-                if (Pointer != IntPtr.Zero)
-                {
-                    Marshal.DestroyStructure(Pointer, typeof(T));
-                    Marshal.FreeHGlobal(Pointer);
-                }
-            }
-
-            public static implicit operator IntPtr(UnmanagedDisposer<T> disposer)
-            {
-                return disposer.Pointer;
-            }
-        }
         #endregion
 
         #region Read

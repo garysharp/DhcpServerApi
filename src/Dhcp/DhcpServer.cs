@@ -178,6 +178,29 @@ namespace Dhcp
         public DhcpServerOptionValue GetUserOptionValue(string className, int optionId)
             => DhcpServerOptionValue.GetGlobalUserOptionValue(this, optionId, className);
 
+        public DhcpServerScope GetScope(DhcpServerIpAddress scopeAddress)
+            => DhcpServerScope.GetScope(this, scopeAddress);
+
+        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, DhcpServerScopeState state)
+            => CreateScope(name, description, ipRange, mask, excludedRanges: null, timeDelayOffer: DhcpServerScope.DefaultTimeDelayOffer, leaseDuration: DhcpServerScope.DefaultLeaseDuration, state);
+
+        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, IEnumerable<DhcpServerIpRange> excludedRanges, TimeSpan timeDelayOffer, TimeSpan? leaseDuration, DhcpServerScopeState state)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name));
+            if (leaseDuration.HasValue && leaseDuration.Value.TotalMinutes < 1)
+                throw new ArgumentOutOfRangeException(nameof(leaseDuration), "Lease duration can be unlimited (null) or at least 1 minute");
+
+            return DhcpServerScope.CreateScope(server: this,
+                                               name: name,
+                                               description: description,
+                                               ipRange: ipRange,
+                                               mask: mask,
+                                               excludedRanges: excludedRanges,
+                                               timeDelayOffer: timeDelayOffer,
+                                               leaseDuration: leaseDuration,
+                                               state: state);
+        }
 
         /// <summary>
         /// Connects to a DHCP server

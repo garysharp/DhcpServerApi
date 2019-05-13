@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_SCOPE_INFO structure defines information about the options provided for a certain DHCP scope.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_SCOPE_INFO_LocalGlobal
+    internal struct DHCP_OPTION_SCOPE_INFO_Managed_Global
     {
         private IntPtr scopeType;
 
@@ -27,7 +27,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_SCOPE_INFO structure defines information about the options provided for a certain DHCP scope.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_SCOPE_INFO_LocalSubnet
+    internal struct DHCP_OPTION_SCOPE_INFO_Managed_Subnet
     {
         private IntPtr scopeType;
 
@@ -50,7 +50,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_SCOPE_INFO structure defines information about the options provided for a certain DHCP scope.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_SCOPE_INFO_LocalReserved
+    internal struct DHCP_OPTION_SCOPE_INFO_Managed_Reserved
     {
         private IntPtr scopeType;
 
@@ -78,7 +78,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_SCOPE_INFO structure defines information about the options provided for a certain DHCP scope.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_SCOPE_INFO_LocalMScope
+    internal struct DHCP_OPTION_SCOPE_INFO_Managed_MScope
     {
         private IntPtr scopeType;
 

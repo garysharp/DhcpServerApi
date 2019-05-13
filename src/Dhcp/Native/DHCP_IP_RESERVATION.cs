@@ -32,4 +32,38 @@ namespace Dhcp.Native
             }
         }
     }
+
+    /// <summary>
+    /// The DHCP_IP_RESERVATION structure defines a client IP reservation.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DHCP_IP_RESERVATION_Managed : IDisposable
+    {
+        /// <summary>
+        /// DHCP_IP_ADDRESS value that contains the reserved IP address.
+        /// </summary>
+        public readonly DHCP_IP_ADDRESS ReservedIpAddress;
+        /// <summary>
+        /// DHCP_CLIENT_UID structure that contains information on the client holding this IP reservation.
+        /// </summary>
+        private readonly IntPtr ReservedForClientPointer;
+
+        public DHCP_IP_RESERVATION_Managed(DHCP_IP_ADDRESS reservedIpAddress, DHCP_CLIENT_UID_Managed reservedForClient)
+        {
+            ReservedIpAddress = reservedIpAddress;
+            ReservedForClientPointer = Marshal.AllocHGlobal(Marshal.SizeOf(reservedForClient));
+            Marshal.StructureToPtr(reservedForClient, ReservedForClientPointer, false);
+        }
+
+        public void Dispose()
+        {
+            if (ReservedForClientPointer != IntPtr.Zero)
+            {
+                var reservedForClient = ReservedForClientPointer.MarshalToStructure<DHCP_CLIENT_UID_Managed>();
+                reservedForClient.Dispose();
+
+                Marshal.FreeHGlobal(ReservedForClientPointer);
+            }
+        }
+    }
 }

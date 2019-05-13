@@ -23,14 +23,14 @@ namespace Dhcp
 
         internal static DhcpServerHost FromNative(ref DHCP_HOST_INFO native)
         {
-            return new DhcpServerHost(ipAddress: native.IpAddress.AsNetworkToIpAddress(),
+            return new DhcpServerHost(ipAddress: native.IpAddress.AsHostToIpAddress(),
                                       netBiosName: native.NetBiosName,
                                       serverName: native.ServerName);
         }
 
         internal static DhcpServerHost FromNative(DHCP_HOST_INFO native)
         {
-            return new DhcpServerHost(ipAddress: native.IpAddress.AsNetworkToIpAddress(),
+            return new DhcpServerHost(ipAddress: native.IpAddress.AsHostToIpAddress(),
                                       netBiosName: native.NetBiosName,
                                       serverName: native.ServerName);
         }

@@ -86,7 +86,7 @@ namespace Dhcp
 
         internal static DhcpServerClass GetClass(DhcpServer server, string name)
         {
-            var query = new DHCP_CLASS_INFO_Local()
+            var query = new DHCP_CLASS_INFO_Managed()
             {
                 ClassName = name,
                 ClassDataLength = 0,

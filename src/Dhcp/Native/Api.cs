@@ -171,7 +171,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, IntPtr OptionValue);
+        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, DHCP_OPTION_DATA_Managed OptionValue);
 
         /// <summary>
         /// The DhcpSetOptionValueV5 function sets information for a specific option value on the DHCP server. This function extends the functionality provided by DhcpSetOptionValue by allowing the caller to specify a class and/or vendor for the option.
@@ -184,8 +184,8 @@ namespace Dhcp.Native
         /// <param name="ScopeInfo">Pointer to a DHCP_OPTION_SCOPE_INFO structure that contains information describing the DHCP scope this option value will be set on.</param>
         /// <param name="OptionValue">Pointer to a DHCP_OPTION_DATA structure that contains the data value corresponding to the DHCP option code specified by OptionID.</param>
         /// <returns></returns>
-        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, int Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, IntPtr OptionValue);
+        [DllImport("dhcpsapi.dll", SetLastError = false, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, DHCP_OPTION_DATA_Managed OptionValue);
 
         /// <summary>
         /// The DhcpRemoveOptionValue function removes the option value for a specific option on the DHCP4 server for the default user class and vendor class, for the specified scope.
@@ -223,7 +223,7 @@ namespace Dhcp.Native
         /// <param name="FilledClassInfo">DHCP_CLASS_INFO structure returned after lookup that contains the complete class information.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO_Local PartialClassInfo, out IntPtr FilledClassInfo);
+        public static extern DhcpErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO_Managed PartialClassInfo, out IntPtr FilledClassInfo);
 
         /// <summary>
         /// The DhcpEnumClasses function enumerates the user or vendor classes configured for the DHCP server.
@@ -246,9 +246,9 @@ namespace Dhcp.Native
         /// <param name="ServerIpAddress">Pointer to a Unicode string that contains the IPv4 address of the subnet DHCP server.</param>
         /// <param name="SubnetAddress"><see cref="DHCP_IP_ADDRESS"/> structure that contains the IPv4 address of the subnet.</param>
         /// <param name="AddElementInfo">Pointer to a DHCP_SUBNET_ELEMENT_DATA structure that contains information about the subnet element corresponding to the IPv4 subnet specified in SubnetAddress.</param>
-        /// <returns></returns>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAddSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA AddElementInfo);
+        public static extern DhcpErrors DhcpAddSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_Managed AddElementInfo);
 
         /// <summary>
         /// The DhcpAddSubnetElementV5 function adds an element describing a feature or aspect of the subnet to the subnet entry in the DHCP database. Windows 2000 and earlier:  This function is not available.
@@ -256,9 +256,37 @@ namespace Dhcp.Native
         /// <param name="ServerIpAddress">Pointer to a Unicode string that contains the IPv4 address of the subnet DHCP server.</param>
         /// <param name="SubnetAddress"><see cref="DHCP_IP_ADDRESS"/> structure that contains the IPv4 address of the subnet.</param>
         /// <param name="AddElementInfo">Pointer to a <see cref="DHCP_SUBNET_ELEMENT_DATA_V5"/> structure that contains the element data to add to the subnet. The V5 structure adds support for BOOTP clients.</param>
-        /// <returns></returns>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAddSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_V5 AddElementInfo);
+        public static extern DhcpErrors DhcpAddSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_V5_Managed AddElementInfo);
+
+        /// <summary>
+        /// The DhcpRemoveSubnetElement function removes an IPv4 subnet element from an IPv4 subnet defined on the DHCPv4 server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCPv4 server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that specifies the IPv4 address of the subnet gateway from which elements are to be removed.</param>
+        /// <param name="RemoveElementInfo">DHCP_SUBNET_ELEMENT_DATA structure that contains information used to find the element that will be removed from subnet specified in SubnetAddress.</param>
+        /// <param name="ForceFlag">DHCP_FORCE_FLAG enumeration value that indicates whether or not the clients affected by the removal of the subnet element should also be deleted.</param>
+        /// <remarks>
+        /// If the flag is set to DhcpNoForce and this subnet has served an IPv4 address to DHCPv4/BOOTP clients, the IPv4 range is not deleted; conversely, if the flag is set to DhcpFullForce, the IPv4 range is deleted along with the DHCPv4 client lease record on the DHCPv4 server.
+        /// </remarks>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpRemoveSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
+
+        /// <summary>
+        /// The DhcpRemoveSubnetElement function removes an IPv4 subnet element from an IPv4 subnet defined on the DHCPv4 server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCPv4 server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that specifies the IPv4 address of the subnet gateway from which elements are to be removed.</param>
+        /// <param name="RemoveElementInfo">DHCP_SUBNET_ELEMENT_DATA structure that contains information used to find the element that will be removed from subnet specified in SubnetAddress.</param>
+        /// <param name="ForceFlag">DHCP_FORCE_FLAG enumeration value that indicates whether or not the clients affected by the removal of the subnet element should also be deleted.</param>
+        /// <remarks>
+        /// If the flag is set to DhcpNoForce and this subnet has served an IPv4 address to DHCPv4/BOOTP clients, the IPv4 range is not deleted; conversely, if the flag is set to DhcpFullForce, the IPv4 range is deleted along with the DHCPv4 client lease record on the DHCPv4 server.
+        /// </remarks>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpRemoveSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_V5 RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
 
         /// <summary>
         /// The DhcpCreateSubnet function creates a new subnet on the DHCP server.
@@ -268,7 +296,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo"><see cref="DHCP_SUBNET_INFO"/> structure that contains specific settings for the subnet, including the subnet mask and IP address of the subnet gateway.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO SubnetInfo);
+        public static extern DhcpErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpCreateSubnet function creates a new subnet on the DHCP server.
@@ -467,7 +495,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes. Common errors include the following:</returns>
         /// <remarks>When no longer needed, the resources consumed for the enumerated data, and all pointers contained within, should be released with DhcpRpcFreeMemory.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetElementsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE_V5 EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
+        public static extern DhcpErrors DhcpEnumSubnetElementsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
 
         /// <summary>
         /// The DhcpGetClientInfo function returns information about a specific DHCP client.

@@ -24,5 +24,13 @@ namespace Dhcp.Native
         /// Specifies the maximum number of BOOTP clients this range is allowed to serve.
         /// </summary>
         public readonly int MaxBootpAllowed;
+
+        public DHCP_BOOTP_IP_RANGE(DHCP_IP_ADDRESS startAddress, DHCP_IP_ADDRESS endAddress, int bootpAllocated, int maxBootpAllowed)
+        {
+            StartAddress = startAddress;
+            EndAddress = endAddress;
+            BootpAllocated = bootpAllocated;
+            MaxBootpAllowed = maxBootpAllowed;
+        }
     }
 }

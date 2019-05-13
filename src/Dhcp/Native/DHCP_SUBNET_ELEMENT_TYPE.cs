@@ -5,7 +5,7 @@ namespace Dhcp.Native
     /// <summary>
     /// The DHCP_SUBNET_ELEMENT_TYPE enumeration defines the set of possible subnet element types.
     /// </summary>
-    internal enum DHCP_SUBNET_ELEMENT_TYPE_V5
+    internal enum DHCP_SUBNET_ELEMENT_TYPE
     {
         /// <summary>
         /// The subnet element contains the range of DHCP-served IP addresses.

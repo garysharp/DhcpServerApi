@@ -3,12 +3,12 @@
     /// <summary>
     /// The DHCP_OPTION_DATA_TYPE enumeration defines the set of formats that represent DHCP option data.
     /// </summary>
-    internal enum DHCP_OPTION_DATA_TYPE
+    internal enum DHCP_OPTION_DATA_TYPE : uint
     {
         /// <summary>
         /// The option data is stored as a BYTE value.
         /// </summary>
-        DhcpByteOption,
+        DhcpByteOption = 0,
         /// <summary>
         /// The option data is stored as a WORD value.
         /// </summary>

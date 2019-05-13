@@ -18,6 +18,27 @@ namespace Dhcp
             ipAddress = nativeIpAddress;
         }
 
+        public DhcpServerIpAddress(string ipAddress)
+        {
+            this.ipAddress = BitHelper.StringToIpAddress(ipAddress);
+        }
+
+        public DhcpServerIpAddress(IPAddress ipAddress)
+        {
+            if (ipAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                throw new ArgumentOutOfRangeException(nameof(ipAddress), "Only IPv4 addresses are supported");
+            }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            var ip = (uint)ipAddress.Address;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            // DhcpServerIpAddress always stores in network order
+            // IPAddress stores in host order
+            this.ipAddress = BitHelper.HostToNetworkOrder(ip);
+        }
+
         /// <summary>
         /// IP Address in network order
         /// </summary>
@@ -39,19 +60,16 @@ namespace Dhcp
         }
 
         public static DhcpServerIpAddress FromNative(uint nativeIpAddress) => new DhcpServerIpAddress(nativeIpAddress);
-
         public static DhcpServerIpAddress FromNative(int nativeIpAddress) => new DhcpServerIpAddress((uint)nativeIpAddress);
-
-        public static DhcpServerIpAddress FromString(string ipAddress) => new DhcpServerIpAddress(
-                BitHelper.StringToIpAddress(ipAddress));
-
         internal static DhcpServerIpAddress FromNative(IntPtr pointer)
         {
             if (pointer == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(pointer));
 
-            return FromNative(BitHelper.HostToNetworkOrder(Marshal.ReadInt32(pointer)));
+            return new DhcpServerIpAddress((uint)BitHelper.HostToNetworkOrder(Marshal.ReadInt32(pointer)));
         }
+
+        public static DhcpServerIpAddress FromString(string ipAddress) => new DhcpServerIpAddress(ipAddress);
 
         public override string ToString() => BitHelper.IpAddressToString(ipAddress);
 
@@ -101,31 +119,14 @@ namespace Dhcp
         public static explicit operator int(DhcpServerIpAddress ipAddress) => (int)ipAddress.ipAddress;
         public static explicit operator DhcpServerIpAddress(int ipAddress) => new DhcpServerIpAddress((uint)ipAddress);
 
-        public static implicit operator DhcpServerIpAddress(IPAddress ipAddress)
-        {
-            if (ipAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
-            {
-                throw new ArgumentOutOfRangeException(nameof(ipAddress), "Only IPv4 addresses are supported");
-            }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            var ip = (uint)ipAddress.Address;
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            // DhcpServerIpAddress always stores in network order
-            // IPAddress stores in host order
-            return new DhcpServerIpAddress(BitHelper.HostToNetworkOrder(ip));
-        }
-
+        public static implicit operator DhcpServerIpAddress(IPAddress ipAddress) => new DhcpServerIpAddress(ipAddress);
         public static implicit operator IPAddress(DhcpServerIpAddress ipAddress)
-        {
-            // DhcpServerIpAddress always stores in network order
-            // IPAddress stores in host order
-            return new IPAddress(BitHelper.NetworkToHostOrder(ipAddress.ipAddress));
-        }
+            // IPAddress stores in host order; DhcpServerIpAddress always stores in network order
+            => new IPAddress(BitHelper.NetworkToHostOrder(ipAddress.ipAddress));
 
-        public static implicit operator DhcpServerIpMask(DhcpServerIpAddress ipAddress) => new DhcpServerIpMask(ipAddress.ipAddress);
+        public static explicit operator DhcpServerIpMask(DhcpServerIpAddress ipAddress) => new DhcpServerIpMask(ipAddress.ipAddress);
         public static implicit operator string(DhcpServerIpAddress ipAddress) => ipAddress.ToString();
+        public static implicit operator DhcpServerIpAddress(string ipAddress) => FromString(ipAddress);
 
         public static bool operator >(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.ipAddress > b.ipAddress;
         public static bool operator >=(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.ipAddress >= b.ipAddress;

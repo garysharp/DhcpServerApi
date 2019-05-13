@@ -40,7 +40,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Possible types of the DHCPv4 client.
         /// </summary>
-        public readonly ClientTypes bClientType;
+        public readonly DHCP_CLIENT_TYPE bClientType;
         /// <summary>
         /// Possible states of the IPv4 address given to the DHCPv4 client.
         /// </summary>

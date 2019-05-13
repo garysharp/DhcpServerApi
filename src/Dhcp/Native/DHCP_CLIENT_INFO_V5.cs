@@ -40,7 +40,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the types of dynamic IP address service used by the client.
         /// </summary>
-        public readonly ClientTypes bClientType;
+        public readonly DHCP_CLIENT_TYPE bClientType;
         /// <summary>
         /// Specifies the current state of the client IP address.
         /// </summary>

@@ -66,7 +66,7 @@ namespace Dhcp
 
         internal static DhcpServerClient GetClient(DhcpServer server, DhcpServerIpAddress ipAddress)
         {
-            var searchInfo = new DHCP_SEARCH_INFO_LocalIpAddress
+            var searchInfo = new DHCP_SEARCH_INFO_Managed_IpAddress
             {
                 SearchType = DHCP_SEARCH_INFO_TYPE.DhcpClientIpAddress,
                 ClientIpAddress = ipAddress.ToNativeAsNetwork()

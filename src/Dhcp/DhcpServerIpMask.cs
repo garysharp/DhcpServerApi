@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Dhcp.Native;
 
 namespace Dhcp
@@ -11,9 +12,13 @@ namespace Dhcp
         /// </summary>
         private readonly uint ipMask;
 
-        public DhcpServerIpMask(uint nativeIpMask)
+        public DhcpServerIpMask(uint ipMask)
         {
-            ipMask = nativeIpMask;
+            this.ipMask = ipMask;
+        }
+        public DhcpServerIpMask(string ipMask)
+        {
+            this.ipMask = BitHelper.StringToIpAddress(ipMask);
         }
 
         /// <summary>
@@ -21,17 +26,22 @@ namespace Dhcp
         /// </summary>
         public uint Native => ipMask;
 
-        public static DhcpServerIpMask FromNative(uint nativeIpAddress) =>
-            DhcpServerIpAddress.FromNative(nativeIpAddress); // reuse DhcpServerIpAddress method
+        public static DhcpServerIpMask FromNative(uint nativeIpMask)
+            => new DhcpServerIpMask(nativeIpMask);
 
-        public static DhcpServerIpMask FromNative(int nativeIpAddress) 
-            => DhcpServerIpAddress.FromNative((uint)nativeIpAddress); // reuse DhcpServerIpAddress method
+        public static DhcpServerIpMask FromNative(int nativeIpMask) 
+            => new DhcpServerIpMask((uint)nativeIpMask);
 
-        internal static DhcpServerIpMask FromNative(IntPtr pointer) 
-            => DhcpServerIpAddress.FromNative(pointer); // reuse DhcpServerIpAddress method
+        internal static DhcpServerIpMask FromNative(IntPtr pointer)
+        {
+            if (pointer == IntPtr.Zero)
+                throw new ArgumentNullException(nameof(pointer));
 
-        public static DhcpServerIpMask FromString(string ipAddress)
-            => DhcpServerIpAddress.FromString(ipAddress); // reuse DhcpServerIpAddress method
+            return new DhcpServerIpMask((uint)BitHelper.HostToNetworkOrder(Marshal.ReadInt32(pointer)));
+        }
+
+        public static DhcpServerIpMask FromString(string ipMask)
+            => new DhcpServerIpMask(ipMask);
 
         public static DhcpServerIpMask FromSignificantBits(int bitCount)
         {
@@ -48,13 +58,14 @@ namespace Dhcp
 
         public int SignificantBits => BitHelper.HighSignificantBits(ipMask);
 
-        public DhcpServerIpRange GetIpRange(DhcpServerIpAddress ipAddress) => new DhcpServerIpRange(this, ipAddress);
+        public DhcpServerIpRange GetIpRange(DhcpServerIpAddress ipAddress) => new DhcpServerIpRange(ipAddress, this);
 
         internal DHCP_IP_MASK ToNativeAsHost() => new DHCP_IP_MASK(BitHelper.NetworkToHostOrder(ipMask));
         internal DHCP_IP_MASK ToNativeAsNetwork() => new DHCP_IP_MASK(ipMask);
 
         public override string ToString() => BitHelper.IpAddressToString(ipMask);
 
-        public static implicit operator DhcpServerIpAddress(DhcpServerIpMask ipMask) => new DhcpServerIpAddress(ipMask.ipMask);
+        public static explicit operator DhcpServerIpAddress(DhcpServerIpMask ipMask) => new DhcpServerIpAddress(ipMask.ipMask);
+        public static explicit operator DhcpServerIpMask(string ipMask) => new DhcpServerIpMask(ipMask);
     }
 }

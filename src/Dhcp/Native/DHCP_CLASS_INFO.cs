@@ -56,7 +56,7 @@ namespace Dhcp.Native
     /// Used when creating managed copies
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLASS_INFO_Local
+    internal struct DHCP_CLASS_INFO_Managed
     {
         /// <summary>
         /// Unicode string that contains the name of the class.

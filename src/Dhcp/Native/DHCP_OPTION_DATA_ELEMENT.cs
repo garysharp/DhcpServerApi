@@ -6,6 +6,7 @@ namespace Dhcp.Native
     /// <summary>
     /// The DHCP_OPTION_DATA_ELEMENT structure defines a data element present (either singly or as a member of an array) within a DHCP_OPTION_DATA structure. 
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     internal struct DHCP_OPTION_DATA_ELEMENT : IDisposable
     {
         /// <summary>
@@ -90,6 +91,129 @@ namespace Dhcp.Native
 
                 DataOffset = IntPtr.Zero;
             }
+        }
+    }
+
+    /// <summary>
+    /// The DHCP_OPTION_DATA_ELEMENT structure defines a data element present (either singly or as a member of an array) within a DHCP_OPTION_DATA structure. 
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DHCP_OPTION_DATA_ELEMENT_Managed : IDisposable
+    {
+        /// <summary>
+        /// A DHCP_OPTION_DATA_TYPE enumeration value that indicates the type of data that is present in the subsequent field, Element.
+        /// </summary>
+        public readonly int OptionType;
+
+        private readonly DHCP_OPTION_DATA_ELEMENT_ManagedValue Data;
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(byte dataByte)
+        {
+            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpByteOption;
+            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataByte = dataByte };
+        }
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(short dataWord)
+        {
+            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpWordOption;
+            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataWord = dataWord };
+        }
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(int dataDWord)
+        {
+            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpDWordOption;
+            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataDWord = dataDWord };
+        }
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(long dataDWordDWord)
+        {
+            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpDWordDWordOption;
+            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataDWordDWord = dataDWordDWord };
+        }
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(DHCP_IP_ADDRESS dataIpAddress)
+        {
+            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpIpAddressOption;
+            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataIpAddress = dataIpAddress };
+        }
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(DHCP_OPTION_DATA_TYPE type, string dataString)
+        {
+            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpStringDataOption;
+            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataString = Marshal.StringToHGlobalUni(dataString) };
+
+            switch (type)
+            {
+                case DHCP_OPTION_DATA_TYPE.DhcpStringDataOption:
+                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpStringDataOption;
+                    Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataString = Marshal.StringToHGlobalUni(dataString) };
+                    break;
+                case DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption:
+                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption;
+                    Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataIpv6Address = Marshal.StringToHGlobalUni(dataString) };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type));
+            }
+        }
+
+        public DHCP_OPTION_DATA_ELEMENT_Managed(DHCP_OPTION_DATA_TYPE type, DHCP_BINARY_DATA_Managed dataBinary)
+        {
+            switch (type)
+            {
+                case DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption:
+                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption;
+                    Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataBinary = dataBinary };
+                    break;
+                case DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption:
+                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption;
+                    Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataBinary = dataBinary };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type));
+            }
+        }
+
+        public void Dispose()
+        {
+            switch ((DHCP_OPTION_DATA_TYPE)OptionType)
+            {
+                case DHCP_OPTION_DATA_TYPE.DhcpStringDataOption:
+                    Marshal.FreeHGlobal(Data.DataString);
+                    break;
+                case DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption:
+                    Marshal.FreeHGlobal(Data.DataIpv6Address);
+                    break;
+                case DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption:
+                    Data.DataBinary.Dispose();
+                    break;
+                case DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption:
+                    Data.DataEncapsulated.Dispose();
+                    break;
+            }
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        internal struct DHCP_OPTION_DATA_ELEMENT_ManagedValue
+        {
+            [FieldOffset(0)]
+            public byte DataByte;
+            [FieldOffset(0)]
+            public short DataWord;
+            [FieldOffset(0)]
+            public int DataDWord;
+            [FieldOffset(0)]
+            public long DataDWordDWord;
+            [FieldOffset(0)]
+            public DHCP_IP_ADDRESS DataIpAddress;
+            [FieldOffset(0)]
+            public IntPtr DataString;
+            [FieldOffset(0)]
+            public DHCP_BINARY_DATA_Managed DataBinary;
+            [FieldOffset(0)]
+            public DHCP_BINARY_DATA_Managed DataEncapsulated;
+            [FieldOffset(0)]
+            public IntPtr DataIpv6Address;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Dhcp.Native
     /// Possible types of the DHCPv4 client.
     /// </summary>
     [Flags]
-    internal enum ClientTypes : byte
+    internal enum DHCP_CLIENT_TYPE : byte
     {
         /// <summary>
         /// A DHCPv4 client other than ones defined in this table.
