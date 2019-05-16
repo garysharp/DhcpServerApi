@@ -79,7 +79,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.Word;
         public override object Value => RawValue;
-        public override string ValueFormatted => RawValue.ToString("N");
+        public override string ValueFormatted => RawValue.ToString("N0");
 
         public short RawValue { get; }
 
@@ -99,7 +99,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.DWord;
         public override object Value => RawValue;
-        public override string ValueFormatted => RawValue.ToString("N");
+        public override string ValueFormatted => RawValue.ToString("N0");
 
         public int RawValue { get; }
 
@@ -119,7 +119,7 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.DWordDWord;
         public override object Value => RawValue;
-        public override string ValueFormatted => RawValue.ToString("N");
+        public override string ValueFormatted => RawValue.ToString("N0");
 
         public long RawValue { get; }
 

@@ -58,7 +58,9 @@ namespace Dhcp
 
         public int SignificantBits => BitHelper.HighSignificantBits(ipMask);
 
-        public DhcpServerIpRange GetIpRange(DhcpServerIpAddress ipAddress) => new DhcpServerIpRange(ipAddress, this);
+        public DhcpServerIpRange GetDhcpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.FromMaskDhcpScope(ipAddress, this);
+        public DhcpServerIpRange GetDhcpAndBootpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.FromMaskDhcpAndBootpScope(ipAddress, this);
+        public DhcpServerIpRange GetBootpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.FromMaskBootpScope(ipAddress, this);
 
         internal DHCP_IP_MASK ToNativeAsHost() => new DHCP_IP_MASK(BitHelper.NetworkToHostOrder(ipMask));
         internal DHCP_IP_MASK ToNativeAsNetwork() => new DHCP_IP_MASK(ipMask);

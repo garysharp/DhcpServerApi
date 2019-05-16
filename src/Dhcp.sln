@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DhcpDemo", "DhcpDemo\DhcpDe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DhcpCalloutDemo", "DhcpCalloutDemo\DhcpCalloutDemo.csproj", "{AB9AD770-6EF7-4AF0-91F5-11640E296BA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DhcpWritableDemo", "DhcpWritableDemo\DhcpWritableDemo.csproj", "{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,12 +43,20 @@ Global
 		{AB9AD770-6EF7-4AF0-91F5-11640E296BA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB9AD770-6EF7-4AF0-91F5-11640E296BA8}.Release|x64.ActiveCfg = Release|Any CPU
 		{AB9AD770-6EF7-4AF0-91F5-11640E296BA8}.Release|x64.Build.0 = Release|Any CPU
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Debug|x64.ActiveCfg = Debug|x64
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Debug|x64.Build.0 = Debug|x64
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Release|x64.ActiveCfg = Release|Any CPU
+		{B49D9FF1-D3C9-49E5-AC3A-E804F01F6541}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		BuildVersion_StartDate = 2000/1/1
 		SolutionGuid = {029977BA-CD42-4F3D-80B0-B64CD126357D}
+		BuildVersion_StartDate = 2000/1/1
 	EndGlobalSection
 EndGlobal

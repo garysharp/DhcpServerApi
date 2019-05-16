@@ -69,6 +69,16 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpGetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out ushort TimeDelayInMilliseconds);
 
         /// <summary>
+        /// The DhcpSetSubnetDelayOffer function sets the delay period for DHCP OFFER messages after a DISCOVER message is received, for a specific DHCP scope.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that contains the IP address of the subnet gateway.</param>
+        /// <param name="TimeDelayInMilliseconds">Unsigned 16-bit integer value that specifies the time to delay an OFFER message after receiving a DISCOVER message, in milliseconds, and set for a particular scope. This value must be between 0 and 1000 (milliseconds). The default value is 0.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpSetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ushort TimeDelayInMilliseconds);
+
+        /// <summary>
         /// The DhcpEnumOptions function returns an enumerated set of options stored on the DHCPv4 server.
         /// </summary>
         /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IPv4 address of the DHCP server.</param>
@@ -299,16 +309,6 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
-        /// The DhcpCreateSubnet function creates a new subnet on the DHCP server.
-        /// </summary>
-        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
-        /// <param name="SubnetAddress"><see cref="DHCP_IP_ADDRESS"/> value that contains the IP address of the subnet's gateway.</param>
-        /// <param name="SubnetInfo"><see cref="DHCP_SUBNET_INFO"/> structure that contains specific settings for the subnet, including the subnet mask and IP address of the subnet gateway.</param>
-        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
-        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpCreateSubnetVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_VQ SubnetInfo);
-
-        /// <summary>
         /// The DhcpDeleteSubnet function deletes a subnet from the DHCP server.
         /// </summary>
         /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
@@ -360,17 +360,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo">Pointer to a <see cref="DHCP_SUBNET_INFO"/> structure that contains the information about the subnet.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO SubnetInfo);
-
-        /// <summary>
-        /// The DhcpSetSubnetInfo function sets information about a subnet defined on the DHCP server.
-        /// </summary>
-        /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
-        /// <param name="SubnetAddress"><see cref="DHCP_IP_ADDRESS"/> value that specifies the IP address of the subnet gateway, as well as uniquely identifies the subnet.</param>
-        /// <param name="SubnetInfo">Pointer to a <see cref="DHCP_SUBNET_INFO_VQ"/> structure that contains the information about the subnet.</param>
-        /// <returns></returns>
-        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_VQ SubnetInfo);
+        public static extern DhcpErrors DhcpSetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpGetAllOptions function returns an array that contains all options defined on the DHCP server.

@@ -83,7 +83,7 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_SUBNET_STATE enumeration value indicating the current state of the subnet (enabled/disabled).
         /// </summary>
-        public readonly DHCP_SUBNET_STATE SubnetState;
+        public DHCP_SUBNET_STATE SubnetState;
 
         public DHCP_SUBNET_INFO_Managed(DHCP_IP_ADDRESS subnetAddress, DHCP_IP_MASK subnetMask, string subnetName, string subnetComment, DHCP_HOST_INFO_Managed primaryHost, DHCP_SUBNET_STATE subnetState)
         {

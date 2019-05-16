@@ -1,6 +1,8 @@
 ﻿using Dhcp;
 using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace DhcpDemo
 {
@@ -85,34 +87,7 @@ namespace DhcpDemo
                 Console.WriteLine($"      Adapter Subnet Address: {be.AdapterSubnetAddress}");
             }
 
-            // Enum Default Options
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" All Options:");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var option in dhcpServer.AllOptions.ToList())
-            {
-                Console.WriteLine($"  {option}");
-            }
-
-            // Enum Default Options
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($" Default Options ({dhcpServer.SpecificStrings.DefaultVendorClassName}):");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var option in dhcpServer.Options.ToList())
-            {
-                Console.WriteLine($"   {option}");
-            }
-
-            // Enum Default Global Option Values
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Global Option Values:");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var value in dhcpServer.AllGlobalOptionValues.ToList())
-            {
-                Console.WriteLine($"  {value}");
-            }
-
-            // Enum Classes
+            // Classes
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Classes:");
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -134,6 +109,24 @@ namespace DhcpDemo
                 }
             }
 
+            // Global Options
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" Global Options:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var option in dhcpServer.Options.ToList())
+            {
+                Console.WriteLine($"  {option}");
+            }
+
+            // Global Option Values
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("   Global Option Values:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var value in dhcpServer.Options.GetOptionValues().ToList())
+            {
+                Console.WriteLine($"     {value}");
+            }
+
             // Server Clients
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("      Server Clients:");
@@ -143,7 +136,7 @@ namespace DhcpDemo
                 Console.WriteLine($"          {client}");
             }
 
-            // Enum Scopes
+            // Scopes
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Scopes:");
             Console.ForegroundColor = ConsoleColor.Gray;

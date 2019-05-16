@@ -43,8 +43,7 @@ namespace Dhcp
         {
         }
 
-        private DhcpServerOption GetOption()
-        => DhcpServerOption.GetOption(Server, OptionId, ClassName, VendorName);
+        private DhcpServerOption GetOption() => DhcpServerOption.GetOption(Server, OptionId, ClassName, VendorName);
 
         private static DhcpServerOptionValue FromNative(DhcpServer server, ref DHCP_OPTION_VALUE native, string className, string vendorName)
         {
@@ -306,10 +305,10 @@ namespace Dhcp
         internal static DhcpServerOptionValue GetGlobalDefaultOptionValue(DhcpServer server, int optionId)
             => GetGlobalOptionValue(server, optionId, null, null);
 
-        internal static DhcpServerOptionValue GetGlobalVendorOptionValue(DhcpServer server, int optionId, string vendorName)
+        internal static DhcpServerOptionValue GetGlobalVendorOptionValue(DhcpServer server, string vendorName, int optionId)
             => GetGlobalOptionValue(server, optionId, null, vendorName);
 
-        internal static DhcpServerOptionValue GetGlobalUserOptionValue(DhcpServer server, int optionId, string className)
+        internal static DhcpServerOptionValue GetGlobalUserOptionValue(DhcpServer server, string className, int optionId)
             => GetGlobalOptionValue(server, optionId, className, null);
 
         internal static DhcpServerOptionValue GetGlobalOptionValue(DhcpServer server, int optionId, string className, string vendorName)

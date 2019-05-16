@@ -35,7 +35,7 @@ namespace Dhcp
         /// </summary>
         public int MaxBootpAllowed => maxBootpAllowed;
 
-        public DhcpServerIpRange(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress, DhcpServerIpRangeType type, int bootpClientsAllocated, int maxBootpAllowed)
+        private DhcpServerIpRange(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress, DhcpServerIpRangeType type, int bootpClientsAllocated, int maxBootpAllowed)
         {
             this.startAddress = startAddress;
             this.endAddress = endAddress;
@@ -44,32 +44,40 @@ namespace Dhcp
             this.maxBootpAllowed = maxBootpAllowed;
         }
 
-        public DhcpServerIpRange(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress, DhcpServerIpRangeType type)
-            : this(startAddress, endAddress, type, DefaultBootpClientsAllocated, DefaultMaxBootpAllowed)
-        {
-        }
+        private DhcpServerIpRange(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress, DhcpServerIpRangeType type)
+            : this(startAddress, endAddress, type, DefaultBootpClientsAllocated, DefaultMaxBootpAllowed) { }
 
-        public DhcpServerIpRange(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress)
-            : this(startAddress, endAddress, DhcpServerIpRangeType.ScopeDhcpOnly)
-        {
-        }
-
-        public DhcpServerIpRange(DhcpServerIpAddress address, DhcpServerIpMask mask, DhcpServerIpRangeType type, int bootpClientsAllocated, int maxBootpAllowed)
+        private DhcpServerIpRange(DhcpServerIpAddress address, DhcpServerIpMask mask, DhcpServerIpRangeType type, int bootpClientsAllocated, int maxBootpAllowed)
             : this(DhcpServerIpAddress.FromNative(address.Native & mask.Native),
                  DhcpServerIpAddress.FromNative((address.Native & mask.Native) | ~address.Native),
-                 type, bootpClientsAllocated, maxBootpAllowed)
-        {
-        }
+                 type, bootpClientsAllocated, maxBootpAllowed) { }
 
-        public DhcpServerIpRange(DhcpServerIpAddress address, DhcpServerIpMask mask, DhcpServerIpRangeType type)
-            : this(address, mask, type, DefaultBootpClientsAllocated, DefaultMaxBootpAllowed)
-        {
-        }
+        private DhcpServerIpRange(DhcpServerIpAddress address, DhcpServerIpMask mask, DhcpServerIpRangeType type)
+            : this(address, mask, type, DefaultBootpClientsAllocated, DefaultMaxBootpAllowed) { }
 
-        public DhcpServerIpRange(DhcpServerIpAddress address, DhcpServerIpMask mask)
-            : this(address, mask, DhcpServerIpRangeType.ScopeDhcpOnly)
-        {
-        }
+        public static DhcpServerIpRange FromAddressesDhcpAndBootpScope(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress, int bootpClientsAllocated = DefaultBootpClientsAllocated, int maxBootpAllowed = DefaultMaxBootpAllowed)
+            => new DhcpServerIpRange(startAddress, endAddress, DhcpServerIpRangeType.ScopeDhcpAndBootp, bootpClientsAllocated, maxBootpAllowed);
+
+        public static DhcpServerIpRange FromAddressesBootpScope(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress, int bootpClientsAllocated = DefaultBootpClientsAllocated, int maxBootpAllowed = DefaultMaxBootpAllowed)
+            => new DhcpServerIpRange(startAddress, endAddress, DhcpServerIpRangeType.ScopeBootpOnly, bootpClientsAllocated, maxBootpAllowed);
+
+        public static DhcpServerIpRange FromAddressesDhcpScope(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress)
+            => new DhcpServerIpRange(startAddress, endAddress, DhcpServerIpRangeType.ScopeDhcpOnly);
+
+        public static DhcpServerIpRange FromAddressesExcluded(DhcpServerIpAddress startAddress, DhcpServerIpAddress endAddress)
+            => new DhcpServerIpRange(startAddress, endAddress, DhcpServerIpRangeType.Excluded);
+
+        public static DhcpServerIpRange FromMaskDhcpAndBootpScope(DhcpServerIpAddress address, DhcpServerIpMask mask, int bootpClientsAllocated = DefaultBootpClientsAllocated, int maxBootpAllowed = DefaultMaxBootpAllowed)
+            => new DhcpServerIpRange(address, mask, DhcpServerIpRangeType.ScopeDhcpAndBootp, bootpClientsAllocated, maxBootpAllowed);
+
+        public static DhcpServerIpRange FromMaskBootpScope(DhcpServerIpAddress address, DhcpServerIpMask mask, int bootpClientsAllocated = DefaultBootpClientsAllocated, int maxBootpAllowed = DefaultMaxBootpAllowed)
+            => new DhcpServerIpRange(address, mask, DhcpServerIpRangeType.ScopeBootpOnly, bootpClientsAllocated, maxBootpAllowed);
+
+        public static DhcpServerIpRange FromMaskDhcpScope(DhcpServerIpAddress address, DhcpServerIpMask mask)
+            => new DhcpServerIpRange(address, mask, DhcpServerIpRangeType.ScopeDhcpOnly);
+
+        public static DhcpServerIpRange FromMaskExcluded(DhcpServerIpAddress address, DhcpServerIpMask mask)
+            => new DhcpServerIpRange(address, mask, DhcpServerIpRangeType.Excluded);
 
         public DhcpServerIpMask GetSmallestIpMask()
         {

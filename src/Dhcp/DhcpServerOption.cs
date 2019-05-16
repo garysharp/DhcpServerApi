@@ -96,10 +96,10 @@ namespace Dhcp
         internal static DhcpServerOption GetDefaultOption(DhcpServer server, int optionId)
             => GetOption(server, optionId, null, null);
 
-        internal static DhcpServerOption GetVendorOption(DhcpServer server, int optionId, string vendorName)
+        internal static DhcpServerOption GetVendorOption(DhcpServer server, string vendorName, int optionId)
             => GetOption(server, optionId, null, vendorName);
 
-        internal static DhcpServerOption GetUserOption(DhcpServer server, int optionId, string className)
+        internal static DhcpServerOption GetUserOption(DhcpServer server, string className, int optionId)
             => GetOption(server, optionId, className, null);
 
         internal static DhcpServerOption GetOption(DhcpServer server, int optionId, string className, string vendorName)
