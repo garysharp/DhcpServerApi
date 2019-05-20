@@ -21,10 +21,20 @@ namespace Dhcp
         public DhcpServerScope GetScope(DhcpServerIpAddress scopeAddress)
             => DhcpServerScope.GetScope(Server, scopeAddress);
 
-        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, bool enable)
-            => DhcpServerScope.CreateScope(Server, name, description, ipRange, mask, enable);
+        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange)
+            => DhcpServerScope.CreateScope(Server, name, description, ipRange);
+        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
+            => DhcpServerScope.CreateScope(Server, name, description, ipRange, mask);
+        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
+            => DhcpServerScope.CreateScope(Server, name, description, ipRange, mask, timeDelayOffer, leaseDuration);
 
-        public DhcpServerScope CreateScope(string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, IEnumerable<DhcpServerIpRange> excludedRanges, TimeSpan timeDelayOffer, TimeSpan? leaseDuration, bool enable)
-            => DhcpServerScope.CreateScope(Server, name, description, ipRange, mask, excludedRanges, timeDelayOffer, leaseDuration, enable);
+        /// <summary>
+        /// Deletes the specified scope
+        /// </summary>
+        /// <param name="scope">The scope to be deleted</param>
+        /// <param name="retainClientDnsRecords">If true registered client DNS records are not removed. Useful in failover scenarios. Default = false</param>
+        public void DeleteScope(DhcpServerScope scope, bool retainClientDnsRecords = false)
+            => scope.Delete(retainClientDnsRecords);
+
     }
 }

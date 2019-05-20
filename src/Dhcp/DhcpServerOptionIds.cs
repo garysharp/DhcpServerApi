@@ -2,20 +2,20 @@
 
 namespace Dhcp
 {
-    public enum OptionTags : byte
+    public enum DhcpServerOptionIds : byte
     {
         /// <summary>
         /// The pad option can be used to cause subsequent fields to align on word boundaries.
         /// The code for the pad option is 0, and its length is 1 octet. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Pad)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Pad)]
         Pad = 0,
         /// <summary>
         /// The end option marks the end of valid information in the vendor field.
         /// Subsequent octets should be filled with pad options.
         /// The code for the end option is 255, and its length is 1 octet.
         /// </summary>
-        [OptionTagType(OptionTagTypes.End)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.End)]
         End = 255,
         /// <summary>
         /// The subnet mask option specifies the client's subnet mask as per RFC 950.
@@ -23,7 +23,7 @@ namespace Dhcp
         ///  reply, the subnet mask option MUST be first.
         ///  The code for the subnet mask option is 1, and its length is 4 octets. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         SubnetMask = 1,
         /// <summary>
         /// The time offset field specifies the offset of the client's subnet in
@@ -31,7 +31,7 @@ namespace Dhcp
         /// expressed as a signed 32-bit integer.
         /// The code for the time offset option is 2, and its length is 4 octets. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Int32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Int32)]
         TimeOffset = 2,
         /// <summary>
         /// The router option specifies a list of IP addresses for routers on the
@@ -39,7 +39,7 @@ namespace Dhcp
         /// The code for the router option is 3.  The minimum length for the
         ///  router option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         Router = 3,
         /// <summary>
         /// The time server option specifies a list of RFC 868 time servers
@@ -48,7 +48,7 @@ namespace Dhcp
         /// The code for the time server option is 4.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         TimeServer = 4,
         /// <summary>
         /// The name server option specifies a list of IEN 116 name servers
@@ -56,7 +56,7 @@ namespace Dhcp
         /// The code for the name server option is 5.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NameServer = 5,
         /// <summary>
         /// The domain name server option specifies a list of Domain Name System
@@ -65,7 +65,7 @@ namespace Dhcp
         /// The code for the domain name server option is 6.  The minimum length
         /// for this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         DomainNameServer = 6,
         /// <summary>
         /// The log server option specifies a list of MIT-LCS UDP log servers
@@ -73,7 +73,7 @@ namespace Dhcp
         /// The code for the log server option is 7.  The minimum length for this
         /// option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         LogServer = 7,
         /// <summary>
         /// The cookie server option specifies a list of RFC 865 cookie
@@ -81,7 +81,7 @@ namespace Dhcp
         /// The code for the log server option is 8.  The minimum length for this
         /// option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         CookieServer = 8,
         /// <summary>
         /// The LPR server option specifies a list of RFC 1179 line printer
@@ -89,7 +89,7 @@ namespace Dhcp
         /// The code for the LPR server option is 9.  The minimum length for this
         /// option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         LprServer = 9,
         /// <summary>
         /// The Impress server option specifies a list of Imagen Impress servers
@@ -98,7 +98,7 @@ namespace Dhcp
         /// The code for the Impress server option is 10.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         ImpressServer = 10,
         /// <summary>
         /// This option specifies a list of RFC 887 Resource Location
@@ -106,7 +106,7 @@ namespace Dhcp
         /// The code for this option is 11.  The minimum length for this option
         /// is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         ResourceLocationServer = 11,
         /// <summary>
         /// This option specifies the name of the client.  The name may or may
@@ -115,7 +115,7 @@ namespace Dhcp
         /// character set restrictions.
         /// The code for this option is 12, and its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         HostName = 12,
         /// <summary>
         /// This option specifies the length in 512-octet blocks of the default
@@ -123,7 +123,7 @@ namespace Dhcp
         /// unsigned 16-bit integer.
         /// The code for this option is 13, and its length is 2. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16)]
         BootFileSize = 13,
         /// <summary>
         /// This option specifies the path-name of a file to which the client's
@@ -132,20 +132,20 @@ namespace Dhcp
         /// the NVT ASCII character set.
         /// The code for this option is 14.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         MeritDumpFile = 14,
         /// <summary>
         /// This option specifies the domain name that client should use when
         /// resolving hostnames via the Domain Name System.
         /// The code for this option is 15.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         DomainName = 15,
         /// <summary>
         /// This specifies the IP address of the client's swap server.
         /// The code for this option is 16 and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         SwapServer = 16,
         /// <summary>
         /// This option specifies the path-name that contains the client's root
@@ -153,7 +153,7 @@ namespace Dhcp
         /// characters from the NVT ASCII character set.
         /// The code for this option is 17.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         RootPath = 17,
         /// <summary>
         /// A string to specify a file, retrievable via TFTP, which contains
@@ -165,7 +165,7 @@ namespace Dhcp
         ///   Path field) within the file are ignored.
         /// The code for this option is 18.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         ExtensionsPath = 18,
         /// <summary>
         /// This option specifies whether the client should configure its IP
@@ -173,7 +173,7 @@ namespace Dhcp
         /// forwarding, and a value of 1 means enable IP forwarding.
         /// The code for this option is 19, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         IpForwarding = 19,
         /// <summary>
         /// This option specifies whether the client should configure its IP
@@ -182,7 +182,7 @@ namespace Dhcp
         /// and a value of 1 means allow forwarding.
         /// The code for this option is 20, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         NonLocalSourceRouting = 20,
         /// <summary>
         /// This option specifies policy filters for non-local source routing.
@@ -193,7 +193,7 @@ namespace Dhcp
         /// The code for this option is 21.  The minimum length of this option is
         /// 8, and the length MUST be a multiple of 8. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressAndSubnet)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressAndSubnet)]
         PolicyFilter = 21,
         /// <summary>
         /// This option specifies the maximum size datagram that the client
@@ -201,7 +201,7 @@ namespace Dhcp
         /// unsigned integer.  The minimum value legal value is 576.
         /// The code for this option is 22, and its length is 2. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16)]
         MaximumDatagramReassemblySize = 22,
         /// <summary>
         /// This option specifies the default time-to-live that the client should
@@ -209,7 +209,7 @@ namespace Dhcp
         /// value between 1 and 255.
         /// The code for this option is 23, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         DefaultIpTtl = 23,
         /// <summary>
         /// This option specifies the timeout (in seconds) to use when aging Path
@@ -217,7 +217,7 @@ namespace Dhcp
         /// timeout is specified as a 32-bit unsigned integer.
         /// The code for this option is 24, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         PathMtuAgingTimeout = 24,
         /// <summary>
         /// This option specifies a table of MTU sizes to use when performing
@@ -227,7 +227,7 @@ namespace Dhcp
         /// The code for this option is 25.  Its minimum length is 2, and the
         /// length MUST be a multiple of 2. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16List)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16List)]
         PathMtuPlateauTable = 25,
         /// <summary>
         /// This option specifies the MTU to use on this interface.  The MTU is
@@ -235,7 +235,7 @@ namespace Dhcp
         /// the MTU is 68.
         /// The code for this option is 26, and its length is 2. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16)]
         InterfaceMtu = 26,
         /// <summary>
         /// This option specifies whether or not the client may assume that all
@@ -246,14 +246,14 @@ namespace Dhcp
         /// some subnets of the directly connected network may have smaller MTUs.
         /// The code for this option is 27, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         AllSubnetsAreLocal = 27,
         /// <summary>
         /// This option specifies the broadcast address in use on the client's
         /// subnet.
         /// The code for this option is 28, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         BroadcastAddress = 28,
         /// <summary>
         /// This option specifies whether or not the client should perform subnet
@@ -262,7 +262,7 @@ namespace Dhcp
         /// client should perform mask discovery.
         /// The code for this option is 29, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         PerformMaskDiscovery = 29,
         /// <summary>
         /// This option specifies whether or not the client should respond to
@@ -271,7 +271,7 @@ namespace Dhcp
         /// respond.
         /// The code for this option is 30, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         MaskSupplier = 30,
         /// <summary>
         /// This option specifies whether or not the client should solicit
@@ -281,14 +281,14 @@ namespace Dhcp
         /// router discovery.
         /// The code for this option is 31, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         PerformRouterDiscovery = 31,
         /// <summary>
         /// This option specifies the address to which the client should transmit
         /// router solicitation requests.
         /// The code for this option is 32, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         RouterSolicitationAddress = 32,
         /// <summary>
         /// This option specifies a list of static routes that the client should
@@ -303,7 +303,7 @@ namespace Dhcp
         /// The code for this option is 33.  The minimum length of this option is
         /// 8, and the length MUST be a multiple of 8. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressAndIpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressAndIpAddress)]
         [Obsolete("See RFC 3442")]
         StaticRouter = 33,
         /// <summary>
@@ -313,14 +313,14 @@ namespace Dhcp
         /// value of 1 means that the client should attempt to use trailers.
         /// The code for this option is 34, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         TrailerEncapsulation = 34,
         /// <summary>
         /// This option specifies the timeout in seconds for ARP cache entries.
         /// The time is specified as a 32-bit unsigned integer.
         /// The code for this option is 35, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         ArpCacheTimeout = 35,
         /// <summary>
         /// This option specifies whether or not the client should use Ethernet
@@ -330,7 +330,7 @@ namespace Dhcp
         /// client should use RFC 1042 encapsulation.
         /// The code for this option is 36, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         EthernetEncapsulation = 36,
         /// <summary>
         /// This option specifies the default TTL that the client should use when
@@ -338,7 +338,7 @@ namespace Dhcp
         /// integer.  The minimum value is 1.
         /// The code for this option is 37, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         TcpDefaultTtl = 37,
         /// <summary>
         /// This option specifies the interval (in seconds) that the client TCP
@@ -348,7 +348,7 @@ namespace Dhcp
         /// connections unless specifically requested by an application.
         /// The code for this option is 38, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         TcpKeepaliveInterval = 38,
         /// <summary>
         /// This option specifies the whether or not the client should send TCP
@@ -358,7 +358,7 @@ namespace Dhcp
         /// should be sent.
         /// The code for this option is 39, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         TcpKeepaliveGarbage = 39,
         /// <summary>
         /// This option specifies the name of the client's NIS domain.  The
@@ -366,7 +366,7 @@ namespace Dhcp
         /// from the NVT ASCII character set.
         /// The code for this option is 40.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         NisDomain = 40,
         /// <summary>
         /// This option specifies a list of IP addresses indicating NIS servers
@@ -375,7 +375,7 @@ namespace Dhcp
         /// The code for this option is 41.  Its minimum length is 4, and the
         /// length MUST be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NetworkInformationServers = 41,
         /// <summary>
         /// This option specifies a list of IP addresses indicating NTP
@@ -384,7 +384,7 @@ namespace Dhcp
         /// The code for this option is 42.  Its minimum length is 4, and the
         /// length MUST be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NtpServers = 42,
         /// <summary>
         /// This option is used by clients and servers to exchange vendor-
@@ -422,7 +422,7 @@ namespace Dhcp
         /// The code for this option is 44.  The minimum length of the option is
         /// 4 octets, and the length must always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NetBiosOverTcpIpNameServer = 44,
         /// <summary>
         /// The NetBIOS datagram distribution server (NBDD) option specifies a
@@ -430,7 +430,7 @@ namespace Dhcp
         /// The code for this option is 45.  The minimum length of the option is 4
         /// octets, and the length must always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NetBiosOverTcpIpDatagramDistributionServer = 45,
         /// <summary>
         /// The NetBIOS node type option allows NetBIOS over TCP/IP clients which
@@ -447,7 +447,7 @@ namespace Dhcp
         /// (hexadecimal).
         /// The code for this option is 46.  The length of this option is always 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         NetBiosOverTcpIpNodeType = 46,
         /// <summary>
         /// The NetBIOS scope option specifies the NetBIOS over TCP/IP scope
@@ -461,7 +461,7 @@ namespace Dhcp
         /// The code for this option is 48.  The minimum length of this option is
         /// 4 octets, and the length MUST be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         XWindowSystemFontServer = 48,
         /// <summary>
         /// This option specifies a list of IP addresses of systems that are
@@ -470,14 +470,14 @@ namespace Dhcp
         /// The code for the this option is 49. The minimum length of this option
         /// is 4, and the length MUST be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         XWindowSystemDisplayManager = 49,
         /// <summary>
         /// This option is used in a client request (DHCPDISCOVER) to allow the
         /// client to request that a particular IP address be assigned.
         /// The code for this option is 50, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         DhcpRequestedIpAddress = 50,
         /// <summary>
         /// This option is used in a client request (DHCPDISCOVER or DHCPREQUEST)
@@ -487,7 +487,7 @@ namespace Dhcp
         /// The time is in units of seconds, and is specified as a 32-bit unsigned integer.
         /// The code for this option is 51, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         DhcpIpAddressLeaseTime = 51,
         /// <summary>
         /// This option is used to indicate that the DHCP 'sname' or 'file'
@@ -505,14 +505,14 @@ namespace Dhcp
         /// 2     the "sname" field is used to hold options
         /// 3     both fields are used to hold options
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         DhcpOptionOverload = 52,
         /// <summary>
         /// This option is used to convey the type of the DHCP message.
-        /// <see cref="PacketMessageTypes"/>
+        /// <see cref="DhcpServerPacketMessageTypes"/>
         /// The code for this option is 53, and its length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DhcpMessageType)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DhcpMessageType)]
         DhcpMessageType = 53,
         /// <summary>
         /// This option is used in DHCPOFFER and DHCPREQUEST messages, and may
@@ -526,7 +526,7 @@ namespace Dhcp
         /// The identifier is the IP address of the selected server.
         /// The code for this option is 54, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         DhcpServerIdentifier = 54,
         /// <summary>
         /// This option is used by a DHCP client to request values for specified
@@ -539,7 +539,7 @@ namespace Dhcp
         /// by the client.
         /// The code for this option is 55.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DhcpParameterRequestList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DhcpParameterRequestList)]
         DhcpParameterRequestList = 55,
         /// <summary>
         /// This option is used by a DHCP server to provide an error message to a
@@ -550,7 +550,7 @@ namespace Dhcp
         /// available output device.
         /// The code for this option is 56 and its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         DhcpMessage = 56,
         /// <summary>
         /// This option specifies the maximum length DHCP message that it is
@@ -561,7 +561,7 @@ namespace Dhcp
         /// The code for this option is 57, and its length is 2.  The minimum
         /// legal value is 576 octets. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16)]
         DhcpMaximumMessageSize = 57,
         /// <summary>
         /// This option specifies the time interval from address assignment until
@@ -570,7 +570,7 @@ namespace Dhcp
         /// unsigned integer.
         /// The code for this option is 58, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         DhcpRenewalTime = 58,
         /// <summary>
         /// This option specifies the time interval from address assignment until
@@ -579,7 +579,7 @@ namespace Dhcp
         /// unsigned integer.
         /// The code for this option is 59, and its length is 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         DhcpRebindingTime = 59,
         /// <summary>
         /// This option is used by DHCP clients to optionally identify the vendor
@@ -594,7 +594,7 @@ namespace Dhcp
         /// information to the client.
         /// The code for this option is 60, and its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         DhcpClassIdentifier = 60,
         /// <summary>
         /// This option is used by DHCP clients to specify their unique
@@ -626,7 +626,7 @@ namespace Dhcp
         /// field.
         /// The code for this option is 62, and its maximum length is 255. See [RFC2242]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         NetWareIpDomain = 62,
         /// <summary>
         /// NetWare/IP sub Options
@@ -640,7 +640,7 @@ namespace Dhcp
         /// from the NVT ASCII character set.
         /// The code for this option is 64.  Its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         NisPlusDomain = 64,
         /// <summary>
         /// This option specifies a list of IP addresses indicating NIS+ servers
@@ -649,21 +649,21 @@ namespace Dhcp
         /// The code for this option is 65.  Its minimum length is 4, and the
         /// length MUST be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NisPlusServerAddresses = 65,
         /// <summary>
         /// This option is used to identify a TFTP server when the 'sname' field
         /// in the DHCP header has been used for DHCP options.
         /// The code for this option is 66, and its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         TftpServerName = 66,
         /// <summary>
         /// This option is used to identify a bootfile when the 'file' field in
         /// the DHCP header has been used for DHCP options.
         /// The code for this option is 67, and its minimum length is 1. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         BootFileName = 67,
         /// <summary>
         /// This option specifies a list of IP addresses indicating mobile IP
@@ -674,7 +674,7 @@ namespace Dhcp
         /// It is expected that the usual length will be four octets, containing
         /// a single home agent's address. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         MobileIpHomeAgents = 68,
         /// <summary>
         /// The SMTP server option specifies a list of SMTP servers available to
@@ -682,7 +682,7 @@ namespace Dhcp
         /// The code for the SMTP server option is 69.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         SmtpServer = 69,
         /// <summary>
         /// The POP3 server option specifies a list of POP3 available to the
@@ -690,7 +690,7 @@ namespace Dhcp
         /// The code for the POP3 server option is 70.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         Pop3Server = 70,
         /// <summary>
         /// The NNTP server option specifies a list of NNTP available to the
@@ -698,7 +698,7 @@ namespace Dhcp
         /// The code for the NNTP server option is 71. The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NntpServer = 71,
         /// <summary>
         /// The WWW server option specifies a list of WWW available to the
@@ -706,7 +706,7 @@ namespace Dhcp
         /// The code for the WWW server option is 72.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         WwwServer = 72,
         /// <summary>
         /// The Finger server option specifies a list of Finger available to the
@@ -714,7 +714,7 @@ namespace Dhcp
         /// The code for the Finger server option is 73.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         DefaultFingerServer = 73,
         /// <summary>
         /// The IRC server option specifies a list of IRC available to the
@@ -722,7 +722,7 @@ namespace Dhcp
         /// The code for the IRC server option is 74.  The minimum length for
         /// this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         DefaultIrcServer = 74,
         /// <summary>
         /// The StreetTalk server option specifies a list of StreetTalk servers
@@ -730,7 +730,7 @@ namespace Dhcp
         /// The code for the StreetTalk server option is 75.  The minimum length
         /// for this option is 4 octets, and the length MUST always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         StreetTalkServer = 75,
         /// <summary>
         /// The StreetTalk Directory Assistance (STDA) server option specifies a
@@ -740,7 +740,7 @@ namespace Dhcp
         /// The minimum length for this option is 4 octets, and the length MUST
         /// always be a multiple of 4. See [RFC2132]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         StreetTalkDirectoryAssistanceServer = 76,
 
         /// <summary>
@@ -752,25 +752,25 @@ namespace Dhcp
         /// directory agent information
         /// See [RFC2610]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         DirectoryAgent = 78,
         /// <summary>
         /// service location agent scope
         /// See [RFC2610]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Utf8String)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Utf8String)]
         ServiceScope = 79,
         /// <summary>
         /// Rapid Commit
         /// See [RFC4039]
         /// </summary>
-        [OptionTagType(OptionTagTypes.ZeroLengthFlag)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.ZeroLengthFlag)]
         RapidCommit = 80,
         /// <summary>
         /// Fully Qualified Domain Name
         /// See [RFC4702]
         /// </summary>
-        [OptionTagType(OptionTagTypes.ClientFQDN)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.ClientFQDN)]
         ClientFQDN = 81,
         /// <summary>
         /// Relay Agent Information
@@ -786,19 +786,19 @@ namespace Dhcp
         /// Novell Directory Services
         /// See [RFC2241]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         NdsServers = 85,
         /// <summary>
         /// Novell Directory Services
         /// See [RFC2241]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Utf8String)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Utf8String)]
         NdsTreeName = 86,
         /// <summary>
         /// Novell Directory Services
         /// See [RFC2241]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Utf8String)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Utf8String)]
         NdsContext = 87,
         /// <summary>
         /// The option MAY contain multiple domain names, but these domain names
@@ -827,7 +827,7 @@ namespace Dhcp
         /// be represented in the DHCPv4 message as specified in [RFC3396].
         /// See [RFC4280]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DnsNameList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DnsNameList)]
         BroadcastAndMulticastServiceControllerDomainNameList = 88,
         /// <summary>
         /// The Length byte (Len) is followed by a list of IPv4 addresses
@@ -836,7 +836,7 @@ namespace Dhcp
         /// the length MUST be a multiple of 4.
         /// See [RFC4280]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         BroadcastAndMulticastServiceControllerIpv4Addresses = 89,
         /// <summary>
         /// Authentication
@@ -847,19 +847,19 @@ namespace Dhcp
         /// Client Last Transaction Time
         /// See [RFC4388]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         ClientLastTransactionTime = 91,
         /// <summary>
         /// 
         /// See [RFC4388]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         AssociatedIp = 92,
         /// <summary>
         /// Client System Architecture
         /// See [RFC4578]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16)]
         ClientSystem = 93,
         /// <summary>
         /// Client Network Device Interface
@@ -875,13 +875,13 @@ namespace Dhcp
         /// UUID/GUID-based Client Identifier
         /// See [RFC4578]
         /// </summary>
-        [OptionTagType(OptionTagTypes.ClientUUID)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.ClientUUID)]
         ClientUUID = 97,
         /// <summary>
         /// Open Group's User Authentication
         /// See [RFC2485]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         UserAuth = 98,
         /// <summary>
         /// 
@@ -892,13 +892,13 @@ namespace Dhcp
         /// IEEE 1003.1 TZ String
         /// See [RFC4833]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         PCode = 100,
         /// <summary>
         /// Reference to the TZ Database
         /// See [RFC4833]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         TCode = 101,
         /// <summary>
         /// NetInfo Parent Server Address
@@ -919,31 +919,31 @@ namespace Dhcp
         /// DHCP Auto-Configuration
         /// See [RFC2563]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         AutoConfiguration = 116,
         /// <summary>
         /// Name Service Search
         /// See [RFC2937]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt16List)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt16List)]
         NameServiceSearch = 117,
         /// <summary>
         /// Subnet Selection Option
         /// See [RFC3011]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddress)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddress)]
         SubnetSelection = 118,
         /// <summary>
         /// DNS domain search list
         /// See [RFC3397]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DnsNameList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DnsNameList)]
         DomainSearch = 119,
         /// <summary>
         /// SIP Servers DHCP Option
         /// See [RFC3361]
         /// </summary>
-        [OptionTagType(OptionTagTypes.SipServers)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.SipServers)]
         SipServers = 120,
 
         /// <summary>
@@ -1035,19 +1035,19 @@ namespace Dhcp
         /// PANA Authentication Agent DHCPv4
         /// See [RFC5192]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         PanaAuthenticationAgent = 136,
         /// <summary>
         /// 
         /// See [RFC5223]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DnsName)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DnsName)]
         LostServer = 137,
         /// <summary>
         /// CAPWAP Access Controller addresses
         /// See [RFC5417]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         CapwapAc = 138,
         /// <summary>
         /// a series of suboptions
@@ -1068,7 +1068,7 @@ namespace Dhcp
         /// ANDSF IPv4 Address Option for DHCPv4
         /// See [RFC6153]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         IPv4_Address_ANDSF = 142,
         /// <summary>
         /// Geospatial Location with Uncertainty
@@ -1089,7 +1089,7 @@ namespace Dhcp
         /// 
         /// See [RFC5859]
         /// </summary>
-        [OptionTagType(OptionTagTypes.IpAddressList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.IpAddressList)]
         TftpServerAddress = 150,
         /// <summary>
         /// 
@@ -1105,43 +1105,43 @@ namespace Dhcp
         /// Status code and optional N byte text message describing status.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.StatusCode)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.StatusCode)]
         StatusCode = 151,
         /// <summary>
         /// Absolute time (seconds since Jan 1, 1970) message was sent.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         BaseTime = 152,
         /// <summary>
         /// Number of seconds in the past when client entered current state.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         StartTimeOfState = 153,
         /// <summary>
         /// Absolute time (seconds since Jan 1, 1970) for beginning of query.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         QueryStartTime = 154,
         /// <summary>
         /// Absolute time (seconds since Jan 1, 1970) for end of query.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         QueryEndTime = 155,
         /// <summary>
         /// State of IP address.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DhcpState)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DhcpState)]
         DhcpState = 156,
         /// <summary>
         /// Indicates information came from local or remote server.
         /// See [RFC6926]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Byte)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Byte)]
         DataSource = 157,
         /// <summary>
         /// Includes one or multiple lists of PCP server IP addresses; 
@@ -1159,7 +1159,7 @@ namespace Dhcp
         /// DHCP Captive-Portal
         /// See [RFC7710]
         /// </summary>
-        [OptionTagType(OptionTagTypes.Utf8String)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Utf8String)]
         DhcpCaptivePortal = 160,
         /// <summary>
         /// Manufacturer Usage Descriptions
@@ -1193,19 +1193,19 @@ namespace Dhcp
         /// Configuration file
         /// See [RFC5071]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         ConfigurationFile = 209,
         /// <summary>
         /// Path Prefix Option
         /// See [RFC5071]
         /// </summary>
-        [OptionTagType(OptionTagTypes.AsciiString)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.AsciiString)]
         PathPrefix = 210,
         /// <summary>
         /// Reboot Time
         /// See [RFC5071]
         /// </summary>
-        [OptionTagType(OptionTagTypes.UInt32)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.UInt32)]
         RebootTime = 211,
         /// <summary>
         /// OPTION_6RD with N/4 6rd BR addresses
@@ -1216,7 +1216,7 @@ namespace Dhcp
         /// Access Network Domain Name
         /// See [RFC5986]
         /// </summary>
-        [OptionTagType(OptionTagTypes.DnsNameList)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.DnsNameList)]
         OPTION_V4_ACCESS_DOMAIN = 213,
         /// <summary>
         /// Subnet Allocation Option
@@ -1244,7 +1244,7 @@ namespace Dhcp
         /// Web Proxy Auto-Discovery Protocol URL.
         /// Non-standard, Site-local; see: https://en.wikipedia.org/wiki/Web_Proxy_Auto-Discovery_Protocol
         /// </summary>
-        [OptionTagType(OptionTagTypes.Utf8String)]
+        [DhcpServerOptionIdType(DhcpServerOptionIdTypes.Utf8String)]
         AutoProxyConfig = 252,
     }
 }

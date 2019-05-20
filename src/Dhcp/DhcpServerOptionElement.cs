@@ -13,6 +13,43 @@ namespace Dhcp
         public abstract object Value { get; }
         public abstract string ValueFormatted { get; }
 
+        internal static List<DhcpServerOptionElement> CreateElement(byte value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementByte(value) };
+        internal static List<DhcpServerOptionElement> CreateElement(List<byte> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementByte(v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateElement(short value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementWord(value) };
+        internal static List<DhcpServerOptionElement> CreateElement(List<short> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementWord(v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateElement(int value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementDWord(value) };
+        internal static List<DhcpServerOptionElement> CreateElement(List<int> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementDWord(v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateElement(long value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementDWordDWord(value) };
+        internal static List<DhcpServerOptionElement> CreateElement(List<long> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementDWordDWord(v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateElement(DhcpServerIpAddress value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementIpAddress(value) };
+        internal static List<DhcpServerOptionElement> CreateElement(List<DhcpServerIpAddress> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementIpAddress(v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateStringElement(string value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementString(value) };
+        internal static List<DhcpServerOptionElement> CreateStringElement(List<string> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementString(v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateBinaryElement(byte[] value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementBinary(DhcpServerOptionElementType.BinaryData, value) };
+        internal static List<DhcpServerOptionElement> CreateBinaryElement(List<byte[]> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementBinary(DhcpServerOptionElementType.BinaryData, v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateEncapsulatedElement(byte[] value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementBinary(DhcpServerOptionElementType.EncapsulatedData, value) };
+        internal static List<DhcpServerOptionElement> CreateEncapsulatedElement(List<byte[]> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementBinary(DhcpServerOptionElementType.EncapsulatedData, v)).ToList();
+        internal static List<DhcpServerOptionElement> CreateIpv6AddressElement(string value)
+            => new List<DhcpServerOptionElement>(1) { new DhcpServerOptionElementIpv6Address(value) };
+        internal static List<DhcpServerOptionElement> CreateIpv6AddressElement(List<string> values)
+            => values.Select(v => (DhcpServerOptionElement)new DhcpServerOptionElementIpv6Address(v)).ToList();
+
         internal static IEnumerable<DhcpServerOptionElement> ReadNativeElements(DHCP_OPTION_DATA elementArray)
         {
             foreach (var element in elementArray.Elements)
@@ -145,10 +182,12 @@ namespace Dhcp
 
         public uint RawValue => ipAddress.Native;
 
-        internal DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
+        internal DhcpServerOptionElementIpAddress(DhcpServerIpAddress value)
         {
-            ipAddress = value.AsNetworkToIpAddress();
+            ipAddress = value;
         }
+        internal DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
+            : this(value.AsNetworkToIpAddress()) { }
 
         internal static DhcpServerOptionElementIpAddress ReadNative(DHCP_OPTION_DATA_ELEMENT native)
             => new DhcpServerOptionElementIpAddress(native.IpAddressOption);

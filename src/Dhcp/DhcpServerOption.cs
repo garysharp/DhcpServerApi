@@ -33,6 +33,8 @@ namespace Dhcp
         /// </summary>
         public IEnumerable<DhcpServerOptionElement> DefaultValue { get; }
 
+        public DhcpServerOptionElementType ValueType { get; }
+
         /// <summary>
         /// True if this Option has a single data item associated with it, False when an array of data items are associated with it.
         /// </summary>
@@ -61,26 +63,135 @@ namespace Dhcp
             Name = name;
             Comment = comment;
             DefaultValue = defaultValue;
+            ValueType = defaultValue.First().Type;
             IsUnaryOption = isUnaryOption;
             VendorName = vendorName;
             ClassName = className;
         }
 
-        /// <summary>
-        /// The Option Value associated with the Global Server Configuration
-        /// </summary>
-        public DhcpServerOptionValue GetGlobalValue() => DhcpServerOptionValue.GetGlobalOptionValue(Server, OptionId, ClassName, VendorName);
+        public DhcpServerOptionValue CreateOptionByteValue(byte value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.Byte);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionByteValue(IEnumerable<byte> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.Byte, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionInt16Value(short value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.Word);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionInt16Value(IEnumerable<short> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.Word, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionInt32Value(int value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.DWord);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionInt32Value(IEnumerable<int> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.DWord, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionInt64Value(long value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.DWordDWord);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionInt64Value(IEnumerable<long> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.DWordDWord, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionIpAddressValue(DhcpServerIpAddress value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.IpAddress);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionIpAddressValue(IEnumerable<DhcpServerIpAddress> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.IpAddress, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionStringValue(string value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.StringData);
+            return CreateOptionValue(DhcpServerOptionElement.CreateStringElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionStringValue(IEnumerable<string> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.StringData, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateStringElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionBinaryValue(byte[] value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.BinaryData);
+            return CreateOptionValue(DhcpServerOptionElement.CreateBinaryElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionBinaryValue(IEnumerable<byte[]> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.BinaryData, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateBinaryElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionEncapsulatedValue(byte[] value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.EncapsulatedData);
+            return CreateOptionValue(DhcpServerOptionElement.CreateEncapsulatedElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionEncapsulatedValue(IEnumerable<byte[]> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.EncapsulatedData, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateEncapsulatedElement(valueList));
+        }
+        public DhcpServerOptionValue CreateOptionIpv6AddressValue(string value)
+        {
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.Ipv6Address);
+            return CreateOptionValue(DhcpServerOptionElement.CreateIpv6AddressElement(value));
+        }
+        public DhcpServerOptionValue CreateOptionIpv6AddressValue(IEnumerable<string> values)
+        {
+            var valueList = values?.ToList() ?? throw new ArgumentNullException(nameof(values));
+            ValidateCreateOptionArguments(DhcpServerOptionElementType.Ipv6Address, valueList.Count);
+            return CreateOptionValue(DhcpServerOptionElement.CreateIpv6AddressElement(valueList));
+        }
+
+        private DhcpServerOptionValue CreateOptionValue(List<DhcpServerOptionElement> values)
+            => new DhcpServerOptionValue(server: Server, optionId: OptionId, className: ClassName, vendorName: VendorName, values: values);
+
+        private void ValidateCreateOptionArguments(DhcpServerOptionElementType providedType, int valueCount = 1)
+        {
+            if (ValueType != providedType)
+                throw new ArgumentException($"Option {OptionId} ({Name}) requires value type {ValueType} not {providedType}");
+            if (valueCount == 0)
+                throw new ArgumentOutOfRangeException("At least one value is required");
+            if (valueCount > 1 && IsUnaryOption)
+                throw new ArgumentOutOfRangeException($"Option {OptionId} ({Name}) is unary and cannot accept multiple values");
+        }
 
         /// <summary>
         /// The Option Value associated with the Scope Configuration
         /// </summary>
-        public DhcpServerOptionValue GetScopeValue(DhcpServerScope scope)
+        internal DhcpServerOptionValue GetScopeValue(DhcpServerScope scope)
             => DhcpServerOptionValue.GetScopeOptionValue(scope, OptionId, ClassName, VendorName);
 
         /// <summary>
         /// The Option Value associated with the Reservation Configuration
         /// </summary>
-        public DhcpServerOptionValue GetScopeReservationValue(DhcpServerScopeReservation reservation)
+        internal DhcpServerOptionValue GetScopeReservationValue(DhcpServerScopeReservation reservation)
             => DhcpServerOptionValue.GetScopeReservationOptionValue(reservation, OptionId, ClassName, VendorName);
 
         private DhcpServerClass GetClass()
@@ -324,7 +435,7 @@ namespace Dhcp
                                         className: native.ClassName);
         }
 
-        public override string ToString() 
+        public override string ToString()
             => $"{VendorName ?? ClassName ?? Server.SpecificStrings.DefaultVendorClassName}: {OptionId} [{Name}: {Comment}]; Default: {string.Join("; ", DefaultValue)}";
     }
 }

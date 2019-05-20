@@ -598,45 +598,87 @@ namespace Dhcp
         }
 
         public static uint StringToIpAddress(string ipAddress)
+            => StringToIpAddress(ipAddress, 0, ipAddress.Length);
+
+        public static uint StringToIpAddress(string ipAddress, int index, int length)
         {
             if (string.IsNullOrEmpty(ipAddress))
                 throw new ArgumentNullException(nameof(ipAddress));
-            if (ipAddress.Length > 15 || ipAddress.Length < 7)
+            if (ipAddress.Length < index + length)
+                throw new ArgumentOutOfRangeException(nameof(length));
+            if (length > 15 || length < 7)
                 throw new ArgumentOutOfRangeException(nameof(ipAddress));
 
-            var ip = 0U;
-            var os = 24;
-            var oi = 0;
-            var o = 0;
+            var result = 0U;
+            var shiftAmount = 24;
+            var octetIndex = index;
+            var octetValue = 0;
+            var indexEnd = index + length;
 
-            for (var i = 0; i < ipAddress.Length; i++)
+            for (var i = index; i < indexEnd; i++)
             {
-                var c = ipAddress[i];
+                var ipChar = ipAddress[i];
 
-                if (c == '.')
+                if (ipChar == '.')
                 {
-                    if ((i - oi) < 1 || (i - oi) > 3 || os <= 0 || o > 255)
+                    if ((i - octetIndex) < 1 || (i - octetIndex) > 3 || shiftAmount <= 0 || octetValue > 255)
                         throw new ArgumentOutOfRangeException(nameof(ipAddress));
 
-                    ip |= (uint)(o << os);
-                    os -= 8;
-                    o = 0;
-                    oi = i + 1;
+                    result |= (uint)(octetValue << shiftAmount);
+                    shiftAmount -= 8;
+                    octetValue = 0;
+                    octetIndex = i + 1;
                 }
                 else
                 {
-                    if (c < '0' || c > '9')
+                    if (ipChar < '0' || ipChar > '9')
                         throw new ArgumentOutOfRangeException(nameof(ipAddress));
 
-                    o = (o * 10) + (c - '0');
+                    octetValue = (octetValue * 10) + (ipChar - '0');
                 }
             }
-            if ((ipAddress.Length - oi) < 1 || (ipAddress.Length - oi) > 3 || os != 0 || o > 255)
+            if ((indexEnd - octetIndex) < 1 || (indexEnd - octetIndex) > 3 || shiftAmount != 0 || octetValue > 255)
                 throw new ArgumentOutOfRangeException(nameof(ipAddress));
 
-            ip |= (uint)o;
+            result |= (uint)octetValue;
 
-            return ip;
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to parse a byte from a string at a particular position
+        /// </summary>
+        /// <param name="s">String to parse</param>
+        /// <param name="index">Index to begin parsing</param>
+        /// <param name="length">Number of characters to parse</param>
+        /// <param name="result">The parsed byte</param>
+        /// <returns>True if the byte was successfully parsed</returns>
+        public static bool TryParseByteFromSubstring(string s, int index, int length, out byte result)
+        {
+            result = 0;
+
+            if (string.IsNullOrEmpty(s))
+                return false;
+            if (index < 0 || index + length > s.Length)
+                return false;
+            if (length < 1 || length > 3)
+                return false;
+
+            var value = 0;
+            var indexEnd = index + length;
+            for (var i = 0; (index < indexEnd && i < 3); i++)
+            {
+                var c = s[index] - 48;
+                if (c > 9)
+                    return false;
+                value = (value * 10) + c;
+                index++;
+            }
+            if (index != indexEnd || value > 255 || value < 0)
+                return false;
+
+            result = (byte)value;
+            return true;
         }
 
         public static int HighSignificantBits(uint value)

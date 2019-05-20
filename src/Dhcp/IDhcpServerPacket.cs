@@ -7,7 +7,7 @@ namespace Dhcp
         /// <summary>
         /// Packet OP Code/Message Type (OP)
         /// </summary>
-        MessageTypes MessageType { get; }
+        DhcpServerMessageTypes MessageType { get; }
 
         /// <summary>
         /// Type of Hardware Address (HTYPE)
@@ -37,7 +37,7 @@ namespace Dhcp
         /// <summary>
         /// Flags (FLAGS)
         /// </summary>
-        PacketFlags Flags { get; }
+        DhcpServerPacketFlags Flags { get; }
         
         /// <summary>
         /// Client IP Address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to ARP requests (CIADDR)
@@ -76,11 +76,11 @@ namespace Dhcp
         
         int OptionsMagicCookie { get; }
         
-        PacketMessageTypes DhcpMessageType { get; }
+        DhcpServerPacketMessageTypes DhcpMessageType { get; }
 
         ReadOnlyCollection<DhcpServerPacketOption> Options { get; }
-        bool TryGetOption(OptionTags tag, out DhcpServerPacketOption option);
-        bool TryGetOption(byte tag, out DhcpServerPacketOption option);
+        bool TryGetOption(DhcpServerOptionIds optionId, out DhcpServerPacketOption option);
+        bool TryGetOption(byte optionId, out DhcpServerPacketOption option);
 
     }
 }

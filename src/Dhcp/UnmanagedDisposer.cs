@@ -5,7 +5,9 @@ namespace Dhcp
 {
     internal struct UnmanagedDisposer<T> : IDisposable
     {
+#pragma warning disable IDE0032 // Use auto property
         private readonly IntPtr pointer;
+#pragma warning restore IDE0032 // Use auto property
 
         public IntPtr Pointer => pointer;
 

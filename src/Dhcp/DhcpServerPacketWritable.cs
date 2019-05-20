@@ -87,7 +87,7 @@ namespace Dhcp
         #region Packet Fields
 
         /// <inheritdoc />
-        MessageTypes IDhcpServerPacketWritable.MessageType
+        DhcpServerMessageTypes IDhcpServerPacketWritable.MessageType
         {
             get => MessageType;
             set => Buffer[OpOffset] = (byte)value;
@@ -131,7 +131,7 @@ namespace Dhcp
             set => BitHelper.Write(Buffer, SecsOffset, value);
         }
 
-        PacketFlags IDhcpServerPacketWritable.Flags
+        DhcpServerPacketFlags IDhcpServerPacketWritable.Flags
         {
             get => Flags;
             set => BitHelper.Write(Buffer, FlagsOffset, (ushort)value);
@@ -189,198 +189,198 @@ namespace Dhcp
 
         #region TryAddOption
 
-        public bool TryAddOption(OptionTags tag, byte[] data)
+        public bool TryAddOption(DhcpServerOptionIds optionId, byte[] data)
         {
-            if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+            if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                 endIndex = GetLength();
-            return TryWriteOption(tag, data, endIndex, isUpdate: false);
+            return TryWriteOption(optionId, data, endIndex, isUpdate: false);
         }
 
-        public bool TryAddOption(OptionTags tag, long data)
+        public bool TryAddOption(DhcpServerOptionIds optionId, long data)
         {
-            if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+            if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                 endIndex = GetLength();
-            return TryWriteOption(tag, data, endIndex, isUpdate: false);
+            return TryWriteOption(optionId, data, endIndex, isUpdate: false);
         }
 
-        public bool TryAddOption(OptionTags tag, int data)
+        public bool TryAddOption(DhcpServerOptionIds optionId, int data)
         {
-            if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+            if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                 endIndex = GetLength();
-            return TryWriteOption(tag, data, endIndex, isUpdate: false);
+            return TryWriteOption(optionId, data, endIndex, isUpdate: false);
         }
 
-        public bool TryAddOption(OptionTags tag, short data)
+        public bool TryAddOption(DhcpServerOptionIds optionId, short data)
         {
-            if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+            if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                 endIndex = GetLength();
-            return TryWriteOption(tag, data, endIndex, isUpdate: false);
+            return TryWriteOption(optionId, data, endIndex, isUpdate: false);
         }
 
-        public bool TryAddOption(OptionTags tag, byte data)
+        public bool TryAddOption(DhcpServerOptionIds optionId, byte data)
         {
-            if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+            if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                 endIndex = GetLength();
-            return TryWriteOption(tag, data, endIndex, isUpdate: false);
+            return TryWriteOption(optionId, data, endIndex, isUpdate: false);
         }
 
-        public bool TryAddOption(OptionTags tag, string data)
+        public bool TryAddOption(DhcpServerOptionIds optionId, string data)
         {
-            if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+            if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                 endIndex = GetLength();
-            return TryWriteOption(tag, data, endIndex, isUpdate: false);
+            return TryWriteOption(optionId, data, endIndex, isUpdate: false);
         }
 
-        public bool TryAddOption(OptionTags tag, DhcpServerIpAddress data) 
-            => TryAddOption(tag, (int)data.Native);
+        public bool TryAddOption(DhcpServerOptionIds optionId, DhcpServerIpAddress data) 
+            => TryAddOption(optionId, (int)data.Native);
 
         #endregion
 
         #region TryAddOrUpdateOption
 
-        public bool TryAddOrUpdateOption(OptionTags tag, byte[] data)
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, byte[] data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, isUpdate: true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, isUpdate: true);
             else
             {
-                if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+                if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                     endIndex = GetLength();
-                return TryWriteOption(tag, data, endIndex, isUpdate: false);
+                return TryWriteOption(optionId, data, endIndex, isUpdate: false);
             }
         }
 
-        public bool TryAddOrUpdateOption(OptionTags tag, long data)
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, long data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, isUpdate: true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, isUpdate: true);
             else
             {
-                if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+                if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                     endIndex = GetLength();
-                return TryWriteOption(tag, data, endIndex, isUpdate: false);
+                return TryWriteOption(optionId, data, endIndex, isUpdate: false);
             }
         }
 
-        public bool TryAddOrUpdateOption(OptionTags tag, int data)
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, int data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, isUpdate: true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, isUpdate: true);
             else
             {
-                if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+                if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                     endIndex = GetLength();
-                return TryWriteOption(tag, data, endIndex, isUpdate: false);
+                return TryWriteOption(optionId, data, endIndex, isUpdate: false);
             }
         }
 
-        public bool TryAddOrUpdateOption(OptionTags tag, short data)
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, short data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, isUpdate: true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, isUpdate: true);
             else
             {
-                if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+                if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                     endIndex = GetLength();
-                return TryWriteOption(tag, data, endIndex, isUpdate: false);
+                return TryWriteOption(optionId, data, endIndex, isUpdate: false);
             }
         }
 
-        public bool TryAddOrUpdateOption(OptionTags tag, byte data)
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, byte data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, isUpdate: true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, isUpdate: true);
             else
             {
-                if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+                if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                     endIndex = GetLength();
-                return TryWriteOption(tag, data, endIndex, isUpdate: false);
+                return TryWriteOption(optionId, data, endIndex, isUpdate: false);
             }
         }
 
-        public bool TryAddOrUpdateOption(OptionTags tag, string data)
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, string data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, isUpdate: true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, isUpdate: true);
             else
             {
-                if (!TryGetOptionIndex(OptionTags.End, out var endIndex))
+                if (!TryGetOptionIndex(DhcpServerOptionIds.End, out var endIndex))
                     endIndex = GetLength();
-                return TryWriteOption(tag, data, endIndex, isUpdate: false);
+                return TryWriteOption(optionId, data, endIndex, isUpdate: false);
             }
         }
 
-        public bool TryAddOrUpdateOption(OptionTags tag, DhcpServerIpAddress data)
-            => TryAddOrUpdateOption(tag, (int)data.Native);
+        public bool TryAddOrUpdateOption(DhcpServerOptionIds optionId, DhcpServerIpAddress data)
+            => TryAddOrUpdateOption(optionId, (int)data.Native);
 
         #endregion
 
         #region TryUpdateOption
 
-        public bool TryUpdateOption(OptionTags tag, byte[] data)
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, byte[] data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, true);
 
             return false;
         }
 
-        public bool TryUpdateOption(OptionTags tag, long data)
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, long data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, true);
 
             return false;
         }
 
-        public bool TryUpdateOption(OptionTags tag, int data)
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, int data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, true);
 
             return false;
         }
 
-        public bool TryUpdateOption(OptionTags tag, short data)
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, short data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, true);
 
             return false;
         }
 
-        public bool TryUpdateOption(OptionTags tag, byte data)
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, byte data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, true);
 
             return false;
         }
 
-        public bool TryUpdateOption(OptionTags tag, string data)
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, string data)
         {
-            if (TryGetOptionIndex(tag, out var index))
-                return TryWriteOption(tag, data, index, true);
+            if (TryGetOptionIndex(optionId, out var index))
+                return TryWriteOption(optionId, data, index, true);
 
             return false;
         }
 
-        public bool TryUpdateOption(OptionTags tag, DhcpServerIpAddress data)
-            => TryUpdateOption(tag, (int)data.Native);
+        public bool TryUpdateOption(DhcpServerOptionIds optionId, DhcpServerIpAddress data)
+            => TryUpdateOption(optionId, (int)data.Native);
 
         #endregion
 
         #region TryWriteOption
 
-        private bool TryPrepWriteOption(OptionTags tag, int dataLength, int index, bool isUpdate, out int dataIndex)
+        private bool TryPrepWriteOption(DhcpServerOptionIds optionId, int dataLength, int index, bool isUpdate, out int dataIndex)
         {
             var buffer = base.buffer ?? Buffer;
             dataIndex = -1;
 
-            switch (tag)
+            switch (optionId)
             {
-                case OptionTags.Pad:
-                case OptionTags.End:
+                case DhcpServerOptionIds.Pad:
+                case DhcpServerOptionIds.End:
                     // 0-byte fixed length
                     if (dataLength != 0)
                         return false;
@@ -390,13 +390,13 @@ namespace Dhcp
                         if (!TryAdjustBuffer(index, 1))
                             return false;
 
-                        buffer[index] = (byte)tag;
+                        buffer[index] = (byte)optionId;
                     }
 
                     dataIndex = ++index;
                     return true;
-                case OptionTags.SubnetMask:
-                case OptionTags.TimeOffset:
+                case DhcpServerOptionIds.SubnetMask:
+                case DhcpServerOptionIds.TimeOffset:
                     // 4-byte fixed length
                     if (dataLength != 4)
                         return false;
@@ -406,7 +406,7 @@ namespace Dhcp
                         if (!TryAdjustBuffer(index, 5))
                             return false;
 
-                        buffer[index] = (byte)tag;
+                        buffer[index] = (byte)optionId;
                     }
 
                     dataIndex = ++index;
@@ -423,7 +423,7 @@ namespace Dhcp
                         if (!TryAdjustBuffer(index, 2 + dataLength))
                             return false;
 
-                        buffer[index++] = (byte)tag;
+                        buffer[index++] = (byte)optionId;
                         buffer[index++] = (byte)dataLength;
                         dataIndex = index;
                         BufferModified = true;
@@ -466,11 +466,11 @@ namespace Dhcp
             }
         }
 
-        private bool TryWriteOption(OptionTags tag, byte[] data, int index, bool isUpdate)
+        private bool TryWriteOption(DhcpServerOptionIds optionId, byte[] data, int index, bool isUpdate)
         {
             var dataLength = data?.Length ?? 0;
 
-            if (TryPrepWriteOption(tag, dataLength, index, isUpdate, out var dataIndex))
+            if (TryPrepWriteOption(optionId, dataLength, index, isUpdate, out var dataIndex))
             {
                 if (dataLength > 0)
                     Array.Copy(data, 0, buffer ?? Buffer, dataIndex, dataLength);
@@ -481,9 +481,9 @@ namespace Dhcp
             return false;
         }
 
-        private bool TryWriteOption(OptionTags tag, long data, int index, bool isUpdate)
+        private bool TryWriteOption(DhcpServerOptionIds optionId, long data, int index, bool isUpdate)
         {
-            if (TryPrepWriteOption(tag, BitHelper.Int64Size, index, isUpdate, out var dataIndex))
+            if (TryPrepWriteOption(optionId, BitHelper.Int64Size, index, isUpdate, out var dataIndex))
             {
                 BitHelper.Write(buffer ?? Buffer, dataIndex, data);
                 return true;
@@ -492,9 +492,9 @@ namespace Dhcp
             return false;
         }
 
-        private bool TryWriteOption(OptionTags tag, int data, int index, bool isUpdate)
+        private bool TryWriteOption(DhcpServerOptionIds optionId, int data, int index, bool isUpdate)
         {
-            if (TryPrepWriteOption(tag, BitHelper.Int32Size, index, isUpdate, out var dataIndex))
+            if (TryPrepWriteOption(optionId, BitHelper.Int32Size, index, isUpdate, out var dataIndex))
             {
                 BitHelper.Write(buffer ?? Buffer, dataIndex, data);
                 return true;
@@ -503,9 +503,9 @@ namespace Dhcp
             return false;
         }
 
-        private bool TryWriteOption(OptionTags tag, short data, int index, bool isUpdate)
+        private bool TryWriteOption(DhcpServerOptionIds optionId, short data, int index, bool isUpdate)
         {
-            if (TryPrepWriteOption(tag, BitHelper.Int16Size, index, isUpdate, out var dataIndex))
+            if (TryPrepWriteOption(optionId, BitHelper.Int16Size, index, isUpdate, out var dataIndex))
             {
                 BitHelper.Write(buffer ?? Buffer, dataIndex, data);
                 return true;
@@ -514,9 +514,9 @@ namespace Dhcp
             return false;
         }
 
-        private bool TryWriteOption(OptionTags tag, byte data, int index, bool isUpdate)
+        private bool TryWriteOption(DhcpServerOptionIds optionId, byte data, int index, bool isUpdate)
         {
-            if (TryPrepWriteOption(tag, BitHelper.ByteSize, index, isUpdate, out var dataIndex))
+            if (TryPrepWriteOption(optionId, BitHelper.ByteSize, index, isUpdate, out var dataIndex))
             {
                 BitHelper.Write(buffer ?? Buffer, dataIndex, data);
                 return true;
@@ -525,9 +525,9 @@ namespace Dhcp
             return false;
         }
 
-        private bool TryWriteOption(OptionTags tag, string data, int index, bool isUpdate)
+        private bool TryWriteOption(DhcpServerOptionIds optionId, string data, int index, bool isUpdate)
         {
-            if (TryPrepWriteOption(tag, data.Length, index, isUpdate, out var dataIndex))
+            if (TryPrepWriteOption(optionId, data.Length, index, isUpdate, out var dataIndex))
             {
                 BitHelper.WriteAscii(buffer ?? Buffer, dataIndex, data);
                 return true;

@@ -1,6 +1,6 @@
 ﻿namespace Dhcp
 {
-    public enum MessageTypes : byte
+    public enum DhcpServerMessageTypes : byte
     {
         BootRequest = 1,
         BootReply = 2

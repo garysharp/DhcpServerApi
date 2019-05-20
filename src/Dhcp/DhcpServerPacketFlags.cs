@@ -3,7 +3,7 @@
 namespace Dhcp
 {
     [Flags]
-    public enum PacketFlags : ushort
+    public enum DhcpServerPacketFlags : ushort
     {
         Broadcast = 0x8000
     }

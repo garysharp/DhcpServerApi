@@ -43,7 +43,7 @@ namespace Dhcp
 
             if (length == 0)
             {
-                if (TryGetOptionIndex(OptionTags.End, out length))
+                if (TryGetOptionIndex(DhcpServerOptionIds.End, out length))
                     length++;
                 else
                     length = size;
@@ -56,7 +56,7 @@ namespace Dhcp
 
         protected const int OpOffset = 0;
         /// <inheritdoc />
-        public MessageTypes MessageType => (MessageTypes)Buffer[OpOffset];
+        public DhcpServerMessageTypes MessageType => (DhcpServerMessageTypes)Buffer[OpOffset];
 
         protected const int HtypeOffset = OpOffset + 1; // 1
         /// <inheritdoc />
@@ -80,7 +80,7 @@ namespace Dhcp
 
         protected const int FlagsOffset = SecsOffset + 2; // 10
         /// <inheritdoc />
-        public PacketFlags Flags => (PacketFlags)BitHelper.ReadInt16(Buffer, FlagsOffset);
+        public DhcpServerPacketFlags Flags => (DhcpServerPacketFlags)BitHelper.ReadInt16(Buffer, FlagsOffset);
 
         protected const int CiaddrOffset = FlagsOffset + 2; // 12
         /// <inheritdoc />
@@ -117,22 +117,22 @@ namespace Dhcp
 
         #endregion
 
-        public PacketMessageTypes DhcpMessageType
+        public DhcpServerPacketMessageTypes DhcpMessageType
         {
             get
             {
-                if (TryGetOption(OptionTags.DhcpMessageType, out var option) && option.DataLength == 1)
-                    return (PacketMessageTypes)option.DataAsByte();
+                if (TryGetOption(DhcpServerOptionIds.DhcpMessageType, out var option) && option.DataLength == 1)
+                    return (DhcpServerPacketMessageTypes)option.DataAsByte();
 
-                return PacketMessageTypes.Unknown;
+                return DhcpServerPacketMessageTypes.Unknown;
             }
         }
 
         protected const int OptionsOffset = MagicCookieOffset + 4;
         public ReadOnlyCollection<DhcpServerPacketOption> Options => DhcpServerPacketOption.ParseAll(Buffer, OptionsOffset, GetLength());
-        public bool TryGetOption(OptionTags tag, out DhcpServerPacketOption option)
+        public bool TryGetOption(DhcpServerOptionIds optionId, out DhcpServerPacketOption option)
         {
-            if (TryGetOptionIndex(tag, out var optionIndex))
+            if (TryGetOptionIndex(optionId, out var optionIndex))
             {
                 option = DhcpServerPacketOption.Parse(Buffer, ref optionIndex);
                 return true;
@@ -141,34 +141,34 @@ namespace Dhcp
             option = default;
             return false;
         }
-        public bool TryGetOption(byte tag, out DhcpServerPacketOption option) => TryGetOption((OptionTags)tag, out option);
+        public bool TryGetOption(byte optionId, out DhcpServerPacketOption option) => TryGetOption((DhcpServerOptionIds)optionId, out option);
 
-        protected bool TryGetOptionIndex(OptionTags tag, out int optionIndex)
+        protected bool TryGetOptionIndex(DhcpServerOptionIds optionId, out int optionIndex)
         {
             var buffer = this.buffer ?? Buffer;
 
             for (var offset = OptionsOffset; offset < buffer.Length;)
             {
-                var optionTag = (OptionTags)buffer[offset];
+                var optionTag = (DhcpServerOptionIds)buffer[offset];
 
-                if (optionTag == tag)
+                if (optionTag == optionId)
                 {
                     optionIndex = offset;
                     return true;
                 }
 
-                if (optionTag == OptionTags.End)
+                if (optionTag == DhcpServerOptionIds.End)
                     break;
 
                 switch (optionTag)
                 {
-                    case OptionTags.Pad:
-                    case OptionTags.End:
+                    case DhcpServerOptionIds.Pad:
+                    case DhcpServerOptionIds.End:
                         // 0-byte fixed length
                         offset++;
                         break;
-                    case OptionTags.SubnetMask:
-                    case OptionTags.TimeOffset:
+                    case DhcpServerOptionIds.SubnetMask:
+                    case DhcpServerOptionIds.TimeOffset:
                         // 4-byte fixed length
                         offset += 5;
                         break;
@@ -195,7 +195,7 @@ namespace Dhcp
             sb.Append("Transaction Id (xid): ").AppendLine(TransactionId.ToString());
             sb.Append("Seconds Elapsed (secs): ").AppendLine(SecondsElapsed.ToString());
             sb.Append("Flags (flags): ").AppendLine(Convert.ToString((int)Flags, 2));
-            foreach (PacketFlags flag in Enum.GetValues(typeof(PacketFlags)))
+            foreach (DhcpServerPacketFlags flag in Enum.GetValues(typeof(DhcpServerPacketFlags)))
             {
                 sb.Append("    ");
                 var mask = Convert.ToString((short)flag, 2).Replace('0', '.');
@@ -223,9 +223,9 @@ namespace Dhcp
                 {
                     sb.AppendLine();
                     sb.Append("    ");
-                    sb.Append(((byte)option.Tag).ToString("000"));
+                    sb.Append(((byte)option.Id).ToString("000"));
                     sb.Append(" ");
-                    sb.Append(option.Tag.ToString());
+                    sb.Append(option.Id.ToString());
                     sb.Append(" [");
                     sb.Append(option.Type.ToString());
                     sb.AppendLine("]");

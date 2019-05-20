@@ -7,10 +7,12 @@ namespace Dhcp
     [Serializable]
     public struct DhcpServerIpMask
     {
+#pragma warning disable IDE0032// Use auto property
         /// <summary>
         /// IP Mask stored in big-endian (network) order
         /// </summary>
         private readonly uint ipMask;
+#pragma warning restore IDE0032 // Use auto property
 
         public DhcpServerIpMask(uint ipMask)
         {
@@ -29,7 +31,7 @@ namespace Dhcp
         public static DhcpServerIpMask FromNative(uint nativeIpMask)
             => new DhcpServerIpMask(nativeIpMask);
 
-        public static DhcpServerIpMask FromNative(int nativeIpMask) 
+        public static DhcpServerIpMask FromNative(int nativeIpMask)
             => new DhcpServerIpMask((uint)nativeIpMask);
 
         internal static DhcpServerIpMask FromNative(IntPtr pointer)
@@ -58,9 +60,10 @@ namespace Dhcp
 
         public int SignificantBits => BitHelper.HighSignificantBits(ipMask);
 
-        public DhcpServerIpRange GetDhcpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.FromMaskDhcpScope(ipAddress, this);
-        public DhcpServerIpRange GetDhcpAndBootpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.FromMaskDhcpAndBootpScope(ipAddress, this);
-        public DhcpServerIpRange GetBootpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.FromMaskBootpScope(ipAddress, this);
+        public DhcpServerIpRange GetDhcpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.AsDhcpScope(ipAddress, this);
+        public DhcpServerIpRange GetDhcpAndBootpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.AsDhcpAndBootpScope(ipAddress, this);
+        public DhcpServerIpRange GetBootpIpRange(DhcpServerIpAddress ipAddress) => DhcpServerIpRange.AsBootpScope(ipAddress, this);
+        internal DhcpServerIpRange GetIpRange(DhcpServerIpAddress ipAddress, DhcpServerIpRangeType type) => DhcpServerIpRange.FromMask(ipAddress, this, type);
 
         internal DHCP_IP_MASK ToNativeAsHost() => new DHCP_IP_MASK(BitHelper.NetworkToHostOrder(ipMask));
         internal DHCP_IP_MASK ToNativeAsNetwork() => new DHCP_IP_MASK(ipMask);

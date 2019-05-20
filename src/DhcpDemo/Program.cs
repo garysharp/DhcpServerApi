@@ -162,7 +162,7 @@ namespace DhcpDemo
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Options:");
                 Console.ForegroundColor = ConsoleColor.Gray;
-                foreach (var value in scope.AllOptionValues.ToList())
+                foreach (var value in scope.Options.ToList())
                 {
                     Console.WriteLine($"        {value}");
                 }

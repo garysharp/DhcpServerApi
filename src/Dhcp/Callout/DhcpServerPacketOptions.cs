@@ -15,7 +15,7 @@ namespace Dhcp.Callout
         /// <summary>
         /// DHCP message type.
         /// </summary>
-        public PacketMessageTypes? MessageType => options.MessageType == IntPtr.Zero ? null : (PacketMessageTypes?)Marshal.ReadByte(options.MessageType);
+        public DhcpServerPacketMessageTypes? MessageType => options.MessageType == IntPtr.Zero ? null : (DhcpServerPacketMessageTypes?)Marshal.ReadByte(options.MessageType);
 
         /// <summary>
         /// Subnet mask.
@@ -47,17 +47,17 @@ namespace Dhcp.Callout
         /// <summary>
         /// List of requested parameters.
         /// </summary>
-        public OptionTags[] ParameterRequestList
+        public DhcpServerOptionIds[] ParameterRequestList
         {
             get
             {
                 if (options.ParameterRequestListLength == 0 || options.ParameterRequestList == IntPtr.Zero)
-                    return new OptionTags[0];
+                    return new DhcpServerOptionIds[0];
 
-                var list = new OptionTags[(int)options.ParameterRequestListLength];
+                var list = new DhcpServerOptionIds[(int)options.ParameterRequestListLength];
 
                 for (var i = 0; i < list.Length; i++)
-                    list[i] = (OptionTags)Marshal.ReadByte(options.ParameterRequestList, i);
+                    list[i] = (DhcpServerOptionIds)Marshal.ReadByte(options.ParameterRequestList, i);
 
                 return list;
             }

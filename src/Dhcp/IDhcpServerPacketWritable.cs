@@ -5,7 +5,7 @@
         /// <summary>
         /// Packet OP Code/Message Type (OP)
         /// </summary>
-        new MessageTypes MessageType { get; set; }
+        new DhcpServerMessageTypes MessageType { get; set; }
 
         /// <summary>
         /// Type of Hardware Address (HTYPE)
@@ -35,7 +35,7 @@
         /// <summary>
         /// Flags (FLAGS)
         /// </summary>
-        new PacketFlags Flags { get; set; }
+        new DhcpServerPacketFlags Flags { get; set; }
 
         /// <summary>
         /// Client IP Address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to ARP requests (CIADDR)

@@ -35,6 +35,9 @@ namespace Dhcp
                                       serverName: native.ServerName);
         }
 
+        internal DHCP_HOST_INFO_Managed ToNative()
+            => new DHCP_HOST_INFO_Managed(IpAddress.ToNativeAsNetwork(), NetBiosName, ServerName);
+
         public override string ToString()
         {
             var builder = new StringBuilder(IpAddress);

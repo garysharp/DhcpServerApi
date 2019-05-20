@@ -1,6 +1,6 @@
 ﻿namespace Dhcp
 {
-    public enum PacketMessageTypes : byte
+    public enum DhcpServerPacketMessageTypes : byte
     {
         Unknown = 0,
         Discover = 1,

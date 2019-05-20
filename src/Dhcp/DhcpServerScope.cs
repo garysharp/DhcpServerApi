@@ -17,22 +17,25 @@ namespace Dhcp
         /// </summary>
         public static TimeSpan DefaultLeaseDuration => TimeSpan.FromDays(8);
 
+
         public DhcpServer Server { get; }
-
         public DhcpServerIpAddress Address { get; }
-        [Obsolete("Use Address.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int AddressNative => (int)Address.Native;
 
-
-        public DhcpServerIpMask Mask { get; }
-        [Obsolete("Use Mask.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int MaskNative => (int)Mask.Native;
-
-        public string Name { get; }
-        public string Comment { get; }
-        public DhcpServerScopeState State { get; }
+        private SubnetInfo info;
+        public DhcpServerIpMask Mask => info.Mask;
+        public string Name
+        {
+            get => info.Name;
+            set => SetName(value);
+        }
+        public string Comment
+        {
+            get => info.Comment;
+            set => SetComment(value);
+        }
+        public DhcpServerScopeState State => info.State;
         public DhcpServerIpRange IpRange { get; }
-        public IEnumerable<DhcpServerIpRange> ExcludedIpRanges { get; }
+        
         public TimeSpan? LeaseDuration
         {
             get => GetLeaseDuration(Server, Address);
@@ -43,80 +46,103 @@ namespace Dhcp
             get => GetTimeDelayOffer(Server, Address);
             set => SetTimeDelayOffer(Server, Address, value);
         }
-        public DhcpServerHost PrimaryHost { get; }
-        public DhcpServerDnsSettings DnsSettings { get; }
-        public bool QuarantineOn { get; }
 
-        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange ipRange, List<DhcpServerIpRange> excludedIpRanges, DhcpServerDnsSettings dnsSettings)
+        public DhcpServerHost PrimaryHost => info.PrimaryHost;
+        public DhcpServerDnsSettings DnsSettings { get; }
+        public bool QuarantineOn => info.QuarantineOn;
+
+        /// <summary>
+        /// Excluded IP Ranges
+        /// </summary>
+        public DhcpServerScopeExcludedIpRangeCollection ExcludedIpRanges { get; }
+
+        /// <summary>
+        /// Option Values
+        /// </summary>
+        public DhcpServerScopeOptionValueCollection Options { get; }
+
+        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange ipRange, DhcpServerDnsSettings dnsSettings, SubnetInfo info)
         {
             Server = server;
             Address = address;
             IpRange = ipRange;
-            ExcludedIpRanges = excludedIpRanges;
             DnsSettings = dnsSettings;
+            this.info = info;
+
+            ExcludedIpRanges = new DhcpServerScopeExcludedIpRangeCollection(this);
+            Options = new DhcpServerScopeOptionValueCollection(this);
         }
 
-        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange ipRange, List<DhcpServerIpRange> excludedIpRanges, DhcpServerDnsSettings dnsSettings, SubnetInfo info)
-            : this(server, address, ipRange, excludedIpRanges, dnsSettings)
-        {
-            Mask = info.Mask;
-            Name = info.Name;
-            Comment = info.Comment;
-            State = info.State;
-            PrimaryHost = info.PrimaryHost;
-            QuarantineOn = info.QuarantineOn;
-        }
-
-        /// <summary>
-        /// Enumerates a list of Default Option Values associated with the DHCP Scope
-        /// </summary>
-        public IEnumerable<DhcpServerOptionValue> OptionValues => DhcpServerOptionValue.EnumScopeDefaultOptionValues(this);
-
-        /// <summary>
-        /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
-        /// </summary>
-        public IEnumerable<DhcpServerOptionValue> AllOptionValues => DhcpServerOptionValue.GetAllScopeOptionValues(this);
+        
 
         public IEnumerable<DhcpServerClient> Clients => DhcpServerClient.GetClients(this);
 
         public IEnumerable<DhcpServerScopeReservation> Reservations => DhcpServerScopeReservation.GetReservations(this);
 
-        /// <summary>
-        /// Retrieves the Option Value associated with the Option and Scope
-        /// </summary>
-        /// <param name="option">The associated option to retrieve the option value for</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetOptionValue(DhcpServerOption option) => option.GetScopeValue(this);
+        public void Activate()
+        {
+            if (info.State != DhcpServerScopeState.Enabled)
+            {
+                var proposedInfo = info.UpdateState(DhcpServerScopeState.Enabled);
+                SetInfo(proposedInfo);
+            }
+        }
+
+        public void Deactivate()
+        {
+            if (info.State != DhcpServerScopeState.Disabled)
+            {
+                var proposedInfo = info.UpdateState(DhcpServerScopeState.Disabled);
+                SetInfo(proposedInfo);
+            }
+        }
 
         /// <summary>
-        /// Retrieves the Option Value associated with the Option and Scope from the Default options
+        /// Deletes this scope from the server
         /// </summary>
-        /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetOptionValue(int optionId) => DhcpServerOptionValue.GetScopeDefaultOptionValue(this, optionId);
+        /// <param name="retainClientDnsRecords">If true registered client DNS records are not removed. Useful in failover scenarios. Default = false</param>
+        public void Delete(bool retainClientDnsRecords = false)
+        {
+            var flag = retainClientDnsRecords ? DHCP_FORCE_FLAG.DhcpFailoverForce : DHCP_FORCE_FLAG.DhcpFullForce;
 
-        /// <summary>
-        /// Retrieves the Option Value associated with the Option and Scope within a Vendor Class
-        /// </summary>
-        /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
-        /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId)
-            => DhcpServerOptionValue.GetScopeVendorOptionValue(this, optionId, vendorName);
+            var result = Api.DhcpDeleteSubnet(ServerIpAddress: Server.IpAddress,
+                                              SubnetAddress: Address.ToNativeAsNetwork(),
+                                              ForceFlag: flag);
 
-        /// <summary>
-        /// Retrieves the Option Value associated with the Option and Scope within a User Class
-        /// </summary>
-        /// <param name="className">The name of the User Class to retrieve the Option from</param>
-        /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetUserOptionValue(string className, int optionId)
-            => DhcpServerOptionValue.GetScopeUserOptionValue(this, optionId, className);
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpDeleteSubnet), result);
+        }
 
-        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, bool enable)
-            => CreateScope(server, name, description, ipRange, mask, excludedRanges: null, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration, enable: enable);
+        private void SetName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
 
-        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, IEnumerable<DhcpServerIpRange> excludedRanges, TimeSpan timeDelayOffer, TimeSpan? leaseDuration, bool enable)
+            if (!name.Equals(info.Name, StringComparison.Ordinal))
+            {
+                var proposedInfo = info.UpdateName(name);
+                SetInfo(proposedInfo);
+            }
+        }
+        private void SetComment(string comment)
+        {
+            if (string.IsNullOrEmpty(comment))
+                comment = string.Empty;
+
+            if (!comment.Equals(info.Comment, StringComparison.Ordinal))
+            {
+                var proposedInfo = info.UpdateComment(comment);
+                SetInfo(proposedInfo);
+            }
+        }
+
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange)
+            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
+            => CreateScope(server, name, description, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
+            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer, leaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
@@ -125,7 +151,15 @@ namespace Dhcp
             if (ipRange.Type != DhcpServerIpRangeType.ScopeDhcpOnly && ipRange.Type != DhcpServerIpRangeType.ScopeDhcpAndBootp && ipRange.Type != DhcpServerIpRangeType.ScopeBootpOnly)
                 throw new ArgumentOutOfRangeException(nameof(ipRange), "The IP Range must be of scope type (ScopeDhcpOnly, ScopeDhcpAndBootp or ScopeBootpOnly)");
 
-            var subnetAddress = mask.GetDhcpIpRange(ipRange.StartAddress).StartAddress;
+            var maskRange = mask.GetIpRange(ipRange.StartAddress, DhcpServerIpRangeType.Excluded); // only for validation; use excluded range so the first and last addresses are included
+            var subnetAddress = maskRange.StartAddress;
+
+            if (maskRange.StartAddress == ipRange.StartAddress)
+                throw new ArgumentOutOfRangeException(nameof(ipRange), "The starting address is not valid for this range. Subnet ID address cannot be included in the range.");
+            if (maskRange.EndAddress == ipRange.EndAddress)
+                throw new ArgumentOutOfRangeException(nameof(ipRange), "The ending address is not valid for this range. Subnet broadcast addresses cannot be included in the range.");
+            if (maskRange.EndAddress < ipRange.EndAddress)
+                throw new ArgumentOutOfRangeException(nameof(ipRange), "The range is not valid for this subnet mask.");
 
             var primaryHost = new DHCP_HOST_INFO_Managed(ipAddress: server.IpAddress.ToNativeAsNetwork(), netBiosName: null, serverName: null);
             var scopeInfo = new DHCP_SUBNET_INFO_Managed(subnetAddress: subnetAddress.ToNativeAsNetwork(),
@@ -142,30 +176,16 @@ namespace Dhcp
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpCreateSubnet), result);
 
+            // add ip range
+            AddSubnetScopeIpRangeElement(server, subnetAddress, ipRange);
+
+            // set time delay offer
             if (timeDelayOffer.TotalMilliseconds != 0)
                 SetTimeDelayOffer(server, subnetAddress, timeDelayOffer);
 
+            // set lease duration
             SetLeaseDuration(server, subnetAddress, leaseDuration);
 
-            AddSubnetScopeIpRangeElement(server, subnetAddress, ipRange);
-
-            if (excludedRanges != null)
-            {
-                foreach (var excludedRange in excludedRanges)
-                    AddSubnetExcludedIpRangeElement(server, subnetAddress, excludedRange);
-            }
-
-            if (enable)
-            {
-                scopeInfo.SubnetState = DHCP_SUBNET_STATE.DhcpSubnetEnabled;
-                result = Api.DhcpSetSubnetInfo(ServerIpAddress: server.IpAddress,
-                                               SubnetAddress: subnetAddress.ToNativeAsNetwork(),
-                                               SubnetInfo: ref scopeInfo);
-
-                if (result != DhcpErrors.SUCCESS)
-                    throw new DhcpServerException(nameof(Api.DhcpCreateSubnet), result);
-            }
-            
             return GetScope(server, subnetAddress);
         }
 
@@ -204,23 +224,57 @@ namespace Dhcp
 
         internal static DhcpServerScope GetScope(DhcpServer server, DhcpServerIpAddress address)
         {
-            SubnetInfo info;
-            if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
-                info = GetInfoVQ(server, address);
-            else
-                info = GetInfoV0(server, address);
-
-            var ipRange = EnumSubnetElements(server, address, DHCP_SUBNET_ELEMENT_TYPE.DhcpIpRangesDhcpBootp)
-                .Select(element => DhcpServerIpRange.FromNative(ref element)).First();
-            var excludedIpRanges = EnumSubnetElements(server, address, DHCP_SUBNET_ELEMENT_TYPE.DhcpExcludedIpRanges)
-                .Select(element => DhcpServerIpRange.FromNative(ref element)).ToList();
-
+            var info = GetInfo(server, address);
+            var ipRange = EnumSubnetElements(server, address, DHCP_SUBNET_ELEMENT_TYPE.DhcpIpRangesDhcpBootp).First();
             var dnsSettings = DhcpServerDnsSettings.GetScopeDnsSettings(server, address);
 
-            return new DhcpServerScope(server, address, ipRange, excludedIpRanges, dnsSettings, info);
+            return new DhcpServerScope(server, address, ipRange, dnsSettings, info);
         }
 
-        private static IEnumerable<DHCP_SUBNET_ELEMENT_DATA_V5> EnumSubnetElements(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
+        internal static IEnumerable<DhcpServerIpRange> EnumSubnetElements(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
+        {
+            if (server.IsCompatible(DhcpServerVersions.Windows2008))
+                return EnumSubnetElementsV5(server, address, enumElementType);
+            else
+                return EnumSubnetElementsV0(server, address, enumElementType);
+        }
+
+        private static IEnumerable<DhcpServerIpRange> EnumSubnetElementsV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
+        {
+            var resumeHandle = IntPtr.Zero;
+            var result = Api.DhcpEnumSubnetElements(ServerIpAddress: server.IpAddress,
+                                                    SubnetAddress: address.ToNativeAsNetwork(),
+                                                    EnumElementType: enumElementType,
+                                                    ResumeHandle: ref resumeHandle,
+                                                    PreferredMaximum: 0xFFFFFFFF,
+                                                    EnumElementInfo: out var elementsPtr,
+                                                    ElementsRead: out var elementsRead,
+                                                    ElementsTotal: out _);
+
+            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+                yield break;
+
+            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+                throw new DhcpServerException(nameof(Api.DhcpEnumSubnetElements), result);
+
+            try
+            {
+                if (elementsRead == 0)
+                    yield break;
+
+                using (var elements = elementsPtr.MarshalToStructure<DHCP_SUBNET_ELEMENT_INFO_ARRAY>())
+                {
+                    foreach (var element in elements.Elements)
+                        yield return DhcpServerIpRange.FromNative(element);
+                }
+            }
+            finally
+            {
+                Api.FreePointer(elementsPtr);
+            }
+        }
+
+        private static IEnumerable<DhcpServerIpRange> EnumSubnetElementsV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
         {
             var resumeHandle = IntPtr.Zero;
             var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: server.IpAddress,
@@ -246,7 +300,7 @@ namespace Dhcp
                 using (var elements = elementsPtr.MarshalToStructure<DHCP_SUBNET_ELEMENT_INFO_ARRAY_V5>())
                 {
                     foreach (var element in elements.Elements)
-                        yield return element;
+                        yield return DhcpServerIpRange.FromNative(element);
                 }
             }
             finally
@@ -273,10 +327,10 @@ namespace Dhcp
             }
         }
 
-        private static void AddSubnetExcludedIpRangeElement(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange range)
+        internal static void AddSubnetExcludedIpRangeElement(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange range)
         {
             if (range.Type != DhcpServerIpRangeType.Excluded)
-                throw new ArgumentOutOfRangeException($"{nameof(range)}.{nameof(range.Type)}", "The expected range type is 'Excluded'");
+                throw new ArgumentOutOfRangeException($"{nameof(range)}.{nameof(range.Type)}", $"The expected range type is '{DhcpServerIpRangeType.Excluded}'");
 
             if (server.IsCompatible(DhcpServerVersions.Windows2003))
             {
@@ -310,6 +364,35 @@ namespace Dhcp
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpAddSubnetElement), result);
+        }
+
+        internal static void RemoveSubnetExcludedIpRangeElement(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange range)
+        {
+            if (range.Type != DhcpServerIpRangeType.Excluded)
+                throw new ArgumentOutOfRangeException($"{nameof(range)}.{nameof(range.Type)}", $"The expected range type is '{DhcpServerIpRangeType.Excluded}'");
+
+            using (var element = new DHCP_SUBNET_ELEMENT_DATA_Managed((DHCP_SUBNET_ELEMENT_TYPE)range.Type, range.ToNativeIpRange()))
+            {
+                RemoveSubnetElementV0(server, address, element);
+            }
+        }
+
+        private static void RemoveSubnetElementV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_V5_Managed element)
+        {
+            var elementRef = element;
+            var result = Api.DhcpRemoveSubnetElementV5(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpRemoveSubnetElementV5), result);
+        }
+
+        private static void RemoveSubnetElementV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_Managed element)
+        {
+            var elementRef = element;
+            var result = Api.DhcpRemoveSubnetElement(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpRemoveSubnetElement), result);
         }
 
         private static TimeSpan GetTimeDelayOffer(DhcpServer server, DhcpServerIpAddress address)
@@ -372,6 +455,14 @@ namespace Dhcp
             DhcpServerOptionValue.SetScopeDefaultOptionValue(server, address, 51, new DhcpServerOptionElement[] { optionValue });
         }
 
+        private static SubnetInfo GetInfo(DhcpServer server, DhcpServerIpAddress address)
+        {
+            if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
+                return GetInfoVQ(server, address);
+            else
+                return GetInfoV0(server, address);
+        }
+
         private static SubnetInfo GetInfoV0(DhcpServer server, DhcpServerIpAddress address)
         {
             var result = Api.DhcpGetSubnetInfo(ServerIpAddress: server.IpAddress,
@@ -412,45 +503,115 @@ namespace Dhcp
             }
         }
 
-        public override string ToString() => $"DHCP Scope: {Address} ({Server.Name} ({Server.IpAddress}))";
+        private void SetInfo(SubnetInfo info)
+        {
+            if (Server.IsCompatible(DhcpServerVersions.Windows2008R2))
+                SetInfoVQ(info);
+            else
+                SetInfoV0(info);
+
+            // update cache
+            this.info = info;
+        }
+
+        private void SetInfoV0(SubnetInfo info)
+        {
+            var infoNative = info.ToNativeV0();
+            var result = Api.DhcpSetSubnetInfo(ServerIpAddress: Server.IpAddress,
+                                               SubnetAddress: Address.ToNativeAsNetwork(),
+                                               SubnetInfo: ref infoNative);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpSetSubnetInfo), result);
+        }
+
+        private void SetInfoVQ(SubnetInfo info)
+        {
+            var infoNative = info.ToNativeVQ();
+            var result = Api.DhcpSetSubnetInfoVQ(ServerIpAddress: Server.IpAddress,
+                                                 SubnetAddress: Address.ToNativeAsNetwork(),
+                                                 SubnetInfo: ref infoNative);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpSetSubnetInfoVQ), result);
+        }
+
+        public override string ToString() => $"Scope [{Address}] {Name} ({Comment})";
 
         private class SubnetInfo
         {
+            public readonly DHCP_IP_ADDRESS SubnetAddress;
             public readonly DhcpServerIpMask Mask;
             public readonly string Name;
             public readonly string Comment;
             public readonly DhcpServerHost PrimaryHost;
             public readonly DhcpServerScopeState State;
-            public readonly bool QuarantineOn;
+            public bool QuarantineOn => vqQuarantineOn != 0;
 
-            private SubnetInfo(DhcpServerIpMask mask, string name, string comment, DhcpServerHost primaryHost, DhcpServerScopeState state, bool quarantineOn)
+            private readonly uint vqQuarantineOn;
+            private readonly uint vqReserved1;
+            private readonly uint vqReserved2;
+            private readonly ulong vqReserved3;
+            private readonly ulong vqReserved4;
+
+            private SubnetInfo(DHCP_IP_ADDRESS subnetAddress, DhcpServerIpMask mask, string name, string comment, DhcpServerHost primaryHost, DhcpServerScopeState state)
             {
+                SubnetAddress = subnetAddress;
                 Mask = mask;
                 Name = name;
                 Comment = comment;
                 PrimaryHost = primaryHost;
                 State = state;
-                QuarantineOn = quarantineOn;
+                vqQuarantineOn = 0;
             }
+
+            private SubnetInfo(DHCP_IP_ADDRESS subnetAddress, DhcpServerIpMask mask, string name, string comment, DhcpServerHost primaryHost, DhcpServerScopeState state, uint quarantineOn, uint reserved1, uint reserved2, ulong reserved3, ulong reserved4)
+                : this(subnetAddress, mask, name, comment, primaryHost, state)
+            {
+                vqQuarantineOn = quarantineOn;
+                vqReserved1 = reserved1;
+                vqReserved2 = reserved2;
+                vqReserved3 = reserved3;
+                vqReserved4 = reserved4;
+            }
+
             public static SubnetInfo FromNative(DHCP_SUBNET_INFO info)
             {
-                return new SubnetInfo(mask: info.SubnetMask.AsNetworkToIpMask(),
+                return new SubnetInfo(subnetAddress: info.SubnetAddress,
+                                      mask: info.SubnetMask.AsNetworkToIpMask(),
                                       name: info.SubnetName,
                                       comment: info.SubnetComment,
                                       primaryHost: DhcpServerHost.FromNative(info.PrimaryHost),
-                                      state: (DhcpServerScopeState)info.SubnetState,
-                                      quarantineOn: false);
+                                      state: (DhcpServerScopeState)info.SubnetState);
             }
 
             public static SubnetInfo FromNative(DHCP_SUBNET_INFO_VQ info)
             {
-                return new SubnetInfo(mask: info.SubnetMask.AsNetworkToIpMask(),
+                return new SubnetInfo(subnetAddress: info.SubnetAddress,
+                                      mask: info.SubnetMask.AsNetworkToIpMask(),
                                       name: info.SubnetName,
                                       comment: info.SubnetComment,
                                       primaryHost: DhcpServerHost.FromNative(info.PrimaryHost),
                                       state: (DhcpServerScopeState)info.SubnetState,
-                                      quarantineOn: info.QuarantineOn != 0);
+                                      quarantineOn: info.QuarantineOn,
+                                      reserved1: info.Reserved1,
+                                      reserved2: info.Reserved2,
+                                      reserved3: info.Reserved3,
+                                      reserved4: info.Reserved4);
             }
+
+            public SubnetInfo UpdateName(string name)
+                => new SubnetInfo(SubnetAddress, Mask, name, Comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+            public SubnetInfo UpdateComment(string comment)
+                => new SubnetInfo(SubnetAddress, Mask, Name, comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+            public SubnetInfo UpdateState(DhcpServerScopeState state)
+                => new SubnetInfo(SubnetAddress, Mask, Name, Comment, PrimaryHost, state, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+
+            public DHCP_SUBNET_INFO_Managed ToNativeV0()
+                => new DHCP_SUBNET_INFO_Managed(SubnetAddress, Mask.ToNativeAsNetwork(), Name, Comment, PrimaryHost.ToNative(), (DHCP_SUBNET_STATE)State);
+
+            public DHCP_SUBNET_INFO_VQ_Managed ToNativeVQ()
+                => new DHCP_SUBNET_INFO_VQ_Managed(SubnetAddress, Mask.ToNativeAsNetwork(), Name, Comment, PrimaryHost.ToNative(), (DHCP_SUBNET_STATE)State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
         }
     }
 }

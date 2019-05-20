@@ -9,37 +9,37 @@ namespace Dhcp
     [Serializable]
     public struct DhcpServerPacketOption
     {
-        private static OptionTagTypes[] tagTypesCache;
-        private readonly OptionTags tag;
+        private static DhcpServerOptionIdTypes[] optionIdTypesCache;
+        private readonly DhcpServerOptionIds id;
         private readonly int length;
         private readonly ulong dataLong;
         private readonly byte[] dataArray;
 
-        public OptionTags Tag => tag;
+        public DhcpServerOptionIds Id => id;
         public int DataLength => length;
 
-        internal DhcpServerPacketOption(OptionTags tag)
+        internal DhcpServerPacketOption(DhcpServerOptionIds optionId)
         {
-            this.tag = tag;
+            id = optionId;
             dataLong = default;
             dataArray = null;
             length = 0;
         }
 
-        internal DhcpServerPacketOption(OptionTags tag, byte[] data)
+        internal DhcpServerPacketOption(DhcpServerOptionIds optionId, byte[] data)
         {
-            this.tag = tag;
+            id = optionId;
             dataLong = default;
             dataArray = data;
             length = data.Length;
         }
 
-        internal DhcpServerPacketOption(OptionTags tag, ulong data, int length)
+        internal DhcpServerPacketOption(DhcpServerOptionIds optionId, ulong data, int length)
         {
             if (length > 8)
                 throw new ArgumentOutOfRangeException(nameof(length));
 
-            this.tag = tag;
+            id = optionId;
             dataLong = data;
             dataArray = null;
             this.length = length;
@@ -47,33 +47,33 @@ namespace Dhcp
 
         private static void EnsureTypesCache()
         {
-            if (tagTypesCache == null)
+            if (optionIdTypesCache == null)
             {
-                var cache = new OptionTagTypes[256];
+                var cache = new DhcpServerOptionIdTypes[256];
 
-                foreach (var field in typeof(OptionTags).GetFields(BindingFlags.Public | BindingFlags.Static))
+                foreach (var field in typeof(DhcpServerOptionIds).GetFields(BindingFlags.Public | BindingFlags.Static))
                 {
                     var attributes = field
-                        .GetCustomAttributes(typeof(OptionTagTypeAttribute), false);
-                    if (attributes.Length == 1 && attributes[0] is OptionTagTypeAttribute attribute)
+                        .GetCustomAttributes(typeof(DhcpServerOptionIdTypeAttribute), false);
+                    if (attributes.Length == 1 && attributes[0] is DhcpServerOptionIdTypeAttribute attribute)
                     {
-                        var tag = (byte)field.GetValue(null);
-                        cache[tag] = attribute.Type;
+                        var id = (byte)field.GetValue(null);
+                        cache[id] = attribute.Type;
                     }
                 }
 
-                tagTypesCache = cache;
+                optionIdTypesCache = cache;
             }
         }
 
-        public OptionTagTypes Type
+        public DhcpServerOptionIdTypes Type
         {
             get
             {
-                if (tagTypesCache == null)
+                if (optionIdTypesCache == null)
                     EnsureTypesCache();
 
-                return tagTypesCache[(byte)tag];
+                return optionIdTypesCache[(byte)id];
             }
         }
 
@@ -258,20 +258,20 @@ namespace Dhcp
 
             switch (Type)
             {
-                case OptionTagTypes.Pad:
+                case DhcpServerOptionIdTypes.Pad:
                     builder.Append($"[padding]");
                     return;
-                case OptionTagTypes.End:
+                case DhcpServerOptionIdTypes.End:
                     builder.Append($"[end]");
                     return;
-                case OptionTagTypes.IpAddress:
+                case DhcpServerOptionIdTypes.IpAddress:
                     if (length == 4)
                     {
                         builder.Append(DataAsIpAddress().ToString());
                         return;
                     }
                     break;
-                case OptionTagTypes.IpAddressList:
+                case DhcpServerOptionIdTypes.IpAddressList:
                     if (length > 0 && length % 4 == 0)
                     {
                         for (var i = 0; i < length; i += 4)
@@ -284,48 +284,48 @@ namespace Dhcp
                         return;
                     }
                     break;
-                case OptionTagTypes.Byte:
+                case DhcpServerOptionIdTypes.Byte:
                     if (length == 1)
                     {
                         builder.Append(DataAsByte());
                         return;
                     }
                     break;
-                case OptionTagTypes.Int16:
+                case DhcpServerOptionIdTypes.Int16:
                     if (length == 2)
                     {
                         builder.Append(DataAsInt16());
                         return;
                     }
                     break;
-                case OptionTagTypes.UInt16:
+                case DhcpServerOptionIdTypes.UInt16:
                     if (length == 2)
                     {
                         builder.Append((ushort)DataAsInt16());
                         return;
                     }
                     break;
-                case OptionTagTypes.Int32:
+                case DhcpServerOptionIdTypes.Int32:
                     if (length == 4)
                     {
                         builder.Append(DataAsInt32());
                         return;
                     }
                     break;
-                case OptionTagTypes.UInt32:
+                case DhcpServerOptionIdTypes.UInt32:
                     if (length == 4)
                     {
                         builder.Append((uint)DataAsInt32());
                         return;
                     }
                     break;
-                case OptionTagTypes.AsciiString:
+                case DhcpServerOptionIdTypes.AsciiString:
                     builder.Append(DataAsAsciiString());
                     return;
-                case OptionTagTypes.Utf8String:
+                case DhcpServerOptionIdTypes.Utf8String:
                     builder.Append(DataAsUtf8String());
                     return;
-                case OptionTagTypes.IpAddressAndSubnet:
+                case DhcpServerOptionIdTypes.IpAddressAndSubnet:
                     if (length > 0 && length % 8 == 0)
                     {
                         for (var i = 0; i < length; i += 8)
@@ -340,7 +340,7 @@ namespace Dhcp
                         return;
                     }
                     break;
-                case OptionTagTypes.IpAddressAndIpAddress:
+                case DhcpServerOptionIdTypes.IpAddressAndIpAddress:
                     if (length > 0 && length % 8 == 0)
                     {
                         for (var i = 0; i < length; i += 8)
@@ -355,7 +355,7 @@ namespace Dhcp
                         return;
                     }
                     break;
-                case OptionTagTypes.UInt16List:
+                case DhcpServerOptionIdTypes.UInt16List:
                     if (length > 0 && length % 2 == 0)
                     {
                         for (var i = 0; i < length; i += 2)
@@ -368,18 +368,18 @@ namespace Dhcp
                         return;
                     }
                     break;
-                case OptionTagTypes.DhcpMessageType:
+                case DhcpServerOptionIdTypes.DhcpMessageType:
                     if (length == 1)
                     {
                         var type = DataAsByte();
-                        builder.Append(((PacketMessageTypes)type).ToString());
+                        builder.Append(((DhcpServerPacketMessageTypes)type).ToString());
                         builder.Append(" [");
                         builder.Append(type);
                         builder.Append("]");
                         return;
                     }
                     break;
-                case OptionTagTypes.DhcpParameterRequestList:
+                case DhcpServerOptionIdTypes.DhcpParameterRequestList:
                     if (length > 0)
                     {
                         for (var i = 0; i < length; i++)
@@ -387,23 +387,23 @@ namespace Dhcp
                             if (i != 0)
                                 builder.Append("; ");
 
-                            var tag = DataAsByte(i);
-                            builder.Append(((OptionTags)tag).ToString());
+                            var optionId = DataAsByte(i);
+                            builder.Append(((DhcpServerOptionIds)optionId).ToString());
                             builder.Append(" [");
-                            builder.Append(tag);
+                            builder.Append(optionId);
                             builder.Append("]");
                         }
                         return;
                     }
                     break;
-                case OptionTagTypes.ZeroLengthFlag:
+                case DhcpServerOptionIdTypes.ZeroLengthFlag:
                     if (length == 0)
                     {
                         builder.Append($"[present]");
                         return;
                     }
                     break;
-                case OptionTagTypes.ClientFQDN:
+                case DhcpServerOptionIdTypes.ClientFQDN:
                     if (length >= 3)
                     {
                         var flags = DataAsByte(0);
@@ -443,28 +443,28 @@ namespace Dhcp
                         return;
                     }
                     break;
-                case OptionTagTypes.DnsName:
+                case DhcpServerOptionIdTypes.DnsName:
                     if (length > 0)
                     {
                         builder.AppendDnsLabelsString(DataAsBytes(), 0);
                         return;
                     }
                     break;
-                case OptionTagTypes.DnsNameList:
+                case DhcpServerOptionIdTypes.DnsNameList:
                     if (length > 0)
                     {
                         builder.AppendDnsLabelsStrings(DataAsBytes(), 0, length, "; ");
                         return;
                     }
                     break;
-                case OptionTagTypes.ClientUUID:
+                case DhcpServerOptionIdTypes.ClientUUID:
                     if (length == 17 && DataAsByte(0) == 0)
                     {
                         builder.Append(new Guid(DataAsBytes(1, 16)).ToString("B"));
                         return;
                     }
                     break;
-                case OptionTagTypes.SipServers:
+                case DhcpServerOptionIdTypes.SipServers:
                     if (length > 1)
                     {
                         var encoding = DataAsByte(0);
@@ -486,7 +486,7 @@ namespace Dhcp
                         }
                     }
                     break;
-                case OptionTagTypes.StatusCode:
+                case DhcpServerOptionIdTypes.StatusCode:
                     if (length > 0)
                     {
                         var status = DataAsByte(0);
@@ -519,7 +519,7 @@ namespace Dhcp
                         }
                     }
                     break;
-                case OptionTagTypes.DhcpState:
+                case DhcpServerOptionIdTypes.DhcpState:
                     if (length == 1)
                     {
                         var state = DataAsByte(0);
@@ -556,7 +556,7 @@ namespace Dhcp
                         }
                     }
                     break;
-                case OptionTagTypes.Hex: // default
+                case DhcpServerOptionIdTypes.Hex: // default
                 default:
                     isExpected = true;
                     break;
@@ -573,18 +573,18 @@ namespace Dhcp
 
         internal static DhcpServerPacketOption Parse(byte[] buffer, ref int index)
         {
-            var tag = (OptionTags)buffer[index++];
+            var id = (DhcpServerOptionIds)buffer[index++];
 
-            switch (tag)
+            switch (id)
             {
-                case OptionTags.Pad:
-                case OptionTags.End:
+                case DhcpServerOptionIds.Pad:
+                case DhcpServerOptionIds.End:
                     // 0-byte fixed length
-                    return new DhcpServerPacketOption(tag);
+                    return new DhcpServerPacketOption(id);
                 default:
                     // variable length
                     if (index >= buffer.Length)
-                        return new DhcpServerPacketOption(OptionTags.End);
+                        return new DhcpServerPacketOption(DhcpServerOptionIds.End);
 
                     var dataLength = buffer[index++];
 
@@ -596,14 +596,14 @@ namespace Dhcp
                             bufferL |= ((ulong)buffer[index + i] << (56 - (i * 8)));
                         }
                         index += dataLength;
-                        return new DhcpServerPacketOption(tag, bufferL, dataLength);
+                        return new DhcpServerPacketOption(id, bufferL, dataLength);
                     }
                     else
                     {
                         var bufferA = new byte[dataLength];
                         Array.Copy(buffer, index, bufferA, 0, Math.Min(dataLength, buffer.Length - index));
                         index += dataLength;
-                        return new DhcpServerPacketOption(tag, bufferA);
+                        return new DhcpServerPacketOption(id, bufferA);
                     }
             }
         }
@@ -619,10 +619,10 @@ namespace Dhcp
             {
                 var option = Parse(buffer, ref i);
 
-                if (option.Tag == OptionTags.End)
+                if (option.Id == DhcpServerOptionIds.End)
                     break;
 
-                if (option.Tag != OptionTags.Pad)
+                if (option.Id != DhcpServerOptionIds.Pad)
                     results.Add(option);
             }
 
@@ -633,9 +633,9 @@ namespace Dhcp
         {
             var sb = new StringBuilder();
 
-            sb.Append(tag.ToString());
+            sb.Append(id.ToString());
             sb.Append("[");
-            sb.Append((byte)tag);
+            sb.Append((byte)id);
             sb.Append("]: ");
 
             DataAsFormatted(sb);

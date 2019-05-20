@@ -8,10 +8,12 @@ namespace Dhcp
     [Serializable]
     public struct DhcpServerIpAddress : IEquatable<DhcpServerIpAddress>, IEquatable<IPAddress>
     {
+#pragma warning disable IDE0032 // Use auto property
         /// <summary>
         /// IP Address stored in big-endian (network) order
         /// </summary>
         private readonly uint ipAddress;
+#pragma warning restore IDE0032 // Use auto property
 
         public DhcpServerIpAddress(uint nativeIpAddress)
         {

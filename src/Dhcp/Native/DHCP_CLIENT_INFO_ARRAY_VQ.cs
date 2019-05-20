@@ -9,10 +9,12 @@ namespace Dhcp.Native
     /// </summary>
     internal struct DHCP_CLIENT_INFO_ARRAY_VQ : IDisposable
     {
+#pragma warning disable CS0649
         /// <summary>
         /// The number of elements in the array.
         /// </summary>
         public readonly int NumElements;
+#pragma warning restore CS0649
 
         /// <summary>
         /// Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.

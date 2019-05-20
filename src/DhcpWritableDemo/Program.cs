@@ -16,32 +16,64 @@ namespace DhcpWritableDemo
 
         static void CreateScope(DhcpServer dhcpServer)
         {
+            // gather name and range information
             var name = "Test Scope";
             var description = "Test Scope Description";
 
-            var ipRange = DhcpServerIpRange.FromAddressesDhcpScope("192.168.128.1", "192.168.128.254");
+            var ipRange = DhcpServerIpRange.AsDhcpScope("192.168.128.0/24"); // use CIDR notation
+            // "DhcpScope" automatically removes subnet and broadcast address: 192.168.128.1-192.168.128.254
+            // or:
+            // var ipRange = DhcpServerIpRange.AsDhcpScope("192.168.128.1", "192.168.128.254");
+            // var ipRange = DhcpServerIpRange.AsDhcpScope("192.168.128.0", (DhcpServerIpMask)"255.255.255.0");
 
-            var mask = DhcpServerIpMask.FromSignificantBits(24); // 255.255.255.0
-                                                                 // or:
-                                                                 // var mask = new DhcpServerIpMask("255.255.255.0");
-                                                                 // var mask = (DhcpServerIpMask)"255.255.255.0";
+            // create scope (mask can be explicity set if required)
+            var dhcpScope = dhcpServer.Scopes.CreateScope(
+                name: name,
+                description: description,
+                ipRange: ipRange);
 
-            var excludedRanges = new DhcpServerIpRange[]
-            {
-                DhcpServerIpRange.FromAddressesExcluded("192.168.128.1", "192.168.128.10"),
-                DhcpServerIpRange.FromAddressesExcluded("192.168.128.240", "192.168.128.254"),
-            };
+            // specify excluded ip ranges
+            dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.1", endAddress: "192.168.128.10");
+            dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.240", endAddress: "192.168.128.254");
 
-            var dhcpScope = dhcpServer.Scopes.CreateScope(name: name,
-                                description: description,
-                                ipRange: ipRange,
-                                mask: mask,
-                                excludedRanges: excludedRanges,
-                                timeDelayOffer: DhcpServerScope.DefaultTimeDelayOffer,
-                                leaseDuration: DhcpServerScope.DefaultLeaseDuration,
-                                enable: true);
+            // fetch the default gateway/router option
+            var option3 = dhcpServer.Options.GetDefaultOption(DhcpServerOptionIds.Router);
+            // prepare an option value
+            var option3Value = option3.CreateOptionIpAddressValue("192.168.128.0");
+            // add the option value to the scope
+            dhcpScope.Options.AddOrSetOptionValue(option3Value);
 
+            // fetch option 15 (DNS Domain Name) from the server
+            var option15 = dhcpServer.Options.GetDefaultOption(DhcpServerOptionIds.DomainName);
+            var option15Value = option15.CreateOptionStringValue("mydomain.biz.local");
+            dhcpScope.Options.AddOrSetOptionValue(option15Value);
+
+            // activate the scope
+            dhcpScope.Activate();
+
+            // write out scope information
             DumpScope(dhcpScope);
+
+            // modify the scope
+
+            // remove one of the excluded ip ranges
+            dhcpScope.ExcludedIpRanges.DeleteExcludedIpRange(DhcpServerIpRange.AsExcluded("192.168.128.240", "192.168.128.254"));
+            
+            // remove the DNS Domain Name value
+            dhcpScope.Options.DeleteOptionValue(DhcpServerOptionIds.DomainName);
+            
+            // update the router option
+            option3Value = option3.CreateOptionIpAddressValue("192.168.128.1");
+            dhcpScope.Options.SetOptionValue(option3Value);
+            
+            // deactivate scope
+            dhcpScope.Deactivate();
+
+            // write out scope information
+            DumpScope(dhcpScope);
+
+            // delete the scope
+            dhcpScope.Delete();
         }
 
         static void DumpScope(DhcpServerScope scope)
@@ -66,7 +98,7 @@ namespace DhcpWritableDemo
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("      Options:");
             Console.ForegroundColor = ConsoleColor.Gray;
-            foreach (var value in scope.AllOptionValues.ToList())
+            foreach (var value in scope.Options.ToList())
             {
                 Console.WriteLine($"        {value}");
             }

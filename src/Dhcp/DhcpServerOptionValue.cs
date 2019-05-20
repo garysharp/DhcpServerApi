@@ -54,8 +54,6 @@ namespace Dhcp
                                              values: DhcpServerOptionElement.ReadNativeElements(native.Value).ToList());
         }
 
-        private DHCP_OPTION_VALUE_Managed ToNative() => new DHCP_OPTION_VALUE_Managed(OptionId, DhcpServerOptionElement.WriteNative(Values));
-
         internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationDefaultOptionValues(DhcpServerScopeReservation reservation)
             => EnumScopeReservationOptionValues(reservation, null, null);
 
@@ -181,6 +179,8 @@ namespace Dhcp
         internal static void SetScopeUserOptionValue(DhcpServerScope scope, int optionId, string className, IEnumerable<DhcpServerOptionElement> values)
             => SetScopeOptionValue(scope, optionId, className, null, values);
 
+        internal static void SetScopeOptionValue(DhcpServerScope scope, DhcpServerOptionValue optionValue)
+            => SetScopeOptionValue(scope, optionValue.OptionId, optionValue.ClassName, optionValue.VendorName, optionValue.Values);
         internal static void SetScopeOptionValue(DhcpServerScope scope, int optionId, string className, string vendorName, IEnumerable<DhcpServerOptionElement> values)
             => SetScopeOptionValue(scope.Server, scope.Address, optionId, className, vendorName, values);
 
@@ -195,6 +195,38 @@ namespace Dhcp
             using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
             {
                 SetOptionValue(server, scopeInfoPtr, optionId, className, vendorName, values);
+            }
+        }
+
+        internal static void DeleteScopeOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId)
+            => DeleteScopeOptionValue(server, scopeAddress, optionId, null, null);
+        internal static void DeleteScopeOptionValue(DhcpServerScope scope, int optionId)
+            => DeleteScopeOptionValue(scope, optionId, null, null);
+        internal static void DeleteScopeVendorOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId, string vendorName)
+            => DeleteScopeOptionValue(server, scopeAddress, optionId, null, vendorName);
+        internal static void DeleteScopeUserOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId, string className)
+            => DeleteScopeOptionValue(server, scopeAddress, optionId, className, null);
+        internal static void DeleteScopeVendorOptionValue(DhcpServerScope scope, int optionId, string vendorName)
+            => DeleteScopeOptionValue(scope, optionId, null, vendorName);
+        internal static void DeleteScopeUserOptionValue(DhcpServerScope scope, int optionId, string className)
+            => DeleteScopeOptionValue(scope, optionId, className, null);
+
+        internal static void DeleteScopeOptionValue(DhcpServerScope scope, DhcpServerOptionValue optionValue)
+            => DeleteScopeOptionValue(scope.Server, scope.Address, optionValue.OptionId, optionValue.ClassName, optionValue.VendorName);
+        internal static void DeleteScopeOptionValue(DhcpServerScope scope, int optionId, string className, string vendorName)
+            => DeleteScopeOptionValue(scope.Server, scope.Address, optionId, className, vendorName);
+
+        internal static void DeleteScopeOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId, string className, string vendorName)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Subnet()
+            {
+                ScopeType = DHCP_OPTION_SCOPE_TYPE.DhcpSubnetOptions,
+                SubnetScopeInfo = scopeAddress.ToNativeAsNetwork()
+            };
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                RemoveOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
             }
         }
 
@@ -527,6 +559,42 @@ namespace Dhcp
                 if (result != DhcpErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpSetOptionValueV5), result);
             }
+        }
+
+        private static void RemoveOptionValue(DhcpServer server, IntPtr scopeInfo, int optionId, string className, string vendorName)
+        {
+            if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
+                RemoveOptionValueV5(server, scopeInfo, optionId, className, vendorName);
+            else
+            {
+                if (vendorName != null || className != null)
+                    throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
+
+                RemoveOptionValueV0(server, scopeInfo, optionId);
+            }
+        }
+
+        private static void RemoveOptionValueV0(DhcpServer server, IntPtr scopeInfo, int optionId)
+        {
+            var result = Api.DhcpRemoveOptionValue(ServerIpAddress: server.IpAddress,
+                                                   OptionID: optionId,
+                                                   ScopeInfo: scopeInfo);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpRemoveOptionValue), result);
+        }
+
+        private static void RemoveOptionValueV5(DhcpServer server, IntPtr scopeInfo, int optionId, string className, string vendorName)
+        {
+            var result = Api.DhcpRemoveOptionValueV5(ServerIpAddress: server.IpAddress,
+                                                     Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
+                                                     OptionID: optionId,
+                                                     ClassName: className,
+                                                     VendorName: vendorName,
+                                                     ScopeInfo: scopeInfo);
+
+            if (result != DhcpErrors.SUCCESS)
+                throw new DhcpServerException(nameof(Api.DhcpRemoveOptionValueV5), result);
         }
 
         public override string ToString()

@@ -1,6 +1,6 @@
 ﻿namespace Dhcp
 {
-    public enum OptionTagTypes : byte
+    public enum DhcpServerOptionIdTypes : byte
     {
         Hex = 0,
         Pad,
