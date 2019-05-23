@@ -64,6 +64,12 @@ namespace Dhcp.Native
             Marshal.StructureToPtr(reservedForClient, ReservedForClientPointer, false);
         }
 
+        public DHCP_IP_RESERVATION_V4_Managed(DhcpServerIpAddress address, DhcpServerHardwareAddress reservedForClient, DhcpServerClientTypes allowedClientTypes)
+            :this(reservedIpAddress: address.ToNativeAsNetwork(),
+                  reservedForClient: reservedForClient.ToNativeClientUid(),
+                  allowedClientTypes: (DHCP_CLIENT_TYPE)allowedClientTypes)
+        { }
+
         public void Dispose()
         {
             if (ReservedForClientPointer != IntPtr.Zero)

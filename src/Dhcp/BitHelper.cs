@@ -34,7 +34,7 @@ namespace Dhcp
             "F0", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "FA", "FB", "FC", "FD", "FE", "FF"
         };
 
-        #region Marshaling
+        #region Marshalling
         public static T MarshalToStructure<T>(this IntPtr ptr)
             => (T)Marshal.PtrToStructure(ptr, typeof(T));
 
@@ -678,6 +678,57 @@ namespace Dhcp
                 return false;
 
             result = (byte)value;
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to parse a byte from a hex string at a particular position
+        /// </summary>
+        /// <param name="s">Hex String to parse</param>
+        /// <param name="index">Index to begin parsing</param>
+        /// <param name="length">Number of characters to parse</param>
+        /// <param name="result">The parsed byte</param>
+        /// <returns>True if the byte was successfully parsed</returns>
+        public static bool TryParseByteFromHexSubstring(string s, int index, int length, out byte result)
+        {
+            result = 0;
+            if (length == 0)
+                return true; // shortcut
+
+            if (length < 1 || length > 2)
+                return false;
+            if (string.IsNullOrEmpty(s))
+                return false;
+            if (index < 0 || index + length > s.Length)
+                return false;
+            if (length < 1 || length > 3)
+                return false;
+
+            var c = s[index++];
+            if (c >= 48 && c <= 57) // handle 0-9
+                result = (byte)(c - 48);
+            else if (c >= 65 && c <= 70) // handle A-Z (10-15)
+                result = (byte)(c - 55);
+            else if (c >= 97 && c <= 102) // handle a-z (10-15)
+                result = (byte)(c - 87);
+            else
+                return false;
+
+            if (length == 2)
+            {
+                result <<= 4; // left shift first bits
+
+                c = s[index];
+                if (c >= 48 && c <= 57) // handle 0-9
+                    result |= (byte)(c - 48);
+                else if (c >= 65 && c <= 70) // handle A-Z (10-15)
+                    result |= (byte)(c - 55);
+                else if (c >= 97 && c <= 102) // handle a-z (10-15)
+                    result |= (byte)(c - 87);
+                else
+                    return false;
+            }
+
             return true;
         }
 

@@ -19,5 +19,9 @@ namespace Dhcp.Native
         public DhcpServerIpAddress AsNetworkToIpAddress() => new DhcpServerIpAddress(ipAddress);
 
         public static explicit operator DHCP_IP_ADDRESS(int ipAddress) => new DHCP_IP_ADDRESS((uint)ipAddress);
+        public static explicit operator int(DHCP_IP_ADDRESS ipAddress) => (int)ipAddress.ipAddress;
+
+        public static DHCP_IP_ADDRESS operator &(DHCP_IP_ADDRESS address, DHCP_IP_MASK mask)
+            => (DHCP_IP_ADDRESS)((int)address & (int)mask);
     }
 }

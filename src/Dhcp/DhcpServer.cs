@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -19,8 +18,6 @@ namespace Dhcp
         private DhcpServerSpecificStrings specificStrings;
 
         public DhcpServerIpAddress IpAddress { get; }
-        [Obsolete("Use IpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int IpAddressNative => (int)IpAddress.Native;
         public string Name { get; }
         public int VersionMajor { get; }
         public int VersionMinor { get; }
@@ -42,6 +39,8 @@ namespace Dhcp
             Classes = new DhcpServerClassCollection(this);
             Options = new DhcpServerOptionCollection(this);
             Scopes = new DhcpServerScopeCollection(this);
+            Clients = new DhcpServerClientCollection(this);
+            BindingElements = new DhcpServerBindingElementCollection(this);
 
             GetVersion(address, out var versionMajor, out var versionMinor);
             VersionMajor = versionMajor;
@@ -66,17 +65,17 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of all Clients (in all Scopes) associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerClient> Clients => DhcpServerClient.GetClients(this);
+        public DhcpServerClientCollection Clients { get; }
 
         /// <summary>
         /// Enumerates a list of Binding Elements associated with the DHCP Server
         /// </summary>
-        public IEnumerable<DhcpServerBindingElement> BindingElements => DhcpServerBindingElement.GetBindingInfo(this);
+        public DhcpServerBindingElementCollection BindingElements { get; }
 
         /// <summary>
         /// Calculates if this server version is greater than or equal to the supplied <paramref name="version"/>
         /// </summary>
-        /// <param name="version">Version to test compatibilty against</param>
+        /// <param name="version">Version to test compatibility against</param>
         /// <returns>True if the server version is greater than or equal to the supplied <paramref name="version"/></returns>
         public bool IsCompatible(DhcpServerVersions version) => ((long)version <= (long)Version);
 
@@ -144,7 +143,7 @@ namespace Dhcp
         private static DhcpServer FromNative(DHCPDS_SERVER native)
             => new DhcpServer(native.ServerAddress.AsNetworkToIpAddress(), native.ServerName);
 
-        public override string ToString() => $"DHCP Server: {Name} ({IpAddress})";
+        public override string ToString() => $"{Name} ({IpAddress})";
 
     }
 }

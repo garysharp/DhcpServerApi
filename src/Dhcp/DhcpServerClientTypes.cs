@@ -6,17 +6,21 @@ namespace Dhcp
     public enum DhcpServerClientTypes
     {
         /// <summary>
-        /// A DHCPv4 client other than ones defined in this table.
+        /// A client other than ones defined in this table.
         /// </summary>
         Unspecified = 0x00,
         /// <summary>
-        /// The DHCPv4 client supports the DHCP protocol.
+        /// Supports the DHCP protocol.
         /// </summary>
-        DHCP = 0x01,
+        Dhcp = 0x01,
         /// <summary>
-        /// The DHCPv4 client supports the BOOTP protocol.
+        /// Supports the BOOTP protocol.
         /// </summary>
-        BOOTP = 0x02,
+        Bootp = 0x02,
+        /// <summary>
+        /// Supports the DHCP and BOOTP protocols.
+        /// </summary>
+        DhcpAndBootp = 0x03,
         /// <summary>
         /// There is an IPv4 reservation created for the DHCPv4 client.
         /// </summary>

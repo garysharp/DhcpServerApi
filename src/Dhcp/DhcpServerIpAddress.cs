@@ -61,6 +61,7 @@ namespace Dhcp
             return (byte)(ipAddress >> ((3 - index) * 8));
         }
 
+        public static DhcpServerIpAddress Empty => new DhcpServerIpAddress(0);
         public static DhcpServerIpAddress FromNative(uint nativeIpAddress) => new DhcpServerIpAddress(nativeIpAddress);
         public static DhcpServerIpAddress FromNative(int nativeIpAddress) => new DhcpServerIpAddress((uint)nativeIpAddress);
         internal static DhcpServerIpAddress FromNative(IntPtr pointer)

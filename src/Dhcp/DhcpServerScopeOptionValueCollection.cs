@@ -104,7 +104,7 @@ namespace Dhcp
         /// </summary>
         /// <param name="className">The name of the User Class</param>
         /// <param name="optionId">The identifier for the option value</param>
-        public void DeleteUserOptionValue(string className, int optionId)
+        public void RemoveUserOptionValue(string className, int optionId)
             => DhcpServerOptionValue.DeleteScopeUserOptionValue(Scope, optionId, className);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope within a User Class
@@ -112,7 +112,7 @@ namespace Dhcp
         /// <param name="className">The name of the User Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public void DeleteUserOptionValue(string className, DhcpServerOptionIds optionId)
+        public void RemoveUserOptionValue(string className, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeUserOptionValue(Scope, (int)optionId, className);
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Dhcp
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public void DeleteVendorOptionValue(string vendorName, int optionId)
+        public void RemoveVendorOptionValue(string vendorName, int optionId)
             => DhcpServerOptionValue.GetScopeVendorOptionValue(Scope, optionId, vendorName);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope within a Vendor Class
@@ -129,13 +129,13 @@ namespace Dhcp
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public void DeleteVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
+        public void RemoveVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeVendorOptionValue(Scope, (int)optionId, vendorName);
-        public void DeleteOptionValue(int optionId)
+        public void RemoveOptionValue(int optionId)
             => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, optionId);
-        public void DeleteOptionValue(DhcpServerOptionIds optionId)
+        public void RemoveOptionValue(DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, (int)optionId);
-        public void DeleteOptionValue(DhcpServerOptionValue value)
+        public void RemoveOptionValue(DhcpServerOptionValue value)
             => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, value);
 
     }

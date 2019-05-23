@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Dhcp.Native;
 
 namespace Dhcp
@@ -11,20 +10,12 @@ namespace Dhcp
         public DhcpServerScope Scope { get; }
 
         private DhcpServerClient client;
-
         public DhcpServerIpAddress IpAddress { get; }
-        [Obsolete("Use IpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int IpAddressNative => (int)IpAddress.Native;
-
         public DhcpServerHardwareAddress HardwareAddress { get; }
-        [Obsolete("Use HardwareAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public long HardwareAddressNative => throw new NotImplementedException();
-        [Obsolete("Use HardwareAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public byte[] HardwareAddressBytes => HardwareAddress.Native;
 
         public DhcpServerClientTypes AllowedClientTypes { get; }
 
-        public DhcpServerClient Client => client ??= DhcpServerClient.GetClient(Server, IpAddress);
+        public DhcpServerClient Client => client ??= DhcpServerClient.GetClient(Server, Scope, IpAddress);
 
         /// <summary>
         /// Enumerates a list of Default Global Option Values associated with the DHCP Server
@@ -74,6 +65,18 @@ namespace Dhcp
             IpAddress = ipAddress;
             HardwareAddress = hardwareAddress;
             AllowedClientTypes = allowedClientTypes;
+        }
+
+        internal static DhcpServerScopeReservation CreateReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress)
+            => CreateReservation(scope, address, hardwareAddress, DhcpServerClientTypes.DhcpAndBootp);
+        internal static DhcpServerScopeReservation CreateReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, DhcpServerClientTypes allowedClientTypes)
+        {
+            if (!scope.IpRange.Contains(address))
+                throw new ArgumentOutOfRangeException(nameof(address), "The DHCP scope does not include the provided address");
+
+            DhcpServerScope.AddSubnetReservationElement(scope.Server, scope.Address, address, hardwareAddress, allowedClientTypes);
+
+            return new DhcpServerScopeReservation(scope, address, hardwareAddress, allowedClientTypes);
         }
 
         internal static IEnumerable<DhcpServerScopeReservation> GetReservations(DhcpServerScope scope)

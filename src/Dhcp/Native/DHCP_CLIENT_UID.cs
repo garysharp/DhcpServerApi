@@ -95,12 +95,28 @@ namespace Dhcp.Native
             Marshal.StructureToPtr(data, DataPointer, false);
         }
 
-        public DHCP_CLIENT_UID_Managed(DhcpServerHardwareAddress data)
+        public DHCP_CLIENT_UID_Managed(ulong bytes1, ulong bytes2, int dataLength)
         {
-            var bytes = data.Native;
-            DataLength = bytes.Length;
-            DataPointer = Marshal.AllocHGlobal(bytes.Length);
-            Marshal.Copy(bytes, 0, DataPointer, bytes.Length);
+            if (dataLength == 0)
+            {
+                DataLength = 0;
+                DataPointer = IntPtr.Zero;
+            }
+            else
+            {
+                DataLength = dataLength;
+                DataPointer = Marshal.AllocHGlobal(dataLength > 8 ? 16 : 8);
+
+                bytes1 = BitHelper.HostToNetworkOrder(bytes1);
+                Marshal.WriteInt64(DataPointer, (long)bytes1);
+
+                if (dataLength > 8)
+                {
+                    bytes2 = BitHelper.HostToNetworkOrder(bytes2);
+                    Marshal.WriteInt64(DataPointer + 8, (long)bytes2);
+                }
+
+            }
         }
 
         public void Dispose()

@@ -55,6 +55,11 @@ namespace Dhcp.Native
             Marshal.StructureToPtr(reservedForClient, ReservedForClientPointer, false);
         }
 
+        public DHCP_IP_RESERVATION_Managed(DhcpServerIpAddress address, DhcpServerHardwareAddress reservedForClient)
+            : this(reservedIpAddress: address.ToNativeAsNetwork(),
+                  reservedForClient: reservedForClient.ToNativeClientUid())
+        { }
+
         public void Dispose()
         {
             if (ReservedForClientPointer != IntPtr.Zero)

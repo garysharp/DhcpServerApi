@@ -538,6 +538,24 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpGetClientInfoVQ(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
 
         /// <summary>
+        /// The DhcpCreateClientInfo function creates a client information record on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ClientInfo">DHCP_CLIENT_INFO structure that contains information about the DHCP client, including the assigned IP address, subnet mask, and host.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpCreateClientInfo(string ServerIpAddress, IntPtr ClientInfo);
+
+        /// <summary>
+        /// The DhcpDeleteClientInfo function deletes a client information record from the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ClientInfo">DHCP_SEARCH_INFO union structure that contains one of the following items used to search the DHCP client record database: the client IP address, the client MAC address, or the client network name. All records matching the value will be deleted; for example, if a client IP address of 192.1.1.10 is supplied, all records with this address in the ClientIpAddress field will be deleted.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpDeleteClientInfo(string ServerIpAddress, IntPtr ClientInfo);
+
+        /// <summary>
         /// The DhcpAuditLogGetParams function returns the audit log configuration settings from the DHCP server.
         /// </summary>
         /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>

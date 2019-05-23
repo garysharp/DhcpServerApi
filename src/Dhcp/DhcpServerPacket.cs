@@ -9,8 +9,8 @@ namespace Dhcp
     internal class DhcpServerPacket : MarshalByRefObject, IDhcpServerPacket, IDhcpServerPacketRaw
     {
         internal const int maxBufferLength = 4000;
-        protected readonly internal IntPtr pointer;
-        protected readonly internal int size;
+        protected internal readonly IntPtr pointer;
+        protected internal readonly int size;
         protected internal int length;
         protected internal byte[] buffer;
 

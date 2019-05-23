@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Dhcp.Native;
 
@@ -52,14 +51,24 @@ namespace Dhcp
         public bool QuarantineOn => info.QuarantineOn;
 
         /// <summary>
-        /// Excluded IP Ranges
+        /// Scope Excluded IP Ranges
         /// </summary>
         public DhcpServerScopeExcludedIpRangeCollection ExcludedIpRanges { get; }
 
         /// <summary>
-        /// Option Values
+        /// Scope Option Values
         /// </summary>
         public DhcpServerScopeOptionValueCollection Options { get; }
+
+        /// <summary>
+        /// Scope Reservations
+        /// </summary>
+        public DhcpServerScopeReservationCollection Reservations { get; }
+
+        /// <summary>
+        /// Scope Clients
+        /// </summary>
+        public DhcpServerScopeClientCollection Clients { get; }
 
         private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange ipRange, DhcpServerDnsSettings dnsSettings, SubnetInfo info)
         {
@@ -71,13 +80,9 @@ namespace Dhcp
 
             ExcludedIpRanges = new DhcpServerScopeExcludedIpRangeCollection(this);
             Options = new DhcpServerScopeOptionValueCollection(this);
+            Reservations = new DhcpServerScopeReservationCollection(this);
+            Clients = new DhcpServerScopeClientCollection(this);
         }
-
-        
-
-        public IEnumerable<DhcpServerClient> Clients => DhcpServerClient.GetClients(this);
-
-        public IEnumerable<DhcpServerScopeReservation> Reservations => DhcpServerScopeReservation.GetReservations(this);
 
         public void Activate()
         {
@@ -136,12 +141,20 @@ namespace Dhcp
             }
         }
 
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange)
+            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange)
             => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
+            => CreateScope(server, name, description: null, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
             => CreateScope(server, name, description, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
+            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer, leaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
             => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer, leaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
+            => CreateScope(server, name, description: null, ipRange, mask, timeDelayOffer, leaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -348,6 +361,28 @@ namespace Dhcp
             }
         }
 
+        internal static void AddSubnetReservationElement(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, DhcpServerHardwareAddress hardwareAddress, DhcpServerClientTypes allowedClientTypes)
+        {
+            
+
+            if (server.IsCompatible(DhcpServerVersions.Windows2003))
+            {
+                var reservation = new DHCP_IP_RESERVATION_V4_Managed(reservationAddress, hardwareAddress, allowedClientTypes);
+                using (var element = new DHCP_SUBNET_ELEMENT_DATA_V5_Managed(DHCP_SUBNET_ELEMENT_TYPE.DhcpReservedIps, reservation))
+                {
+                    AddSubnetElementV5(server, scopeAddress, element);
+                }
+            }
+            else
+            {
+                var reservation = new DHCP_IP_RESERVATION_Managed(reservationAddress, hardwareAddress);
+                using (var element = new DHCP_SUBNET_ELEMENT_DATA_Managed(DHCP_SUBNET_ELEMENT_TYPE.DhcpReservedIps, reservation))
+                {
+                    AddSubnetElementV0(server, scopeAddress, element);
+                }
+            }
+        }
+
         private static void AddSubnetElementV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_V5_Managed element)
         {
             var elementRef = element;
@@ -377,14 +412,14 @@ namespace Dhcp
             }
         }
 
-        private static void RemoveSubnetElementV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_V5_Managed element)
-        {
-            var elementRef = element;
-            var result = Api.DhcpRemoveSubnetElementV5(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
+        //private static void RemoveSubnetElementV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_V5_Managed element)
+        //{
+        //    var elementRef = element;
+        //    var result = Api.DhcpRemoveSubnetElementV5(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
 
-            if (result != DhcpErrors.SUCCESS)
-                throw new DhcpServerException(nameof(Api.DhcpRemoveSubnetElementV5), result);
-        }
+        //    if (result != DhcpErrors.SUCCESS)
+        //        throw new DhcpServerException(nameof(Api.DhcpRemoveSubnetElementV5), result);
+        //}
 
         private static void RemoveSubnetElementV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_Managed element)
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using Dhcp.Native;
 
 namespace Dhcp
@@ -30,21 +29,9 @@ namespace Dhcp
         public DhcpServerIpAddress AdapterPrimaryIpAddress { get; }
 
         /// <summary>
-        /// DHCP_IP_ADDRESS value that specifies the IP address assigned to the ethernet adapter of the DHCP server.
-        /// </summary>
-        [Obsolete("Use AdapterPrimaryIpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int AdapterPrimaryIpAddressNative => (int)AdapterPrimaryIpAddress.Native;
-
-        /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet IP mask used by this ethernet adapter.
         /// </summary>
         public DhcpServerIpMask AdapterSubnetAddress { get; }
-
-        /// <summary>
-        /// DHCP_IP_ADDRESS value that specifies the subnet IP mask used by this ethernet adapter.
-        /// </summary>
-        [Obsolete("Use AdapterSubnetAddressNative.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int AdapterSubnetAddressNative => (int)AdapterSubnetAddress.Native;
 
         /// <summary>
         /// Unicode string that specifies the name assigned to this network interface device.

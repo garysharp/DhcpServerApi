@@ -28,6 +28,7 @@ namespace Dhcp
         /// </summary>
         public uint Native => ipMask;
 
+        public static DhcpServerIpMask Empty => new DhcpServerIpMask(0);
         public static DhcpServerIpMask FromNative(uint nativeIpMask)
             => new DhcpServerIpMask(nativeIpMask);
 

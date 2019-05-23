@@ -84,7 +84,7 @@ namespace Dhcp.Native
             Marshal.StructureToPtr(element, ElementPointer, false);
         }
 
-        public DHCP_SUBNET_ELEMENT_DATA_Managed(DHCP_SUBNET_ELEMENT_TYPE elementType, DHCP_IP_RESERVATION_V4_Managed element)
+        public DHCP_SUBNET_ELEMENT_DATA_Managed(DHCP_SUBNET_ELEMENT_TYPE elementType, DHCP_IP_RESERVATION_Managed element)
         {
             if (elementType != DHCP_SUBNET_ELEMENT_TYPE.DhcpReservedIps)
                 throw new ArgumentOutOfRangeException(nameof(elementType));
@@ -101,7 +101,7 @@ namespace Dhcp.Native
                 switch (ElementType)
                 {
                     case DHCP_SUBNET_ELEMENT_TYPE.DhcpReservedIps:
-                        var reservedIp = ElementPointer.MarshalToStructure<DHCP_IP_RESERVATION_V4_Managed>();
+                        var reservedIp = ElementPointer.MarshalToStructure<DHCP_IP_RESERVATION_Managed>();
                         reservedIp.Dispose();
                         break;
                 }

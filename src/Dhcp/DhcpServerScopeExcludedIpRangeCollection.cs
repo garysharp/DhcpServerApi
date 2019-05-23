@@ -15,13 +15,13 @@ namespace Dhcp
         }
 
         /// <summary>
-        /// Enumerates a list of excluded ip ranges associated with the DHCP Scope
+        /// Enumerates a list of excluded IP ranges associated with the DHCP Scope
         /// </summary>
         public IEnumerator<DhcpServerIpRange> GetEnumerator()
             => DhcpServerScope.EnumSubnetElements(Server, Scope.Address, Native.DHCP_SUBNET_ELEMENT_TYPE.DhcpExcludedIpRanges).GetEnumerator();
 
         /// <summary>
-        /// Enumerates a list of excluded ip ranges associated with the DHCP Scope
+        /// Enumerates a list of excluded IP ranges associated with the DHCP Scope
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
@@ -35,7 +35,7 @@ namespace Dhcp
         public void AddExcludedIpRange(string cidrRange)
             => DhcpServerScope.AddSubnetExcludedIpRangeElement(Server, Scope.Address, DhcpServerIpRange.AsExcluded(cidrRange));
 
-        public void DeleteExcludedIpRange(DhcpServerIpRange range)
+        public void RemoveExcludedIpRange(DhcpServerIpRange range)
             => DhcpServerScope.RemoveSubnetExcludedIpRangeElement(Server, Scope.Address, range);
     }
 }

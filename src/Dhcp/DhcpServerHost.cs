@@ -1,16 +1,13 @@
-﻿using System;
-using System.ComponentModel;
-using System.Text;
+﻿using System.Text;
 using Dhcp.Native;
 
 namespace Dhcp
 {
     public class DhcpServerHost
     {
-        public DhcpServerIpAddress IpAddress { get; }
-        [Obsolete("Use IpAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int IpAddressNative => (int)IpAddress.Native;
+        private static readonly DhcpServerHost emptyInstance = new DhcpServerHost(DhcpServerIpAddress.Empty, null, null);
 
+        public DhcpServerIpAddress IpAddress { get; }
         public string NetBiosName { get; }
         public string ServerName { get; }
 
@@ -20,6 +17,8 @@ namespace Dhcp
             NetBiosName = netBiosName;
             ServerName = serverName;
         }
+
+        public static DhcpServerHost Empty => emptyInstance;
 
         internal static DhcpServerHost FromNative(ref DHCP_HOST_INFO native)
         {

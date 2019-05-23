@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Net;
 using Dhcp.Native;
 
@@ -19,13 +18,7 @@ namespace Dhcp
 #pragma warning restore IDE0032 // Use auto property
 
         public DhcpServerIpAddress StartAddress => startAddress;
-        [Obsolete("Use StartAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int StartAddressNative => (int)startAddress.Native;
-
         public DhcpServerIpAddress EndAddress => endAddress;
-        [Obsolete("Use EndAddress.Native instead"), EditorBrowsable(EditorBrowsableState.Never)]
-        public int EndAddressNative => (int)endAddress.Native;
-
         public DhcpServerIpRangeType Type => type;
 
         /// <summary>

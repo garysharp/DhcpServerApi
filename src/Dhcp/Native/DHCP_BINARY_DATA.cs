@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private IntPtr DataPointer;
+        private readonly IntPtr DataPointer;
 
         /// <summary>
         /// Blob of byte (binary) data.
@@ -59,7 +59,7 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref DataPointer);
+            Api.FreePointer(DataPointer);
         }
     }
 
@@ -77,7 +77,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private IntPtr DataPointer;
+        private readonly IntPtr DataPointer;
 
         public DHCP_BINARY_DATA_Managed(byte[] data)
         {
@@ -94,12 +94,33 @@ namespace Dhcp.Native
             }
         }
 
+        public DHCP_BINARY_DATA_Managed(ulong hwAddr1, ulong hwAddr2, int dataLength)
+        {
+            if (dataLength == 0)
+            {
+                DataLength = 0;
+                DataPointer = IntPtr.Zero;
+            }
+            else
+            {
+                DataLength = dataLength;
+                DataPointer = Marshal.AllocHGlobal(dataLength > 8 ? 16 : 8);
+
+                hwAddr1 = BitHelper.HostToNetworkOrder(hwAddr1);
+                Marshal.WriteInt64(DataPointer, (long)hwAddr1);
+
+                if (dataLength > 8)
+                {
+                    hwAddr2 = BitHelper.HostToNetworkOrder(hwAddr2);
+                    Marshal.WriteInt64(DataPointer + 8, (long)hwAddr2);
+                }
+            }
+        }
+
         public void Dispose()
         {
             if (DataPointer != IntPtr.Zero)
-            {
                 Marshal.FreeHGlobal(DataPointer);
-            }
         }
     }
 }

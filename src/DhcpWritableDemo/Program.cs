@@ -18,7 +18,6 @@ namespace DhcpWritableDemo
         {
             // gather name and range information
             var name = "Test Scope";
-            var description = "Test Scope Description";
 
             var ipRange = DhcpServerIpRange.AsDhcpScope("192.168.128.0/24"); // use CIDR notation
             // "DhcpScope" automatically removes subnet and broadcast address: 192.168.128.1-192.168.128.254
@@ -26,13 +25,10 @@ namespace DhcpWritableDemo
             // var ipRange = DhcpServerIpRange.AsDhcpScope("192.168.128.1", "192.168.128.254");
             // var ipRange = DhcpServerIpRange.AsDhcpScope("192.168.128.0", (DhcpServerIpMask)"255.255.255.0");
 
-            // create scope (mask can be explicity set if required)
-            var dhcpScope = dhcpServer.Scopes.CreateScope(
-                name: name,
-                description: description,
-                ipRange: ipRange);
+            // create scope (mask can be explicitly set if required)
+            var dhcpScope = dhcpServer.Scopes.AddScope(name, ipRange);
 
-            // specify excluded ip ranges
+            // specify excluded IP ranges
             dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.1", endAddress: "192.168.128.10");
             dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.240", endAddress: "192.168.128.254");
 
@@ -55,17 +51,30 @@ namespace DhcpWritableDemo
             DumpScope(dhcpScope);
 
             // modify the scope
+            dhcpScope.Comment = "A test scope description";
 
-            // remove one of the excluded ip ranges
-            dhcpScope.ExcludedIpRanges.DeleteExcludedIpRange(DhcpServerIpRange.AsExcluded("192.168.128.240", "192.168.128.254"));
-            
+            // remove one of the excluded IP ranges
+            dhcpScope.ExcludedIpRanges.RemoveExcludedIpRange(DhcpServerIpRange.AsExcluded("192.168.128.240", "192.168.128.254"));
+
             // remove the DNS Domain Name value
-            dhcpScope.Options.DeleteOptionValue(DhcpServerOptionIds.DomainName);
-            
+            dhcpScope.Options.RemoveOptionValue(DhcpServerOptionIds.DomainName);
+
             // update the router option
             option3Value = option3.CreateOptionIpAddressValue("192.168.128.1");
             dhcpScope.Options.SetOptionValue(option3Value);
-            
+
+            // add a client
+            var client = dhcpScope.Clients.AddClient("192.168.128.5", "AABBCCDDEEFF", "MyWorkstation.mydomain.biz.local", "My Workstation Lease");
+            Console.WriteLine($"Client: {client}");
+
+            // convert client to reservation
+            var clientReservation = client.ConvertToReservation();
+            Console.WriteLine($"Client Reservation: {clientReservation}");
+
+            // add a reservation
+            var reservation = dhcpScope.Reservations.AddReservation("192.168.128.10", "AA:00:CC:dd:EE:FF");
+            Console.WriteLine($"Place-holder Reservation: {reservation}");
+
             // deactivate scope
             dhcpScope.Deactivate();
 

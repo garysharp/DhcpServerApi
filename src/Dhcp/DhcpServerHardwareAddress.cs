@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Globalization;
+using Dhcp.Native;
 
 namespace Dhcp
 {
@@ -8,10 +8,12 @@ namespace Dhcp
     {
         public const int MaximumLength = 16;
 
+#pragma warning disable IDE0032 // Use auto property
         private readonly DhcpServerHardwareType hwAddrType;
         private readonly byte hwAddrLen;
         private readonly ulong hwAddr1;
         private readonly ulong hwAddr2;
+#pragma warning restore IDE0032 // Use auto property
 
         /// <summary>
         /// Type of hardware address (see RFC 1700 Assigned Numbers - Number Hardware Type (hrd))
@@ -38,6 +40,9 @@ namespace Dhcp
 
         internal DhcpServerHardwareAddress(DhcpServerHardwareType type, byte length, ulong addr1, ulong addr2)
         {
+            if (length > MaximumLength)
+                throw new ArgumentOutOfRangeException(nameof(length), $"Exceeds maximum length {MaximumLength}");
+
             hwAddrType = type;
             hwAddrLen = length;
             hwAddr1 = addr1;
@@ -58,10 +63,15 @@ namespace Dhcp
             }
         }
 
-        public static DhcpServerHardwareAddress FromNativeEthernet(ulong nativeHardwareAddress) 
+        internal DHCP_BINARY_DATA_Managed ToNativeBinaryData()
+            => new DHCP_BINARY_DATA_Managed(hwAddr1, hwAddr2, hwAddrLen);
+        internal DHCP_CLIENT_UID_Managed ToNativeClientUid()
+            => new DHCP_CLIENT_UID_Managed(hwAddr1, hwAddr2, hwAddrLen);
+
+        public static DhcpServerHardwareAddress FromNativeEthernet(ulong nativeHardwareAddress)
             => new DhcpServerHardwareAddress(DhcpServerHardwareType.Ethernet, 6, nativeHardwareAddress, 0UL);
 
-        public static DhcpServerHardwareAddress FromNativeEthernet(byte[] hardwareAddress) 
+        public static DhcpServerHardwareAddress FromNativeEthernet(byte[] hardwareAddress)
             => FromNative(DhcpServerHardwareType.Ethernet, hardwareAddress);
 
         public static DhcpServerHardwareAddress FromEthernetString(string hardwareAddress)
@@ -69,42 +79,50 @@ namespace Dhcp
             if (string.IsNullOrWhiteSpace(hardwareAddress))
                 throw new ArgumentNullException(nameof(hardwareAddress));
 
-            var sep = ':';
-            if (hardwareAddress.IndexOf(sep) < 0)
-            {
-                if (hardwareAddress.IndexOf('-') >= 0)
-                    sep = '-';
-                else
-                    sep = default;
-            }
+            var hwAddr1 = 0UL;
+            var hwAddr2 = 0UL;
+            int hwLength;
 
-            byte[] octects;
-            if (sep == default(char))
+            if (hardwareAddress.Length < 3 || (hardwareAddress[2] != ':' && hardwareAddress[2] != '-'))
             {
                 // no separator
-                if (hardwareAddress.Length % 2 != 0 || hardwareAddress.Length > MaximumLength * 2)
-                    throw new ArgumentOutOfRangeException(nameof(hardwareAddress));
+                hwLength = hardwareAddress.Length / 2;
 
-                octects = new byte[hardwareAddress.Length / 2];
-                for (var i = 0; i < hardwareAddress.Length / 2; i++)
+                if (hardwareAddress.Length % 2 != 0 || hwLength > MaximumLength)
+                    throw new ArgumentOutOfRangeException(nameof(hardwareAddress), "Invalid hardware address format");
+
+                for (var i = 0; i < hwLength; i++)
                 {
-                    if (!byte.TryParse(hardwareAddress.Substring(i * 2, 2), NumberStyles.AllowHexSpecifier, CultureInfo.CurrentCulture, out octects[i]))
-                        throw new ArgumentOutOfRangeException(nameof(hardwareAddress));
+                    if (!BitHelper.TryParseByteFromHexSubstring(hardwareAddress, i * 2, 2, out var octet))
+                        throw new ArgumentOutOfRangeException(nameof(hardwareAddress), "Invalid hardware address format");
+
+                    if (i < 8)
+                        hwAddr1 |= ((ulong)octet) << (7 - i) * 8;
+                    else
+                        hwAddr2 |= ((ulong)octet) << (15 - i) * 8;
                 }
             }
             else
             {
-                var octectStrings = hardwareAddress.Split(sep);
-                octects = new byte[octectStrings.Length];
-                for (var i = 0; i < octectStrings.Length; i++)
+                // separator between octets
+                hwLength = (hardwareAddress.Length + 1) / 3;
+
+                if (hardwareAddress.Length % 3 != 2 || hwLength > MaximumLength)
+                    throw new ArgumentOutOfRangeException(nameof(hardwareAddress), "Invalid hardware address format");
+
+                for (var i = 0; i < hwLength; i++)
                 {
-                    if (octectStrings[i].Length != 2 ||
-                        !byte.TryParse(octectStrings[i], NumberStyles.AllowHexSpecifier, CultureInfo.CurrentCulture, out octects[i]))
-                        throw new ArgumentOutOfRangeException(nameof(hardwareAddress));
+                    if (!BitHelper.TryParseByteFromHexSubstring(hardwareAddress, i * 3, 2, out var octet))
+                        throw new ArgumentOutOfRangeException(nameof(hardwareAddress), "Invalid hardware address format");
+
+                    if (i < 8)
+                        hwAddr1 |= ((ulong)octet) << (7 - i) * 8;
+                    else
+                        hwAddr2 |= ((ulong)octet) << (15 - i) * 8;
                 }
             }
 
-            return FromNativeEthernet(octects);
+            return new DhcpServerHardwareAddress(DhcpServerHardwareType.Ethernet, (byte)hwLength, hwAddr1, hwAddr2);
         }
 
         internal static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, byte hardwareAddressLength, ulong hardwareAddress1, ulong hardwareAddress2)
@@ -160,8 +178,6 @@ namespace Dhcp
 
             return new DhcpServerHardwareAddress(type, (byte)length, hwAddr1, hwAddr2);
         }
-
-        public override string ToString() => BitHelper.ReadHexString(hwAddr1, hwAddr2, 0, hwAddrLen, ':');
 
         private static ulong Marshal(byte[] address, int offset)
         {
@@ -224,7 +240,11 @@ namespace Dhcp
         }
 
         public static bool operator ==(DhcpServerHardwareAddress lhs, DhcpServerHardwareAddress rhs) => lhs.Equals(rhs);
-
         public static bool operator !=(DhcpServerHardwareAddress lhs, DhcpServerHardwareAddress rhs) => !lhs.Equals(rhs);
+
+        public static implicit operator string(DhcpServerHardwareAddress address) => address.ToString();
+        public static implicit operator DhcpServerHardwareAddress(string address) => FromEthernetString(address);
+
+        public override string ToString() => BitHelper.ReadHexString(hwAddr1, hwAddr2, 0, hwAddrLen, ':');
     }
 }
