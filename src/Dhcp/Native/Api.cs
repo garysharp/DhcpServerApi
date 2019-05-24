@@ -547,6 +547,15 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpCreateClientInfo(string ServerIpAddress, IntPtr ClientInfo);
 
         /// <summary>
+        /// The DhcpSetClientInfo function sets information on a client whose IP address lease is administrated by the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a Unicode string that specifies the IP address or hostname of the DHCP server.</param>
+        /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO structure that contains the information on a client in a subnet served by the DHCP server.</param>
+        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpSetClientInfo(string ServerIpAddress, ref DHCP_CLIENT_INFO_Managed ClientInfo);
+
+        /// <summary>
         /// The DhcpDeleteClientInfo function deletes a client information record from the DHCP server.
         /// </summary>
         /// <param name="ServerIpAddress">Unicode string that specifies the IP address or hostname of the DHCP server.</param>

@@ -80,6 +80,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.Byte, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionByteValue(params byte[] values)
+            => CreateOptionByteValue((IEnumerable<byte>)values);
         public DhcpServerOptionValue CreateOptionInt16Value(short value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.Word);
@@ -91,6 +93,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.Word, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionInt16Value(params short[] values)
+            => CreateOptionInt16Value((IEnumerable<short>)values);
         public DhcpServerOptionValue CreateOptionInt32Value(int value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.DWord);
@@ -102,6 +106,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.DWord, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionInt32Value(params int[] values)
+            => CreateOptionInt32Value((IEnumerable<int>)values);
         public DhcpServerOptionValue CreateOptionInt64Value(long value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.DWordDWord);
@@ -113,6 +119,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.DWordDWord, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionInt64Value(params long[] values)
+            => CreateOptionInt64Value((IEnumerable<long>)values);
         public DhcpServerOptionValue CreateOptionIpAddressValue(DhcpServerIpAddress value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.IpAddress);
@@ -124,6 +132,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.IpAddress, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionIpAddressValue(params DhcpServerIpAddress[] values)
+            => CreateOptionIpAddressValue((IEnumerable<DhcpServerIpAddress>)values);
         public DhcpServerOptionValue CreateOptionStringValue(string value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.StringData);
@@ -135,6 +145,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.StringData, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateStringElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionStringValue(params string[] values)
+            => CreateOptionStringValue((IEnumerable<string>)values);
         public DhcpServerOptionValue CreateOptionBinaryValue(byte[] value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.BinaryData);
@@ -146,6 +158,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.BinaryData, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateBinaryElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionBinaryValue(params byte[][] values)
+            => CreateOptionBinaryValue((IEnumerable<byte[]>)values);
         public DhcpServerOptionValue CreateOptionEncapsulatedValue(byte[] value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.EncapsulatedData);
@@ -157,6 +171,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.EncapsulatedData, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateEncapsulatedElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionEncapsulatedValue(params byte[][] values)
+            => CreateOptionEncapsulatedValue((IEnumerable<byte[]>)values);
         public DhcpServerOptionValue CreateOptionIpv6AddressValue(string value)
         {
             ValidateCreateOptionArguments(DhcpServerOptionElementType.Ipv6Address);
@@ -168,6 +184,8 @@ namespace Dhcp
             ValidateCreateOptionArguments(DhcpServerOptionElementType.Ipv6Address, valueList.Count);
             return CreateOptionValue(DhcpServerOptionElement.CreateIpv6AddressElement(valueList));
         }
+        public DhcpServerOptionValue CreateOptionIpv6AddressValue(params string[] values)
+            => CreateOptionIpv6AddressValue((IEnumerable<string>)values);
 
         private DhcpServerOptionValue CreateOptionValue(List<DhcpServerOptionElement> values)
             => new DhcpServerOptionValue(server: Server, optionId: OptionId, className: ClassName, vendorName: VendorName, values: values);
@@ -230,7 +248,7 @@ namespace Dhcp
 
         private static DhcpServerOption GetOptionV0(DhcpServer server, int optionId)
         {
-            var result = Api.DhcpGetOptionInfo(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpGetOptionInfo(ServerIpAddress: server.Address,
                                                OptionID: optionId,
                                                OptionInfo: out var optionPtr);
 
@@ -253,7 +271,7 @@ namespace Dhcp
 
         private static DhcpServerOption GetOptionV5(DhcpServer server, int optionId, string className, string vendorName)
         {
-            var result = Api.DhcpGetOptionInfoV5(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpGetOptionInfoV5(ServerIpAddress: server.Address,
                                                  Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
                                                  OptionID: optionId,
                                                  ClassName: className,
@@ -279,7 +297,7 @@ namespace Dhcp
 
         internal static IEnumerable<DhcpServerOption> GetAllOptions(DhcpServer server)
         {
-            var result = Api.DhcpGetAllOptions(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpGetAllOptions(ServerIpAddress: server.Address,
                                                Flags: 0,
                                                OptionStruct: out var optionsPtr);
 
@@ -339,7 +357,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerOption> EnumOptionsV0(DhcpServer server)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumOptions(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumOptions(ServerIpAddress: server.Address,
                                              ResumeHandle: ref resumeHandle,
                                              PreferredMaximum: 0xFFFFFFFF,
                                              Options: out var enumInfoPtr,
@@ -375,7 +393,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerOption> EnumOptionsV5(DhcpServer server, string className, string vendorName)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumOptionsV5(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumOptionsV5(ServerIpAddress: server.Address,
                                                Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
                                                ClassName: className,
                                                VendorName: vendorName,

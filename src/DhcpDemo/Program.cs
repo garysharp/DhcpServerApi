@@ -37,7 +37,7 @@ namespace DhcpDemo
         static void DumpDhcpInfo(DhcpServer dhcpServer)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{dhcpServer.Name} (v{dhcpServer.VersionMajor}.{dhcpServer.VersionMinor} - {dhcpServer.IpAddress})");
+            Console.WriteLine($"{dhcpServer.Name} (v{dhcpServer.VersionMajor}.{dhcpServer.VersionMinor} - {dhcpServer.Address})");
 
             // Configuration
             Console.ForegroundColor = ConsoleColor.White;
@@ -175,7 +175,7 @@ namespace DhcpDemo
                     Console.WriteLine($"        Client: {reservation.Client}");
                     Console.WriteLine("          Options:");
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    foreach (var value in reservation.OptionValues.ToList())
+                    foreach (var value in reservation.Options.ToList())
                     {
                         Console.WriteLine($"            {value}");
                     }

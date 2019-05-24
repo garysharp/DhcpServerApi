@@ -29,7 +29,7 @@ namespace DhcpWritableDemo
             var dhcpScope = dhcpServer.Scopes.AddScope(name, ipRange);
 
             // specify excluded IP ranges
-            dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.1", endAddress: "192.168.128.10");
+            dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.1", endAddress: "192.168.128.20");
             dhcpScope.ExcludedIpRanges.AddExcludedIpRange(startAddress: "192.168.128.240", endAddress: "192.168.128.254");
 
             // fetch the default gateway/router option
@@ -39,10 +39,20 @@ namespace DhcpWritableDemo
             // add the option value to the scope
             dhcpScope.Options.AddOrSetOptionValue(option3Value);
 
-            // fetch option 15 (DNS Domain Name) from the server
+            // fetch option 15 (DNS Domain Name) from the server and set a scope-wide value
             var option15 = dhcpServer.Options.GetDefaultOption(DhcpServerOptionIds.DomainName);
             var option15Value = option15.CreateOptionStringValue("mydomain.biz.local");
             dhcpScope.Options.AddOrSetOptionValue(option15Value);
+
+            // fetch option 6 (DNS Name Server) from the server and set a scope-wide value
+            var option6 = dhcpServer.Options.GetDefaultOption(DhcpServerOptionIds.DomainNameServer);
+            var option6Value = option6.CreateOptionIpAddressValue("192.168.128.10", "192.168.128.11");
+            dhcpScope.Options.AddOrSetOptionValue(option6Value);
+
+            // fetch option 4 (Time Server) from the server and set a scope-wide value
+            var option4 = dhcpServer.Options.GetDefaultOption(DhcpServerOptionIds.TimeServer);
+            var option4Value = option4.CreateOptionIpAddressValue("192.168.128.10");
+            dhcpScope.Options.AddOrSetOptionValue(option4Value);
 
             // activate the scope
             dhcpScope.Activate();
@@ -56,8 +66,8 @@ namespace DhcpWritableDemo
             // remove one of the excluded IP ranges
             dhcpScope.ExcludedIpRanges.RemoveExcludedIpRange(DhcpServerIpRange.AsExcluded("192.168.128.240", "192.168.128.254"));
 
-            // remove the DNS Domain Name value
-            dhcpScope.Options.RemoveOptionValue(DhcpServerOptionIds.DomainName);
+            // remove the Time Server value
+            dhcpScope.Options.RemoveOptionValue(DhcpServerOptionIds.TimeServer);
 
             // update the router option
             option3Value = option3.CreateOptionIpAddressValue("192.168.128.1");
@@ -71,9 +81,25 @@ namespace DhcpWritableDemo
             var clientReservation = client.ConvertToReservation();
             Console.WriteLine($"Client Reservation: {clientReservation}");
 
+            // set different dns name server option for reservation
+            var reservationOption6Value = option6.CreateOptionIpAddressValue("192.168.128.11", "192.168.128.12");
+            clientReservation.Options.AddOrSetOptionValue(reservationOption6Value);
+
             // add a reservation
             var reservation = dhcpScope.Reservations.AddReservation("192.168.128.10", "AA:00:CC:dd:EE:FF");
             Console.WriteLine($"Place-holder Reservation: {reservation}");
+            reservation.Client.Name = "YourWorkstation.mydomain.biz.local";
+            reservation.Client.Comment = "Your Workstation Lease";
+
+            // set different dns domain name option for reservation
+            var reservationOption15Value = option15.CreateOptionStringValue("youdomain.biz.local");
+            reservation.Options.AddOrSetOptionValue(reservationOption15Value);
+
+            // write out scope information
+            DumpScope(dhcpScope);
+
+            // remove dns domain name reservation option
+            reservation.Options.RemoveOptionValue(DhcpServerOptionIds.DomainName);
 
             // deactivate scope
             dhcpScope.Deactivate();
@@ -120,7 +146,7 @@ namespace DhcpWritableDemo
                 Console.WriteLine($"        Client: {reservation.Client}");
                 Console.WriteLine("          Options:");
                 Console.ForegroundColor = ConsoleColor.Gray;
-                foreach (var value in reservation.OptionValues.ToList())
+                foreach (var value in reservation.Options.ToList())
                 {
                     Console.WriteLine($"            {value}");
                 }

@@ -12,44 +12,44 @@ namespace Dhcp
         /// <summary>
         /// IP Address stored in big-endian (network) order
         /// </summary>
-        private readonly uint ipAddress;
+        private readonly uint address;
 #pragma warning restore IDE0032 // Use auto property
 
-        public DhcpServerIpAddress(uint nativeIpAddress)
+        public DhcpServerIpAddress(uint nativeAddress)
         {
-            ipAddress = nativeIpAddress;
+            address = nativeAddress;
         }
 
-        public DhcpServerIpAddress(string ipAddress)
+        public DhcpServerIpAddress(string address)
         {
-            this.ipAddress = BitHelper.StringToIpAddress(ipAddress);
+            this.address = BitHelper.StringToIpAddress(address);
         }
 
-        public DhcpServerIpAddress(IPAddress ipAddress)
+        public DhcpServerIpAddress(IPAddress address)
         {
-            if (ipAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
             {
-                throw new ArgumentOutOfRangeException(nameof(ipAddress), "Only IPv4 addresses are supported");
+                throw new ArgumentOutOfRangeException(nameof(address), "Only IPv4 addresses are supported");
             }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            var ip = (uint)ipAddress.Address;
+            var ip = (uint)address.Address;
 #pragma warning restore CS0618 // Type or member is obsolete
 
             // DhcpServerIpAddress always stores in network order
             // IPAddress stores in host order
-            this.ipAddress = BitHelper.HostToNetworkOrder(ip);
+            this.address = BitHelper.HostToNetworkOrder(ip);
         }
 
         /// <summary>
         /// IP Address in network order
         /// </summary>
-        public uint Native => ipAddress;
+        public uint Native => address;
 
         public byte[] GetBytes()
         {
             var buffer = new byte[4];
-            BitHelper.Write(buffer, 0, ipAddress);
+            BitHelper.Write(buffer, 0, address);
             return buffer;
         }
 
@@ -58,12 +58,12 @@ namespace Dhcp
             if (index < 0 || index > 3)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            return (byte)(ipAddress >> ((3 - index) * 8));
+            return (byte)(address >> ((3 - index) * 8));
         }
 
         public static DhcpServerIpAddress Empty => new DhcpServerIpAddress(0);
-        public static DhcpServerIpAddress FromNative(uint nativeIpAddress) => new DhcpServerIpAddress(nativeIpAddress);
-        public static DhcpServerIpAddress FromNative(int nativeIpAddress) => new DhcpServerIpAddress((uint)nativeIpAddress);
+        public static DhcpServerIpAddress FromNative(uint nativeAddress) => new DhcpServerIpAddress(nativeAddress);
+        public static DhcpServerIpAddress FromNative(int nativeAddress) => new DhcpServerIpAddress((uint)nativeAddress);
         internal static DhcpServerIpAddress FromNative(IntPtr pointer)
         {
             if (pointer == IntPtr.Zero)
@@ -72,9 +72,9 @@ namespace Dhcp
             return new DhcpServerIpAddress((uint)BitHelper.HostToNetworkOrder(Marshal.ReadInt32(pointer)));
         }
 
-        public static DhcpServerIpAddress FromString(string ipAddress) => new DhcpServerIpAddress(ipAddress);
+        public static DhcpServerIpAddress FromString(string address) => new DhcpServerIpAddress(address);
 
-        public override string ToString() => BitHelper.IpAddressToString(ipAddress);
+        public override string ToString() => BitHelper.IpAddressToString(address);
 
         public override bool Equals(object obj)
         {
@@ -89,9 +89,9 @@ namespace Dhcp
             return false;
         }
 
-        public override int GetHashCode() => (int)ipAddress;
+        public override int GetHashCode() => (int)address;
 
-        public bool Equals(DhcpServerIpAddress other) => ipAddress == other.ipAddress;
+        public bool Equals(DhcpServerIpAddress other) => address == other.address;
 
         public bool Equals(IPAddress other)
         {
@@ -102,7 +102,7 @@ namespace Dhcp
             var otherIp = (uint)other.Address;
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            return ipAddress == BitHelper.HostToNetworkOrder(otherIp);
+            return address == BitHelper.HostToNetworkOrder(otherIp);
         }
 
         public static bool operator ==(DhcpServerIpAddress lhs, DhcpServerIpAddress rhs) => lhs.Equals(rhs);
@@ -113,27 +113,27 @@ namespace Dhcp
 
         public static bool operator !=(DhcpServerIpAddress lhs, IPAddress rhs) => !lhs.Equals(rhs);
 
-        internal DHCP_IP_ADDRESS ToNativeAsHost() => new DHCP_IP_ADDRESS(BitHelper.NetworkToHostOrder(ipAddress));
+        internal DHCP_IP_ADDRESS ToNativeAsHost() => new DHCP_IP_ADDRESS(BitHelper.NetworkToHostOrder(address));
 
-        internal DHCP_IP_ADDRESS ToNativeAsNetwork() => new DHCP_IP_ADDRESS(ipAddress);
+        internal DHCP_IP_ADDRESS ToNativeAsNetwork() => new DHCP_IP_ADDRESS(address);
 
-        public static explicit operator uint(DhcpServerIpAddress ipAddress) => ipAddress.ipAddress;
-        public static explicit operator DhcpServerIpAddress(uint ipAddress) => new DhcpServerIpAddress(ipAddress);
-        public static explicit operator int(DhcpServerIpAddress ipAddress) => (int)ipAddress.ipAddress;
-        public static explicit operator DhcpServerIpAddress(int ipAddress) => new DhcpServerIpAddress((uint)ipAddress);
+        public static explicit operator uint(DhcpServerIpAddress address) => address.address;
+        public static explicit operator DhcpServerIpAddress(uint address) => new DhcpServerIpAddress(address);
+        public static explicit operator int(DhcpServerIpAddress address) => (int)address.address;
+        public static explicit operator DhcpServerIpAddress(int address) => new DhcpServerIpAddress((uint)address);
 
-        public static implicit operator DhcpServerIpAddress(IPAddress ipAddress) => new DhcpServerIpAddress(ipAddress);
-        public static implicit operator IPAddress(DhcpServerIpAddress ipAddress)
+        public static implicit operator DhcpServerIpAddress(IPAddress address) => new DhcpServerIpAddress(address);
+        public static implicit operator IPAddress(DhcpServerIpAddress address)
             // IPAddress stores in host order; DhcpServerIpAddress always stores in network order
-            => new IPAddress(BitHelper.NetworkToHostOrder(ipAddress.ipAddress));
+            => new IPAddress(BitHelper.NetworkToHostOrder(address.address));
 
-        public static explicit operator DhcpServerIpMask(DhcpServerIpAddress ipAddress) => new DhcpServerIpMask(ipAddress.ipAddress);
-        public static implicit operator string(DhcpServerIpAddress ipAddress) => ipAddress.ToString();
-        public static implicit operator DhcpServerIpAddress(string ipAddress) => FromString(ipAddress);
+        public static explicit operator DhcpServerIpMask(DhcpServerIpAddress address) => new DhcpServerIpMask(address.address);
+        public static implicit operator string(DhcpServerIpAddress address) => address.ToString();
+        public static implicit operator DhcpServerIpAddress(string address) => FromString(address);
 
-        public static bool operator >(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.ipAddress > b.ipAddress;
-        public static bool operator >=(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.ipAddress >= b.ipAddress;
-        public static bool operator <(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.ipAddress < b.ipAddress;
-        public static bool operator <=(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.ipAddress <= b.ipAddress;
+        public static bool operator >(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.address > b.address;
+        public static bool operator >=(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.address >= b.address;
+        public static bool operator <(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.address < b.address;
+        public static bool operator <=(DhcpServerIpAddress a, DhcpServerIpAddress b) => a.address <= b.address;
     }
 }

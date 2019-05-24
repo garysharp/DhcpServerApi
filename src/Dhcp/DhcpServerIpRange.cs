@@ -114,7 +114,7 @@ namespace Dhcp
             return FromMask(address, mask, type, bootpClientsAllocated, maxBootpAllowed);
         }
 
-        public DhcpServerIpMask SmallestIpMask
+        public DhcpServerIpMask SmallestMask
         {
             get
             {
@@ -125,12 +125,12 @@ namespace Dhcp
             }
         }
 
-        public bool Contains(IPAddress ipAddress) => Contains((DhcpServerIpAddress)ipAddress);
-        public bool Contains(string ipAddress) => Contains(DhcpServerIpAddress.FromString(ipAddress));
-        public bool Contains(int ipAddress) => Contains((DhcpServerIpAddress)ipAddress);
-        public bool Contains(uint ipAddress) => Contains((DhcpServerIpAddress)ipAddress);
+        public bool Contains(IPAddress address) => Contains((DhcpServerIpAddress)address);
+        public bool Contains(string address) => Contains(DhcpServerIpAddress.FromString(address));
+        public bool Contains(int address) => Contains((DhcpServerIpAddress)address);
+        public bool Contains(uint address) => Contains((DhcpServerIpAddress)address);
 
-        public bool Contains(DhcpServerIpAddress ipAddress) => ipAddress >= startAddress && ipAddress <= endAddress;
+        public bool Contains(DhcpServerIpAddress address) => address >= startAddress && address <= endAddress;
 
         internal static DhcpServerIpRange FromNative(DHCP_SUBNET_ELEMENT_DATA native)
         {

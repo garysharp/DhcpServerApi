@@ -31,9 +31,9 @@ namespace Dhcp.Native
         private DateTime ToDateTime()
         {
             if (dwDateTime == 0)
-                return DateTime.MinValue;
+                return DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
             else if (dwDateTime == long.MaxValue)
-                return DateTime.MaxValue;
+                return DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc);
             else
                 return DateTime.FromFileTimeUtc(dwDateTime);
         }

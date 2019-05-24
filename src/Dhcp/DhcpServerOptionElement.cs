@@ -176,15 +176,15 @@ namespace Dhcp
     {
         public override DhcpServerOptionElementType Type => DhcpServerOptionElementType.IpAddress;
         public override object Value => RawValue;
-        public override string ValueFormatted => ipAddress;
+        public override string ValueFormatted => address;
 
-        private readonly DhcpServerIpAddress ipAddress;
+        private readonly DhcpServerIpAddress address;
 
-        public uint RawValue => ipAddress.Native;
+        public uint RawValue => address.Native;
 
         internal DhcpServerOptionElementIpAddress(DhcpServerIpAddress value)
         {
-            ipAddress = value;
+            address = value;
         }
         internal DhcpServerOptionElementIpAddress(DHCP_IP_ADDRESS value)
             : this(value.AsNetworkToIpAddress()) { }

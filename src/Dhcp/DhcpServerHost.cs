@@ -7,13 +7,13 @@ namespace Dhcp
     {
         private static readonly DhcpServerHost emptyInstance = new DhcpServerHost(DhcpServerIpAddress.Empty, null, null);
 
-        public DhcpServerIpAddress IpAddress { get; }
+        public DhcpServerIpAddress Address { get; }
         public string NetBiosName { get; }
         public string ServerName { get; }
 
-        private DhcpServerHost(DhcpServerIpAddress ipAddress, string netBiosName, string serverName)
+        private DhcpServerHost(DhcpServerIpAddress address, string netBiosName, string serverName)
         {
-            IpAddress = ipAddress;
+            Address = address;
             NetBiosName = netBiosName;
             ServerName = serverName;
         }
@@ -22,24 +22,24 @@ namespace Dhcp
 
         internal static DhcpServerHost FromNative(ref DHCP_HOST_INFO native)
         {
-            return new DhcpServerHost(ipAddress: native.IpAddress.AsHostToIpAddress(),
+            return new DhcpServerHost(address: native.IpAddress.AsHostToIpAddress(),
                                       netBiosName: native.NetBiosName,
                                       serverName: native.ServerName);
         }
 
         internal static DhcpServerHost FromNative(DHCP_HOST_INFO native)
         {
-            return new DhcpServerHost(ipAddress: native.IpAddress.AsHostToIpAddress(),
+            return new DhcpServerHost(address: native.IpAddress.AsHostToIpAddress(),
                                       netBiosName: native.NetBiosName,
                                       serverName: native.ServerName);
         }
 
         internal DHCP_HOST_INFO_Managed ToNative()
-            => new DHCP_HOST_INFO_Managed(IpAddress.ToNativeAsNetwork(), NetBiosName, ServerName);
+            => new DHCP_HOST_INFO_Managed(Address.ToNativeAsNetwork(), NetBiosName, ServerName);
 
         public override string ToString()
         {
-            var builder = new StringBuilder(IpAddress);
+            var builder = new StringBuilder(Address);
 
             if (!string.IsNullOrEmpty(ServerName))
                 builder.Append(" [").Append(ServerName).Append("]");

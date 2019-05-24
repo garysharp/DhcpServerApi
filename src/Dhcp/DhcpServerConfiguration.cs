@@ -56,7 +56,7 @@ namespace Dhcp
 
         internal static DhcpServerConfiguration GetConfiguration(DhcpServer server)
         {
-            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpServerGetConfig(ServerIpAddress: server.Address,
                                                  ConfigInfo: out var configInfoPtr);
 
             if (result != DhcpErrors.SUCCESS)
@@ -85,6 +85,6 @@ namespace Dhcp
                 databaseCleanupInterval: TimeSpan.FromMinutes(native.DatabaseCleanupInterval));
         }
 
-        public override string ToString() => $"DHCP Configuration: {Server.Name} ({Server.IpAddress})";
+        public override string ToString() => $"DHCP Configuration: {Server.Name} ({Server.Address})";
     }
 }

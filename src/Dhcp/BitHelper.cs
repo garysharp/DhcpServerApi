@@ -581,33 +581,33 @@ namespace Dhcp
             } while (value != 0);
         }
 
-        public static string IpAddressToString(uint nativeIpAddress)
+        public static string IpAddressToString(uint nativeAddress)
         {
             var buffer = new char[15];
             var offset = 15;
 
-            UIntToString(buffer, ref offset, (int)(nativeIpAddress & 0xFF));
+            UIntToString(buffer, ref offset, (int)(nativeAddress & 0xFF));
             buffer[--offset] = '.';
-            UIntToString(buffer, ref offset, (int)((nativeIpAddress >> 8) & 0xFF));
+            UIntToString(buffer, ref offset, (int)((nativeAddress >> 8) & 0xFF));
             buffer[--offset] = '.';
-            UIntToString(buffer, ref offset, (int)((nativeIpAddress >> 16) & 0xFF));
+            UIntToString(buffer, ref offset, (int)((nativeAddress >> 16) & 0xFF));
             buffer[--offset] = '.';
-            UIntToString(buffer, ref offset, (int)((nativeIpAddress >> 24) & 0xFF));
+            UIntToString(buffer, ref offset, (int)((nativeAddress >> 24) & 0xFF));
 
             return new string(buffer, offset, 15 - offset);
         }
 
-        public static uint StringToIpAddress(string ipAddress)
-            => StringToIpAddress(ipAddress, 0, ipAddress.Length);
+        public static uint StringToIpAddress(string address)
+            => StringToIpAddress(address, 0, address.Length);
 
-        public static uint StringToIpAddress(string ipAddress, int index, int length)
+        public static uint StringToIpAddress(string address, int index, int length)
         {
-            if (string.IsNullOrEmpty(ipAddress))
-                throw new ArgumentNullException(nameof(ipAddress));
-            if (ipAddress.Length < index + length)
+            if (string.IsNullOrEmpty(address))
+                throw new ArgumentNullException(nameof(address));
+            if (address.Length < index + length)
                 throw new ArgumentOutOfRangeException(nameof(length));
             if (length > 15 || length < 7)
-                throw new ArgumentOutOfRangeException(nameof(ipAddress));
+                throw new ArgumentOutOfRangeException(nameof(address));
 
             var result = 0U;
             var shiftAmount = 24;
@@ -617,12 +617,12 @@ namespace Dhcp
 
             for (var i = index; i < indexEnd; i++)
             {
-                var ipChar = ipAddress[i];
+                var ipChar = address[i];
 
                 if (ipChar == '.')
                 {
                     if ((i - octetIndex) < 1 || (i - octetIndex) > 3 || shiftAmount <= 0 || octetValue > 255)
-                        throw new ArgumentOutOfRangeException(nameof(ipAddress));
+                        throw new ArgumentOutOfRangeException(nameof(address));
 
                     result |= (uint)(octetValue << shiftAmount);
                     shiftAmount -= 8;
@@ -632,13 +632,13 @@ namespace Dhcp
                 else
                 {
                     if (ipChar < '0' || ipChar > '9')
-                        throw new ArgumentOutOfRangeException(nameof(ipAddress));
+                        throw new ArgumentOutOfRangeException(nameof(address));
 
                     octetValue = (octetValue * 10) + (ipChar - '0');
                 }
             }
             if ((indexEnd - octetIndex) < 1 || (indexEnd - octetIndex) > 3 || shiftAmount != 0 || octetValue > 255)
-                throw new ArgumentOutOfRangeException(nameof(ipAddress));
+                throw new ArgumentOutOfRangeException(nameof(address));
 
             result |= (uint)octetValue;
 

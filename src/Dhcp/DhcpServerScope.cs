@@ -110,7 +110,7 @@ namespace Dhcp
         {
             var flag = retainClientDnsRecords ? DHCP_FORCE_FLAG.DhcpFailoverForce : DHCP_FORCE_FLAG.DhcpFullForce;
 
-            var result = Api.DhcpDeleteSubnet(ServerIpAddress: Server.IpAddress,
+            var result = Api.DhcpDeleteSubnet(ServerIpAddress: Server.Address,
                                               SubnetAddress: Address.ToNativeAsNetwork(),
                                               ForceFlag: flag);
 
@@ -142,17 +142,17 @@ namespace Dhcp
         }
 
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange)
-            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange)
-            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
             => CreateScope(server, name, description: null, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
             => CreateScope(server, name, description, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
-            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer, leaseDuration);
+            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestMask, timeDelayOffer, leaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
-            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestIpMask, timeDelayOffer, leaseDuration);
+            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestMask, timeDelayOffer, leaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
             => CreateScope(server, name, description: null, ipRange, mask, timeDelayOffer, leaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
@@ -174,7 +174,7 @@ namespace Dhcp
             if (maskRange.EndAddress < ipRange.EndAddress)
                 throw new ArgumentOutOfRangeException(nameof(ipRange), "The range is not valid for this subnet mask.");
 
-            var primaryHost = new DHCP_HOST_INFO_Managed(ipAddress: server.IpAddress.ToNativeAsNetwork(), netBiosName: null, serverName: null);
+            var primaryHost = new DHCP_HOST_INFO_Managed(ipAddress: server.Address.ToNativeAsNetwork(), netBiosName: null, serverName: null);
             var scopeInfo = new DHCP_SUBNET_INFO_Managed(subnetAddress: subnetAddress.ToNativeAsNetwork(),
                                                          subnetMask: mask.ToNativeAsNetwork(),
                                                          subnetName: name,
@@ -182,7 +182,7 @@ namespace Dhcp
                                                          primaryHost: primaryHost,
                                                          subnetState: DHCP_SUBNET_STATE.DhcpSubnetDisabled);
 
-            var result = Api.DhcpCreateSubnet(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpCreateSubnet(ServerIpAddress: server.Address,
                                               SubnetAddress: subnetAddress.ToNativeAsNetwork(),
                                               SubnetInfo: ref scopeInfo);
 
@@ -205,7 +205,7 @@ namespace Dhcp
         internal static IEnumerable<DhcpServerScope> GetScopes(DhcpServer server)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnets(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumSubnets(ServerIpAddress: server.Address,
                                              ResumeHandle: ref resumeHandle,
                                              PreferredMaximum: 0xFFFFFFFF,
                                              EnumInfo: out var enumInfoPtr,
@@ -255,7 +255,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerIpRange> EnumSubnetElementsV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetElements(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumSubnetElements(ServerIpAddress: server.Address,
                                                     SubnetAddress: address.ToNativeAsNetwork(),
                                                     EnumElementType: enumElementType,
                                                     ResumeHandle: ref resumeHandle,
@@ -290,7 +290,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerIpRange> EnumSubnetElementsV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
         {
             var resumeHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumSubnetElementsV5(ServerIpAddress: server.Address,
                                                       SubnetAddress: address.ToNativeAsNetwork(),
                                                       EnumElementType: enumElementType,
                                                       ResumeHandle: ref resumeHandle,
@@ -386,7 +386,7 @@ namespace Dhcp
         private static void AddSubnetElementV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_V5_Managed element)
         {
             var elementRef = element;
-            var result = Api.DhcpAddSubnetElementV5(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef);
+            var result = Api.DhcpAddSubnetElementV5(server.Address, address.ToNativeAsNetwork(), ref elementRef);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpAddSubnetElementV5), result);
@@ -395,7 +395,7 @@ namespace Dhcp
         private static void AddSubnetElementV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_Managed element)
         {
             var elementRef = element;
-            var result = Api.DhcpAddSubnetElement(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef);
+            var result = Api.DhcpAddSubnetElement(server.Address, address.ToNativeAsNetwork(), ref elementRef);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpAddSubnetElement), result);
@@ -424,7 +424,7 @@ namespace Dhcp
         private static void RemoveSubnetElementV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_Managed element)
         {
             var elementRef = element;
-            var result = Api.DhcpRemoveSubnetElement(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
+            var result = Api.DhcpRemoveSubnetElement(server.Address, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
 
             if (result != DhcpErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpRemoveSubnetElement), result);
@@ -432,7 +432,7 @@ namespace Dhcp
 
         private static TimeSpan GetTimeDelayOffer(DhcpServer server, DhcpServerIpAddress address)
         {
-            var result = Api.DhcpGetSubnetDelayOffer(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpGetSubnetDelayOffer(ServerIpAddress: server.Address,
                                                      SubnetAddress: address.ToNativeAsNetwork(),
                                                      TimeDelayInMilliseconds: out var timeDelay);
 
@@ -451,7 +451,7 @@ namespace Dhcp
 
             var timeDelayOfferMilliseconds = (ushort)timeDelayOffer.TotalMilliseconds;
 
-            var result = Api.DhcpSetSubnetDelayOffer(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpSetSubnetDelayOffer(ServerIpAddress: server.Address,
                                                      SubnetAddress: address.ToNativeAsNetwork(),
                                                      TimeDelayInMilliseconds: timeDelayOfferMilliseconds);
 
@@ -500,7 +500,7 @@ namespace Dhcp
 
         private static SubnetInfo GetInfoV0(DhcpServer server, DhcpServerIpAddress address)
         {
-            var result = Api.DhcpGetSubnetInfo(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpGetSubnetInfo(ServerIpAddress: server.Address,
                                                SubnetAddress: address.ToNativeAsNetwork(),
                                                SubnetInfo: out var subnetInfoPtr);
 
@@ -520,7 +520,7 @@ namespace Dhcp
 
         private static SubnetInfo GetInfoVQ(DhcpServer server, DhcpServerIpAddress address)
         {
-            var result = Api.DhcpGetSubnetInfoVQ(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpGetSubnetInfoVQ(ServerIpAddress: server.Address,
                                                  SubnetAddress: address.ToNativeAsNetwork(),
                                                  SubnetInfo: out var subnetInfoPtr);
 
@@ -552,7 +552,7 @@ namespace Dhcp
         private void SetInfoV0(SubnetInfo info)
         {
             var infoNative = info.ToNativeV0();
-            var result = Api.DhcpSetSubnetInfo(ServerIpAddress: Server.IpAddress,
+            var result = Api.DhcpSetSubnetInfo(ServerIpAddress: Server.Address,
                                                SubnetAddress: Address.ToNativeAsNetwork(),
                                                SubnetInfo: ref infoNative);
 
@@ -563,7 +563,7 @@ namespace Dhcp
         private void SetInfoVQ(SubnetInfo info)
         {
             var infoNative = info.ToNativeVQ();
-            var result = Api.DhcpSetSubnetInfoVQ(ServerIpAddress: Server.IpAddress,
+            var result = Api.DhcpSetSubnetInfoVQ(ServerIpAddress: Server.Address,
                                                  SubnetAddress: Address.ToNativeAsNetwork(),
                                                  SubnetInfo: ref infoNative);
 

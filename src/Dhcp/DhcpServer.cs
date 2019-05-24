@@ -17,7 +17,7 @@ namespace Dhcp
         private DhcpServerDnsSettings dnsSettings;
         private DhcpServerSpecificStrings specificStrings;
 
-        public DhcpServerIpAddress IpAddress { get; }
+        public DhcpServerIpAddress Address { get; }
         public string Name { get; }
         public int VersionMajor { get; }
         public int VersionMinor { get; }
@@ -33,7 +33,7 @@ namespace Dhcp
 
         private DhcpServer(DhcpServerIpAddress address, string name)
         {
-            IpAddress = address;
+            Address = address;
             Name = name;
 
             Classes = new DhcpServerClassCollection(this);
@@ -143,7 +143,7 @@ namespace Dhcp
         private static DhcpServer FromNative(DHCPDS_SERVER native)
             => new DhcpServer(native.ServerAddress.AsNetworkToIpAddress(), native.ServerName);
 
-        public override string ToString() => $"{Name} ({IpAddress})";
+        public override string ToString() => $"{Name} ({Address})";
 
     }
 }

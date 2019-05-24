@@ -11,49 +11,48 @@ namespace Dhcp
         public DhcpServerScope Scope { get; }
 
         public DhcpServerIpAddress IpAddress { get; }
-        public DhcpServerIpMask SubnetMask { get; }
-        public DhcpServerHardwareAddress HardwareAddress { get; }
+        private ClientInfo info;
 
-        public string Name { get; }
-        public string Comment { get; }
+        public DhcpServerIpMask SubnetMask => info.SubnetMask;
+        public DhcpServerHardwareAddress HardwareAddress => info.HardwareAddress;
+
+        public string Name
+        {
+            get => info.Name;
+            set => SetName(value);
+        }
+        public string Comment
+        {
+            get => info.Comment;
+            set => SetComment(value);
+        }
 
         [Obsolete("Caused confusion. Use LeaseExpiresUtc or LeaseExpiresLocal instead.")]
-        public DateTime LeaseExpires => LeaseExpiresUtc;
-        public DateTime LeaseExpiresUtc { get; }
-        public DateTime LeaseExpiresLocal => LeaseExpiresUtc.ToLocalTime();
+        public DateTime LeaseExpires => info.LeaseExpiresUtc;
+        public DateTime LeaseExpiresUtc => info.LeaseExpiresUtc;
+        public DateTime LeaseExpiresLocal => info.LeaseExpiresUtc.ToLocalTime();
 
-        public bool LeaseExpired => DateTime.UtcNow > LeaseExpiresUtc;
-        public bool LeaseHasExpiry => LeaseExpiresUtc != DateTime.MaxValue;
+        public bool LeaseExpired => DateTime.UtcNow > info.LeaseExpiresUtc;
+        public bool LeaseHasExpiry => info.LeaseExpiresUtc != DateTime.MaxValue;
 
-        public DhcpServerClientTypes Type { get; }
+        public DhcpServerClientTypes Type => info.Type;
 
-        public DhcpServerClientAddressStates AddressState { get; }
-        public DhcpServerClientNameProtectionStates NameProtectionState { get; }
-        public DhcpServerClientDnsStates DnsState { get; }
+        public DhcpServerClientAddressStates AddressState => info.AddressState;
+        public DhcpServerClientNameProtectionStates NameProtectionState => info.NameProtectionState;
+        public DhcpServerClientDnsStates DnsState => info.DnsState;
 
-        public DhcpServerClientQuarantineStatuses QuarantineStatus { get; }
+        public DhcpServerClientQuarantineStatuses QuarantineStatus => info.QuarantineStatus;
 
-        public DateTime ProbationEnds { get; }
+        public DateTime ProbationEnds => info.ProbationEnds;
 
-        public bool QuarantineCapable { get; }
+        public bool QuarantineCapable => info.QuarantineCapable;
 
-        private DhcpServerClient(DhcpServer server, DhcpServerScope scope, DhcpServerIpAddress ipAddress, DhcpServerIpMask subnetMask, DhcpServerHardwareAddress hardwareAddress, string name, string comment, DateTime leaseExpires, DhcpServerClientTypes type, DhcpServerClientAddressStates addressState, DhcpServerClientNameProtectionStates nameProtectionState, DhcpServerClientDnsStates dnsState, DhcpServerClientQuarantineStatuses quarantineStatus, DateTime probationEnds, bool quarantineCapable)
+        private DhcpServerClient(DhcpServer server, DhcpServerScope scope, DhcpServerIpAddress ipAddress, ClientInfo info)
         {
             Server = server;
             Scope = scope;
             IpAddress = ipAddress;
-            SubnetMask = subnetMask;
-            HardwareAddress = hardwareAddress;
-            Name = name;
-            Comment = comment;
-            LeaseExpiresUtc = leaseExpires.ToUniversalTime();
-            Type = type;
-            AddressState = addressState;
-            NameProtectionState = nameProtectionState;
-            DnsState = dnsState;
-            QuarantineStatus = quarantineStatus;
-            ProbationEnds = probationEnds;
-            QuarantineCapable = quarantineCapable;
+            this.info = info;
         }
 
         public void Delete()
@@ -65,6 +64,30 @@ namespace Dhcp
                 throw new NullReferenceException("This client is not associated with a DHCP scope");
 
             return Scope.Reservations.AddReservation(this);
+        }
+
+        private void SetName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = string.Empty;
+
+            if (!name.Equals(info.Name, StringComparison.Ordinal))
+            {
+                var proposedInfo = info.UpdateName(name);
+                SetInfo(proposedInfo);
+            }
+        }
+
+        private void SetComment(string comment)
+        {
+            if (string.IsNullOrEmpty(comment))
+                comment = string.Empty;
+
+            if (!comment.Equals(info.Comment, StringComparison.Ordinal))
+            {
+                var proposedInfo = info.UpdateComment(comment);
+                SetInfo(proposedInfo);
+            }
         }
 
         internal static DhcpServerClient GetClient(DhcpServer server, DhcpServerScope scope, DhcpServerIpAddress ipAddress)
@@ -88,7 +111,7 @@ namespace Dhcp
 
         private static DhcpServerClient GetClientV0(DhcpServer server, DhcpServerScope scope, IntPtr searchInfo)
         {
-            var result = Api.DhcpGetClientInfo(server.IpAddress, searchInfo, out var clientPtr);
+            var result = Api.DhcpGetClientInfo(server.Address, searchInfo, out var clientPtr);
 
             if (result == DhcpErrors.JET_ERROR)
                 return null;
@@ -112,7 +135,7 @@ namespace Dhcp
 
         private static DhcpServerClient GetClientVQ(DhcpServer server, DhcpServerScope scope, IntPtr searchInfo)
         {
-            var result = Api.DhcpGetClientInfoVQ(server.IpAddress, searchInfo, out var clientPtr);
+            var result = Api.DhcpGetClientInfoVQ(server.Address, searchInfo, out var clientPtr);
 
             if (result == DhcpErrors.JET_ERROR)
                 return null;
@@ -148,7 +171,7 @@ namespace Dhcp
         {
             var scopeLookup = server.Scopes.ToDictionary(s => s.Address);
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.Address,
                                                    SubnetAddress: (DHCP_IP_ADDRESS)0,
                                                    ResumeHandle: ref resultHandle,
                                                    PreferredMaximum: 0x10000,
@@ -181,7 +204,7 @@ namespace Dhcp
                         yield break; // Last results
 
                     Api.FreePointer(ref clientsPtr);
-                    result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.IpAddress,
+                    result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.Address,
                                                        SubnetAddress: (DHCP_IP_ADDRESS)0,
                                                        ResumeHandle: ref resultHandle,
                                                        PreferredMaximum: 0x10000,
@@ -203,7 +226,7 @@ namespace Dhcp
         {
             var scopeLookup = server.Scopes.ToDictionary(s => s.Address);
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.IpAddress,
+            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.Address,
                                                      SubnetAddress: (DHCP_IP_ADDRESS)0,
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -236,7 +259,7 @@ namespace Dhcp
                         yield break; // Last results
 
                     Api.FreePointer(ref clientsPtr);
-                    result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.IpAddress,
+                    result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.Address,
                                                          SubnetAddress: (DHCP_IP_ADDRESS)0,
                                                          ResumeHandle: ref resultHandle,
                                                          PreferredMaximum: 0x10000,
@@ -267,7 +290,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerClient> GetScopeClientsV0(DhcpServerScope scope)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: scope.Server.IpAddress,
+            var result = Api.DhcpEnumSubnetClients(ServerIpAddress: scope.Server.Address,
                                                    SubnetAddress: scope.Address.ToNativeAsNetwork(),
                                                    ResumeHandle: ref resultHandle,
                                                    PreferredMaximum: 0x10000,
@@ -299,7 +322,7 @@ namespace Dhcp
                         yield break; // Last results
 
                     Api.FreePointer(ref clientsPtr);
-                    result = Api.DhcpEnumSubnetClients(ServerIpAddress: scope.Server.IpAddress,
+                    result = Api.DhcpEnumSubnetClients(ServerIpAddress: scope.Server.Address,
                                                        SubnetAddress: scope.Address.ToNativeAsNetwork(),
                                                        ResumeHandle: ref resultHandle,
                                                        PreferredMaximum: 0x10000,
@@ -320,7 +343,7 @@ namespace Dhcp
         private static IEnumerable<DhcpServerClient> GetScopeClientsVQ(DhcpServerScope scope)
         {
             var resultHandle = IntPtr.Zero;
-            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: scope.Server.IpAddress,
+            var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: scope.Server.Address,
                                                      SubnetAddress: scope.Address.ToNativeAsNetwork(),
                                                      ResumeHandle: ref resultHandle,
                                                      PreferredMaximum: 0x10000,
@@ -352,7 +375,7 @@ namespace Dhcp
                         yield break; // Last results
 
                     Api.FreePointer(ref clientsPtr);
-                    result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: scope.Server.IpAddress,
+                    result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: scope.Server.Address,
                                                          SubnetAddress: scope.Address.ToNativeAsNetwork(),
                                                          ResumeHandle: ref resultHandle,
                                                          PreferredMaximum: 0x10000,
@@ -408,7 +431,7 @@ namespace Dhcp
             {
                 using (var clientInfoPtr = BitHelper.StructureToPtr(clientInfo))
                 {
-                    var result = Api.DhcpCreateClientInfo(ServerIpAddress: scope.Server.IpAddress, ClientInfo: clientInfoPtr);
+                    var result = Api.DhcpCreateClientInfo(ServerIpAddress: scope.Server.Address, ClientInfo: clientInfoPtr);
 
                     if (result != DhcpErrors.SUCCESS)
                         throw new DhcpServerException(nameof(Api.DhcpCreateClientInfo), result);
@@ -438,7 +461,7 @@ namespace Dhcp
             {
                 using (var clientInfoPtr = BitHelper.StructureToPtr(clientInfo))
                 {
-                    var result = Api.DhcpCreateClientInfo(ServerIpAddress: scope.Server.IpAddress, ClientInfo: clientInfoPtr);
+                    var result = Api.DhcpCreateClientInfo(ServerIpAddress: scope.Server.Address, ClientInfo: clientInfoPtr);
 
                     if (result != DhcpErrors.SUCCESS)
                         throw new DhcpServerException(nameof(Api.DhcpCreateClientInfo), result);
@@ -446,6 +469,28 @@ namespace Dhcp
             }
 
             return GetClient(scope.Server, scope, address);
+        }
+
+        private void SetInfo(ClientInfo info)
+        {
+            // only supporting v0 at this stage
+            SetInfoV0(info);
+
+            // update cache
+            this.info = info;
+        }
+
+        private void SetInfoV0(ClientInfo info)
+        {
+            using (var infoNative = info.ToNativeV0())
+            {
+                var infoNativeRef = infoNative;
+                var result = Api.DhcpSetClientInfo(ServerIpAddress: Server.Address,
+                                                   ClientInfo: ref infoNativeRef);
+
+                if (result != DhcpErrors.SUCCESS)
+                    throw new DhcpServerException(nameof(Api.DhcpSetClientInfo), result);
+            }
         }
 
         private static void Delete(DhcpServer server, DhcpServerIpAddress address)
@@ -458,7 +503,7 @@ namespace Dhcp
 
             using (var searchInfoPtr = BitHelper.StructureToPtr(searchInfo))
             {
-                var result = Api.DhcpDeleteClientInfo(server.IpAddress, searchInfoPtr);
+                var result = Api.DhcpDeleteClientInfo(server.Address, searchInfoPtr);
 
                 if (result != DhcpErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpDeleteClientInfo), result);
@@ -467,83 +512,110 @@ namespace Dhcp
 
         private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_CLIENT_INFO native)
         {
-            return new DhcpServerClient(server: server,
-                                        scope: scope,
-                                        ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
-                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
-                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
-                                        name: native.ClientName,
-                                        comment: native.ClientComment,
-                                        leaseExpires: native.ClientLeaseExpires,
-                                        type: DhcpServerClientTypes.Unspecified,
-                                        addressState: DhcpServerClientAddressStates.Unknown,
-                                        nameProtectionState: DhcpServerClientNameProtectionStates.Unknown,
-                                        dnsState: DhcpServerClientDnsStates.Unknown,
-                                        quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
-                                        probationEnds: DateTime.MaxValue,
-                                        quarantineCapable: false);
-        }
+            var info = ClientInfo.FromNative(native);
 
-        private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_CLIENT_INFO_V4 native)
-        {
             return new DhcpServerClient(server: server,
                                         scope: scope,
                                         ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
-                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
-                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
-                                        name: native.ClientName,
-                                        comment: native.ClientComment,
-                                        leaseExpires: native.ClientLeaseExpires,
-                                        type: (DhcpServerClientTypes)native.bClientType,
-                                        addressState: DhcpServerClientAddressStates.Unknown,
-                                        nameProtectionState: DhcpServerClientNameProtectionStates.Unknown,
-                                        dnsState: DhcpServerClientDnsStates.Unknown,
-                                        quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
-                                        probationEnds: DateTime.MaxValue,
-                                        quarantineCapable: false);
-        }
-
-        private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_CLIENT_INFO_V5 native)
-        {
-            return new DhcpServerClient(server: server,
-                                        scope: scope,
-                                        ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
-                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
-                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
-                                        name: native.ClientName,
-                                        comment: native.ClientComment,
-                                        leaseExpires: native.ClientLeaseExpires,
-                                        type: (DhcpServerClientTypes)native.bClientType,
-                                        addressState: (DhcpServerClientAddressStates)(native.AddressState & 0x03), // bits 0 & 1
-                                        nameProtectionState: (DhcpServerClientNameProtectionStates)((native.AddressState >> 2) & 0x03), // bits 2 & 3
-                                        dnsState: (DhcpServerClientDnsStates)((native.AddressState >> 4) & 0x0F), // bits 4-7
-                                        quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
-                                        probationEnds: DateTime.MaxValue,
-                                        quarantineCapable: false);
+                                        info: info);
         }
 
         private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_CLIENT_INFO_VQ native)
         {
+            var info = ClientInfo.FromNative(native);
+
             return new DhcpServerClient(server: server,
                                         scope: scope,
                                         ipAddress: native.ClientIpAddress.AsNetworkToIpAddress(),
-                                        subnetMask: native.SubnetMask.AsNetworkToIpMask(),
-                                        hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
-                                        name: native.ClientName,
-                                        comment: native.ClientComment,
-                                        leaseExpires: native.ClientLeaseExpires,
-                                        type: (DhcpServerClientTypes)native.ClientType,
-                                        addressState: (DhcpServerClientAddressStates)(native.AddressState & 0x03), // bits 0 & 1
-                                        nameProtectionState: (DhcpServerClientNameProtectionStates)((native.AddressState >> 2) & 0x03), // bits 2 & 3
-                                        dnsState: (DhcpServerClientDnsStates)((native.AddressState >> 4) & 0x0F), // bits 4-7
-                                        quarantineStatus: (DhcpServerClientQuarantineStatuses)native.Status,
-                                        probationEnds: native.ProbationEnds,
-                                        quarantineCapable: native.QuarantineCapable);
+                                        info: info);
         }
 
         public override string ToString()
         {
             return $"[{HardwareAddress}] {AddressState} {IpAddress}/{SubnetMask.SignificantBits} ({(LeaseHasExpiry ? (LeaseExpired ? "expired" : LeaseExpiresLocal.ToString()) : "no expiry")}): {Name}{(string.IsNullOrEmpty(Comment) ? null : $" ({Comment})")}";
+        }
+
+        private class ClientInfo
+        {
+            public readonly DHCP_IP_ADDRESS Address;
+            public readonly DhcpServerIpMask SubnetMask;
+            public readonly DhcpServerHardwareAddress HardwareAddress;
+            public readonly string Name;
+            public readonly string Comment;
+            public readonly DateTime LeaseExpiresUtc;
+            public readonly DhcpServerHost OwnerHost;
+            public readonly DhcpServerClientTypes Type;
+            public readonly DhcpServerClientAddressStates AddressState;
+            public readonly DhcpServerClientNameProtectionStates NameProtectionState;
+            public readonly DhcpServerClientDnsStates DnsState;
+            public readonly DhcpServerClientQuarantineStatuses QuarantineStatus;
+            public readonly DateTime ProbationEnds;
+            public readonly bool QuarantineCapable;
+
+            public ClientInfo(DHCP_IP_ADDRESS address, DhcpServerIpMask subnetMask, DhcpServerHardwareAddress hardwareAddress, string name, string comment,
+                DateTime leaseExpiresUtc, DhcpServerHost ownerHost, DhcpServerClientTypes type, DhcpServerClientAddressStates addressState,
+                DhcpServerClientNameProtectionStates nameProtectionState, DhcpServerClientDnsStates dnsState, DhcpServerClientQuarantineStatuses quarantineStatus,
+                DateTime probationEnds, bool quarantineCapable)
+            {
+                Address = address;
+                SubnetMask = subnetMask;
+                HardwareAddress = hardwareAddress;
+                Name = name;
+                Comment = comment;
+                LeaseExpiresUtc = leaseExpiresUtc;
+                OwnerHost = ownerHost;
+                Type = type;
+                AddressState = addressState;
+                NameProtectionState = nameProtectionState;
+                DnsState = dnsState;
+                QuarantineStatus = quarantineStatus;
+                ProbationEnds = probationEnds;
+                QuarantineCapable = quarantineCapable;
+            }
+
+            public static ClientInfo FromNative(DHCP_CLIENT_INFO native)
+            {
+                return new ClientInfo(address: native.ClientIpAddress,
+                                      subnetMask: native.SubnetMask.AsNetworkToIpMask(),
+                                      hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
+                                      name: native.ClientName,
+                                      comment: native.ClientComment,
+                                      leaseExpiresUtc: ((DateTime)native.ClientLeaseExpires).ToUniversalTime(),
+                                      ownerHost: DhcpServerHost.FromNative(native.OwnerHost),
+                                      type: DhcpServerClientTypes.Unspecified,
+                                      addressState: DhcpServerClientAddressStates.Unknown,
+                                      nameProtectionState: DhcpServerClientNameProtectionStates.Unknown,
+                                      dnsState: DhcpServerClientDnsStates.Unknown,
+                                      quarantineStatus: DhcpServerClientQuarantineStatuses.NoQuarantineInformation,
+                                      probationEnds: DateTime.MaxValue,
+                                      quarantineCapable: false);
+            }
+
+            public static ClientInfo FromNative(DHCP_CLIENT_INFO_VQ native)
+            {
+                return new ClientInfo(address: native.ClientIpAddress,
+                                      subnetMask: native.SubnetMask.AsNetworkToIpMask(),
+                                      hardwareAddress: native.ClientHardwareAddress.DataAsHardwareAddress,
+                                      name: native.ClientName,
+                                      comment: native.ClientComment,
+                                      leaseExpiresUtc: ((DateTime)native.ClientLeaseExpires).ToUniversalTime(),
+                                      ownerHost: DhcpServerHost.FromNative(native.OwnerHost),
+                                      type: (DhcpServerClientTypes)native.ClientType,
+                                      addressState: (DhcpServerClientAddressStates)(native.AddressState & 0x03), // bits 0 & 1
+                                      nameProtectionState: (DhcpServerClientNameProtectionStates)((native.AddressState >> 2) & 0x03), // bits 2 & 3
+                                      dnsState: (DhcpServerClientDnsStates)((native.AddressState >> 4) & 0x0F), // bits 4-7
+                                      quarantineStatus: (DhcpServerClientQuarantineStatuses)native.Status,
+                                      probationEnds: native.ProbationEnds,
+                                      quarantineCapable: native.QuarantineCapable);
+            }
+
+            public ClientInfo UpdateName(string name)
+                => new ClientInfo(Address, SubnetMask, HardwareAddress, name, Comment, LeaseExpiresUtc, OwnerHost, Type, AddressState, NameProtectionState, DnsState, QuarantineStatus, ProbationEnds, QuarantineCapable);
+            public ClientInfo UpdateComment(string comment)
+                => new ClientInfo(Address, SubnetMask, HardwareAddress, Name, comment, LeaseExpiresUtc, OwnerHost, Type, AddressState, NameProtectionState, DnsState, QuarantineStatus, ProbationEnds, QuarantineCapable);
+
+            public DHCP_CLIENT_INFO_Managed ToNativeV0()
+                => new DHCP_CLIENT_INFO_Managed(Address, SubnetMask.ToNativeAsNetwork(), HardwareAddress.ToNativeBinaryData(), Name, Comment, LeaseExpiresUtc, OwnerHost.ToNative());
         }
     }
 }
