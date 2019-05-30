@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of DHCP_OPTION_VALUE structures containing DHCP option values.
         /// </summary>
-        private IntPtr ValuesPointer;
+        private readonly IntPtr ValuesPointer;
         /// <summary>
         /// Pointer to a list of DHCP_OPTION_VALUE structures containing DHCP option values.
         /// </summary>
@@ -43,7 +43,7 @@ namespace Dhcp.Native
             foreach (var value in Values)
                 value.Dispose();
 
-            Api.FreePointer(ref ValuesPointer);
+            Api.FreePointer(ValuesPointer);
         }
     }
 }

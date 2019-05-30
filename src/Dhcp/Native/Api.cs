@@ -578,6 +578,130 @@ namespace Dhcp.Native
         public static extern DhcpErrors DhcpAuditLogGetParams(string ServerIpAddress, int Flags, [MarshalAs(UnmanagedType.LPWStr)] out string AuditLogDir, out int DiskCheckInterval, out int MaxLogFilesSize, out int MinSpaceOnDisk);
 
         /// <summary>
+        /// The DhcpV4FailoverAddScopeToRelationship function adds a DHCPv4 scope to the specified failover relationship.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains both the scope information to add and the failover relationship to modify.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, out IntPtr pRelationship);
+
+        /// <summary>
+        /// The DhcpV4FailoverCreateRelationship function creates a new DHCPv4 failover relationship between two servers.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the DHCPv4 failover relationship to create.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverCreateRelationship(string ServerIpAddress, ref DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
+
+        /// <summary>
+        /// The DhcpV4FailoverDeleteRelationship function deletes a DHCPv4 failover relationship between two servers.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="RelationshipName">Pointer to null-terminated Unicode string that represents the name of the relationship to delete.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverDeleteRelationship(string ServerIpAddress, string RelationshipName);
+
+        /// <summary>
+        /// The DhcpV4FailoverDeleteScopeFromRelationship function deletes a DHCPv4 scope from the specified failover relationship.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains the scopes to delete. The scopes are defined in the pScopes member of this structure.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverDeleteScopeFromRelationship(string ServerIpAddress, ref DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
+
+        /// <summary>
+        /// The DhcpV4FailoverEnumRelationship function enumerates all failover relationships present on the server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="ResumeHandle">Pointer to a DHCP_RESUME_HANDLE structure that identifies this enumeration for use in subsequent calls to this function.
+        ///     Initially, this value should be zero on input. If successful, the returned value should be used for subsequent enumeration requests. For example, if PreferredMaximum is set to 100, and 200 reservation elements are configured on the server, the resume handle can be used after the first 100 policies are retrieved to obtain the next 100 on a subsequent call.</param>
+        /// <param name="PreferredMaximum">The maximum number of failover relationship elements to return in pRelationship. If PreferredMaximum is greater than the number of remaining non-enumerated policies on the server, the remaining number of non-enumerated policies is returned.</param>
+        /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP_ARRAY structure that contains an array of the failover relationships available on the DHCP server. If no relationships are configured, this value is NULL.</param>
+        /// <param name="RelationshipRead">Pointer to a DWORD that specifies the number of failover relationship elements returned in pRelationship.</param>
+        /// <param name="RelationshipTotal">Pointer to a DWORD that specifies the number of failover relationships configured on the DHCP server that have not yet been enumerated.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverEnumRelationship(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Relationship, out int RelationshipRead, out int RelationshipTotal);
+
+        /// <summary>
+        /// The DhcpV4FailoverGetAddressStatus function returns the status of a IPv4 address.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="SubnetAddress">DHCP_IP_ADDRESS structure that contains the IPv4 address whose status is being requested.</param>
+        /// <param name="Status">Pointer to a DWORD that returns the status of the IPv4 address as specified in the table below:
+        /// 0 = The IPv4 address will be leased by a primary server.
+        /// 1 = The IPv4 address will be leased by a secondary server.
+        /// 2 = The IPv4 address is part of an exclusion range.
+        /// 3 = The IPv4 address is a reservation.
+        /// </param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverGetAddressStatus(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out int Status);
+
+        /// <summary>
+        /// The DhcpV4FailoverGetRelationship function retrieves relationship details for a specific relationship name.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="RelationshipName">Pointer to a null-terminated Unicode string which represents the name of the relationship to retrieve.</param>
+        /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the retrieved failover relationship.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverGetRelationship(string ServerIpAddress, string RelationshipName, out IntPtr Relationship);
+
+        /// <summary>
+        /// The DhcpV4FailoverGetScopeRelationship function retrieves the failover relationship that is configured on a specified DHCPv4 scope.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="ScopeId">A DHCP_IP_ADDRESS field that contains the IPv4 scope address for which the relationship details are to be retrieved.</param>
+        /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the retrieved failover relationship which contains scopeId field in its pScopes member.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverGetScopeRelationship(string ServerIpAddress, DHCP_IP_ADDRESS ScopeId, out IntPtr Relationship);
+
+        /// <summary>
+        /// The DhcpV4FailoverGetScopeStatistics function retrieves the address usage statistics of a specific scope that is part of a failover relationship.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="ScopeId">DHCP_IP_ADDRESS structure that contains the IPv4 scope address of the address usage statistics to retrieve.</param>
+        /// <param name="Stats">Pointer to a DHCP_FAILOVER_STATISTICS structure that contains the address usage information for scopeId.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverGetScopeStatistics(string ServerIpAddress, DHCP_IP_ADDRESS ScopeId, out IntPtr Stats);
+
+        /// <summary>
+        /// The DhcpV4FailoverGetSystemTime function returns the current time on the DHCP server.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="Time">Pointer to a DWORD that returns the current time, in seconds, elapsed since midnight, January 1, 1970, Coordinated Universal Time (UTC), on the DHCP server.</param>
+        /// <param name="MaxAllowedDeltaTime">?</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverGetSystemTime(string ServerIpAddress, out int Time, out int MaxAllowedDeltaTime);
+
+        /// <summary>
+        /// The DhcpV4FailoverSetRelationship function sets or modifies the parameters of a DHCPv4 server failover relationship.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="Flags">A bitmask that specifies the fields to update in pRelationship. Each value specifies a member of the DHCP_FAILOVER_RELATIONSHIP structure to be modified.</param>
+        /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains update information about the fields in the DHCPv4 failover relationship.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverSetRelationship(string ServerIpAddress, DHCP_FAILOVER_RELATIONSHIP_SET_FLAGS Flags, ref DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
+
+        /// <summary>
+        /// The DhcpV4FailoverTriggerAddrAllocation function redistributes the free addresses between the primary server and the secondary server that are part of a failover relationship.
+        /// </summary>
+        /// <param name="ServerIpAddress">Pointer to a null-terminated Unicode string that represents the IP address or hostname of the DHCP server.</param>
+        /// <param name="FailRelName">Pointer to a null-terminated Unicode string that represents the name of the failover relationship for which free addresses are to be redistributed.</param>
+        /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
+        [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern DhcpErrors DhcpV4FailoverTriggerAddrAllocation(string ServerIpAddress, string FailRelName);
+
+        /// <summary>
         /// The DhcpRpcFreeMemory function frees a block of buffer space returned as a parameter.
         /// </summary>
         /// <param name="BufferPointer">Pointer to an address that contains a structure (or structures, in the case of an array) returned as a parameter. </param>
