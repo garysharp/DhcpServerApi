@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32;
@@ -64,12 +65,19 @@ namespace Dhcp.Callout.Native
             return ERROR_SUCCESS;
         }
 
-        private static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            if (args.Name == typeof(CalloutNative).Assembly.FullName)
-            {
-                return typeof(CalloutNative).Assembly;
-            }
+            var self = Assembly.GetExecutingAssembly();
+
+            // handle self
+            if (args.Name == self.FullName)
+                return self;
+
+            // handle dependencies
+            var assemblyName = new AssemblyName(args.Name);
+            var assemblyPath = Path.Combine(Path.GetDirectoryName(args.RequestingAssembly.Location), $"{assemblyName.Name}.dll");
+            if (File.Exists(assemblyPath))
+                return Assembly.LoadFile(assemblyPath);
 
             return null;
         }
@@ -184,6 +192,7 @@ namespace Dhcp.Callout.Native
                 {
                     var hostFilename = Path.GetFileName(hostLocation);
                     var hostDirectory = Path.GetDirectoryName(hostLocation);
+                    var hostDependencies = Assembly.GetExecutingAssembly().GetReferencedAssemblies().Select(an => Path.Combine(hostDirectory, $"{an.Name}.dll")).ToList();
                     var assemblyPaths = new List<string>();
 
                     foreach (var assemblyPath in Directory.EnumerateFiles(hostDirectory, "*.dll", SearchOption.TopDirectoryOnly))
@@ -192,15 +201,17 @@ namespace Dhcp.Callout.Native
                         if (Path.GetFileName(assemblyPath).Equals(hostFilename, StringComparison.OrdinalIgnoreCase))
                             continue;
 
+                        // ignore dependencies
+                        if (hostDependencies.Contains(assemblyPath))
+                            continue;
+
                         // add managed assemblies
                         if (IsManagedAssembly(assemblyPath))
                             assemblyPaths.Add(assemblyPath);
                     }
 
                     if (assemblyPaths.Count > 0)
-                    {
                         return InitializeConsumers(assemblyPaths, true);
-                    }
                 }
 
                 return 0x2U; // ERROR_FILE_NOT_FOUND

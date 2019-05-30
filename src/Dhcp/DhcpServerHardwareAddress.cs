@@ -158,7 +158,7 @@ namespace Dhcp
                 hardwareAddressLength > 8 ? Marshal(buffer, hardwareAddressOffset + 8, hardwareAddressLength - 8) : 0UL);
         }
 
-        internal static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, IntPtr pointer, int length)
+        public static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, IntPtr pointer, int length)
         {
             if (pointer == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(pointer));

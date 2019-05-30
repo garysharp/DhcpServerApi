@@ -62,6 +62,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Dhcp.Callout\Dhcp.Callout.csproj">
+      <Project>{4cb9d6c3-67ce-478e-ba98-eb2c2c927282}</Project>
+      <Name>Dhcp.Callout</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dhcp\Dhcp.csproj">
       <Project>{3f2e7427-2adc-43d4-a92b-1f6abae23bed}</Project>
       <Name>Dhcp</Name>

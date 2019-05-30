@@ -12,10 +12,10 @@ namespace DhcpCalloutDemo
     //  - Build, then copy 'DhcpServerApi.dll' and 'DhcpCalloutDemo.dll' to your DHCP server
     //  - Add the Multi-String registry value 'CalloutDlls' to:
     //      HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DHCPServer\Parameters
-    //  - Set the value of CalloutDlls to the full path to the 'DhcpServerApi.dll' file.
+    //  - Set the value of CalloutDlls to the full path to the 'DhcpServerApi.Callout.dll' file.
     //  - Restart the DHCP Service
     // Startup:
-    //  - On service startup DHCP will discover the Callout library (DhcpServerApi.dll) and load it.
+    //  - On service startup DHCP will discover the Callout library (DhcpServerApi.Callout.dll) and load it.
     //  - The library will then discover other .NET consumers, by:
     //       1. Looking files in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DHCPServer\Parameters\CalloutDotNetDlls
     //          OR

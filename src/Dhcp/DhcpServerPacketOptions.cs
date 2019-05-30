@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Dhcp.Callout
+namespace Dhcp
 {
     public class DhcpServerPacketOptions : MarshalByRefObject
     {
         private readonly Native.DHCP_SERVER_OPTIONS options;
 
-        internal DhcpServerPacketOptions(IntPtr pointer)
+        public DhcpServerPacketOptions(IntPtr pointer)
         {
             options = pointer.MarshalToStructure<Native.DHCP_SERVER_OPTIONS>();
         }

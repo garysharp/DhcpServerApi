@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Dhcp
 {
-    internal class DhcpServerPacket : MarshalByRefObject, IDhcpServerPacket, IDhcpServerPacketRaw
+    public class DhcpServerPacket : MarshalByRefObject, IDhcpServerPacket, IDhcpServerPacketRaw
     {
         internal const int maxBufferLength = 4000;
         protected internal readonly IntPtr pointer;
@@ -14,7 +14,7 @@ namespace Dhcp
         protected internal int length;
         protected internal byte[] buffer;
 
-        internal DhcpServerPacket(IntPtr pointer, int size)
+        public DhcpServerPacket(IntPtr pointer, int size)
         {
             // lazy-marshal the buffer as in most cases this will never be used
             this.pointer = pointer;

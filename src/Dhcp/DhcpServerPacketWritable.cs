@@ -3,16 +3,16 @@ using System.Runtime.InteropServices;
 
 namespace Dhcp
 {
-    internal class DhcpServerPacketWritable : DhcpServerPacket, IDhcpServerPacketWritable, IDhcpServerPacketRawWritable
+    public class DhcpServerPacketWritable : DhcpServerPacket, IDhcpServerPacketWritable, IDhcpServerPacketRawWritable
     {
-        internal DhcpServerPacketWritable(IntPtr pointer, int size) : base(pointer, size)
+        public DhcpServerPacketWritable(IntPtr pointer, int size) : base(pointer, size)
         {
             BufferModified = false;
         }
 
         public bool BufferModified { get; private set; }
 
-        internal void WriteBuffer(IntPtr packet, ref uint packetSize)
+        public void WriteBuffer(IntPtr packet, ref uint packetSize)
         {
             if (buffer != null && BufferModified)
             {

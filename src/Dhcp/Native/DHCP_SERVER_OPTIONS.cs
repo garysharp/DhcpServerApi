@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Dhcp.Callout.Native
+namespace Dhcp.Native
 {
     /// <summary>
     /// The DHCP_SERVER_OPTIONS structure specifies requested DHCP Server options.
