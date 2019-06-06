@@ -41,6 +41,7 @@ namespace Dhcp
             Scopes = new DhcpServerScopeCollection(this);
             Clients = new DhcpServerClientCollection(this);
             BindingElements = new DhcpServerBindingElementCollection(this);
+            FailoverRelationships = new DhcpServerFailoverRelationshipCollection(this);
 
             GetVersion(address, out var versionMajor, out var versionMinor);
             VersionMajor = versionMajor;
@@ -71,6 +72,11 @@ namespace Dhcp
         /// Enumerates a list of Binding Elements associated with the DHCP Server
         /// </summary>
         public DhcpServerBindingElementCollection BindingElements { get; }
+
+        /// <summary>
+        /// DHCP Server Failover Relationships
+        /// </summary>
+        public DhcpServerFailoverRelationshipCollection FailoverRelationships { get; }
 
         /// <summary>
         /// Calculates if this server version is greater than or equal to the supplied <paramref name="version"/>

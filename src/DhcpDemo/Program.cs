@@ -153,6 +153,37 @@ namespace DhcpDemo
                 Console.WriteLine($"         Delay Offer: {scope.TimeDelayOffer.TotalMilliseconds} milliseconds");
                 Console.WriteLine($"       Quarantine On: {scope.QuarantineOn}");
                 Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("      Failover Relationship:");
+                Console.ForegroundColor = ConsoleColor.Gray;
+                var failoverRelationship = scope.GetFailoverRelationship();
+                if (failoverRelationship == null)
+                {
+                    Console.WriteLine($"                       Not in a Failover Relationship");
+                }
+                else
+                {
+                    Console.WriteLine($"                            Name: {failoverRelationship.Name}");
+                    Console.WriteLine($"                            Mode: {failoverRelationship.Mode}");
+                    Console.WriteLine($"                           State: {failoverRelationship.State}");
+                    Console.WriteLine($"                     Server Type: {failoverRelationship.ServerType}");
+                    Console.WriteLine($"                  Primary Server: {failoverRelationship.PrimaryServerName} [{failoverRelationship.PrimaryServerAddress}]");
+                    Console.WriteLine($"                Secondary Server: {failoverRelationship.SecondaryServerName} [{failoverRelationship.SecondaryServerAddress}]");
+                    Console.WriteLine($"                   Shared Secret: {failoverRelationship.SharedSecret}");
+                    Console.WriteLine($"        Maximum Client Lead Time: {failoverRelationship.MaximumClientLeadTime}");
+                    Console.WriteLine($"       State Switchover Interval: {failoverRelationship.StateSwitchoverInterval}");
+                    Console.WriteLine($"                  Load Balance %: {failoverRelationship.LoadBalancePercentage}");
+                    Console.WriteLine($"    Standby Addresses Reserved %: {failoverRelationship.StandbyAddressesReservedPercentage}");
+                    Console.WriteLine("      Failover Statistics:");
+                    var failoverStatistics = scope.GetFailoverStatistics();
+                    Console.WriteLine($"            Addresses Total: {failoverStatistics.AddressesTotal}");
+                    Console.WriteLine($"             Addresses Free: {failoverStatistics.AddressesFree}");
+                    Console.WriteLine($"           Addresses In Use: {failoverStatistics.AddressesInUse}");
+                    Console.WriteLine($"     Partner Addresses Free: {failoverStatistics.PartnerAddressesFree}");
+                    Console.WriteLine($"   Partner Addresses In Use: {failoverStatistics.PartnerAddressesInUse}");
+                    Console.WriteLine($"       Local Addresses Free: {failoverStatistics.LocalAddressesFree}");
+                    Console.WriteLine($"     Local Addresses In Use: {failoverStatistics.LocalAddressesInUse}");
+                }
+                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("      Excluded IP Ranges:");
                 Console.ForegroundColor = ConsoleColor.Gray;
                 foreach (var ipRange in scope.ExcludedIpRanges)

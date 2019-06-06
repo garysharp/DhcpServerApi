@@ -118,6 +118,12 @@ namespace Dhcp
                 throw new DhcpServerException(nameof(Api.DhcpDeleteSubnet), result);
         }
 
+        public DhcpServerFailoverRelationship GetFailoverRelationship()
+            => DhcpServerFailoverRelationship.GetFailoverRelationship(Server, Address);
+
+        public DhcpServerScopeFailoverStatistics GetFailoverStatistics()
+            => DhcpServerScopeFailoverStatistics.GetScopeFailoverStatistics(Server, this);
+
         private void SetName(string name)
         {
             if (string.IsNullOrEmpty(name))

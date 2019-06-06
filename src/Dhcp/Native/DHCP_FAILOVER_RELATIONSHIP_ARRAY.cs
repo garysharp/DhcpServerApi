@@ -6,7 +6,13 @@ namespace Dhcp.Native
 {
     internal struct DHCP_FAILOVER_RELATIONSHIP_ARRAY : IDisposable
     {
+        /// <summary>
+        /// This member is of type DWORD and contains the number of DHCP_FAILOVER_RELATIONSHIP elements specified in the subsequent pRelationships field.
+        /// </summary>
         public readonly int NumElements;
+        /// <summary>
+        /// This member is a pointer to an array of DHCP_FAILOVER_RELATIONSHIP structures of length numElements and contains failover relationship information.
+        /// </summary>
         private readonly IntPtr RelationshipsPointer;
 
         public IEnumerable<DHCP_FAILOVER_RELATIONSHIP> Relationships
