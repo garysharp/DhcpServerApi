@@ -428,8 +428,6 @@ namespace Dhcp
 
         private static DhcpServerFailoverRelationship FromNative(DhcpServer server, ref DHCP_FAILOVER_RELATIONSHIP native)
         {
-            BitHelper.DebugDump(native.PrimaryServerNamePointer, 100);
-
             return new DhcpServerFailoverRelationship(server: server,
                                                       name: native.RelationshipName,
                                                       mode: (DhcpServerFailoverMode)native.Mode,
