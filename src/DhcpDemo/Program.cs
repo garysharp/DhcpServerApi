@@ -87,6 +87,30 @@ namespace DhcpDemo
                 Console.WriteLine($"      Adapter Subnet Address: {be.AdapterSubnetAddress}");
             }
 
+            // Failover Relationships
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(" Failover Relationships:");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            foreach (var failoverRelationship in dhcpServer.FailoverRelationships.ToList())
+            {
+                Console.WriteLine($"   Name: {failoverRelationship.Name}");
+                Console.WriteLine($"                            Mode: {failoverRelationship.Mode}");
+                Console.WriteLine($"                           State: {failoverRelationship.State}");
+                Console.WriteLine($"                     Server Type: {failoverRelationship.ServerType}");
+                Console.WriteLine($"                  Primary Server: {failoverRelationship.PrimaryServerName} [{failoverRelationship.PrimaryServerAddress}]");
+                Console.WriteLine($"                Secondary Server: {failoverRelationship.SecondaryServerName} [{failoverRelationship.SecondaryServerAddress}]");
+                Console.WriteLine($"                   Shared Secret: {failoverRelationship.SharedSecret}");
+                Console.WriteLine($"        Maximum Client Lead Time: {failoverRelationship.MaximumClientLeadTime}");
+                Console.WriteLine($"       State Switchover Interval: {failoverRelationship.StateSwitchoverInterval}");
+                Console.WriteLine($"                  Load Balance %: {failoverRelationship.LoadBalancePercentage}");
+                Console.WriteLine($"    Standby Addresses Reserved %: {failoverRelationship.HotStandbyAddressesReservedPercentage}");
+                Console.WriteLine($"               Associated Scopes:");
+                foreach (var failoverScope in failoverRelationship.Scopes.ToList())
+                {
+                    Console.WriteLine($"                    {failoverScope}");
+                }
+            }
+
             // Classes
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" Classes:");
@@ -153,27 +177,19 @@ namespace DhcpDemo
                 Console.WriteLine($"         Delay Offer: {scope.TimeDelayOffer.TotalMilliseconds} milliseconds");
                 Console.WriteLine($"       Quarantine On: {scope.QuarantineOn}");
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("      Failover Relationship:");
-                Console.ForegroundColor = ConsoleColor.Gray;
                 var failoverRelationship = scope.GetFailoverRelationship();
+                Console.Write("    Failover Relationship:");
+                Console.ForegroundColor = ConsoleColor.Gray;
                 if (failoverRelationship == null)
                 {
-                    Console.WriteLine($"                       Not in a Failover Relationship");
+                    Console.WriteLine($" Not in a Failover Relationship");
                 }
                 else
                 {
-                    Console.WriteLine($"                            Name: {failoverRelationship.Name}");
-                    Console.WriteLine($"                            Mode: {failoverRelationship.Mode}");
-                    Console.WriteLine($"                           State: {failoverRelationship.State}");
-                    Console.WriteLine($"                     Server Type: {failoverRelationship.ServerType}");
-                    Console.WriteLine($"                  Primary Server: {failoverRelationship.PrimaryServerName} [{failoverRelationship.PrimaryServerAddress}]");
-                    Console.WriteLine($"                Secondary Server: {failoverRelationship.SecondaryServerName} [{failoverRelationship.SecondaryServerAddress}]");
-                    Console.WriteLine($"                   Shared Secret: {failoverRelationship.SharedSecret}");
-                    Console.WriteLine($"        Maximum Client Lead Time: {failoverRelationship.MaximumClientLeadTime}");
-                    Console.WriteLine($"       State Switchover Interval: {failoverRelationship.StateSwitchoverInterval}");
-                    Console.WriteLine($"                  Load Balance %: {failoverRelationship.LoadBalancePercentage}");
-                    Console.WriteLine($"    Standby Addresses Reserved %: {failoverRelationship.StandbyAddressesReservedPercentage}");
+                    Console.WriteLine($" {failoverRelationship}");
+                    Console.ForegroundColor = ConsoleColor.White;
                     Console.WriteLine("      Failover Statistics:");
+                    Console.ForegroundColor = ConsoleColor.Gray;
                     var failoverStatistics = scope.GetFailoverStatistics();
                     Console.WriteLine($"            Addresses Total: {failoverStatistics.AddressesTotal}");
                     Console.WriteLine($"             Addresses Free: {failoverStatistics.AddressesFree}");

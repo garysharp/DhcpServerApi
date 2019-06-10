@@ -111,6 +111,64 @@ namespace DhcpWritableDemo
             dhcpScope.Delete();
         }
 
+        static void ConfigureFailover(DhcpServer dhcpServer, DhcpServerScope scope)
+        {
+            // Sample snippets only
+
+            // creating a failover relationship
+            //  - matching scopes are created on the partner server
+            //      including all settings supported by this library
+
+            // create with an existing relationship
+            var existingRelationship = dhcpServer.FailoverRelationships.GetRelationship("DHCPServer1-DHCPServer2");
+            scope.ConfigureFailover(existingRelationship);
+
+            // create with a new relationship (name and settings are default)
+            var partnerServer = DhcpServer.Connect("MyPartnerDhcpServer");
+            var relationship = scope.ConfigureFailover(partnerServer, "A Shared Secret", DhcpServerFailoverMode.HotStandby);
+            
+            // create with a new relationship (define a name)
+            var namedRelationship = scope.ConfigureFailover(partnerServer: partnerServer,
+                                                            name: "Relationship Name",
+                                                            sharedSecret: "A Shared Secret",
+                                                            mode: DhcpServerFailoverMode.HotStandby);
+
+            // create with a new relationship (define settings)
+            var customizedRelationship = scope.ConfigureFailover(partnerServer: partnerServer,
+                                                                 name: "Relationship Name",
+                                                                 sharedSecret: "A Shared Secret",
+                                                                 mode: DhcpServerFailoverMode.HotStandby,
+                                                                 modePercentage: 10,
+                                                                 maximumClientLeadTime: TimeSpan.FromHours(2),
+                                                                 stateSwitchInterval: TimeSpan.FromMinutes(10));
+
+            // create load-balance failover
+            var loadBalancedRelationship = scope.ConfigureFailover(partnerServer, "A Shared Secret", DhcpServerFailoverMode.LoadBalance);
+
+            // retrieve scope failover relationship
+            var scopeRelationship = scope.GetFailoverRelationship();
+
+            // replicate failover
+            //  - all supported settings are pushed to the partner server
+            scope.ReplicateFailoverPartner();
+
+            // replicate all scopes in a failover relationship
+            relationship.ReplicateRelationship();
+
+            // deconfigure failover
+            //  - scopes are removed from the partner server
+            //      (whichever isn't being used to deconfigure the failover)
+            scope.DeconfigureFailover();
+
+            // enumerate scopes associated with a relationship
+            foreach (var relationshipScope in relationship.Scopes)
+                Console.WriteLine(relationshipScope);
+            
+            // delete failover relationship
+            //  (all associated scopes must be deconfigured first)
+            relationship.Delete();
+        }
+
         static void DumpScope(DhcpServerScope scope)
         {
             Console.WriteLine($"   {scope.Address}");

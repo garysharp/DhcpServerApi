@@ -4,7 +4,7 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public struct DhcpServerIpRange
+    public struct DhcpServerIpRange : IEquatable<DhcpServerIpRange>
     {
         public const int DefaultBootpClientsAllocated = 0;
         public const int DefaultMaxBootpAllowed = -1;
@@ -129,6 +129,7 @@ namespace Dhcp
         public bool Contains(string address) => Contains(DhcpServerIpAddress.FromString(address));
         public bool Contains(int address) => Contains((DhcpServerIpAddress)address);
         public bool Contains(uint address) => Contains((DhcpServerIpAddress)address);
+        public bool Contains(DhcpServerIpRange range) => range.endAddress >= range.startAddress && range.startAddress >= startAddress && range.endAddress <= endAddress;
 
         public bool Contains(DhcpServerIpAddress address) => address >= startAddress && address <= endAddress;
 
@@ -198,5 +199,40 @@ namespace Dhcp
             => new DHCP_IP_RANGE(StartAddress.ToNativeAsNetwork(), EndAddress.ToNativeAsNetwork());
 
         public override string ToString() => $"{startAddress} - {endAddress} [{type}]";
+
+        public override int GetHashCode()
+        {
+            var result = startAddress.GetHashCode();
+            result = (result * 397) ^ endAddress.GetHashCode();
+            result = (result * 397) ^ (int)type;
+            result = (result * 397) ^ bootpClientsAllocated;
+            result = (result * 397) ^ maxBootpAllowed;
+            return result;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (obj is DhcpServerIpRange ha)
+                return Equals(ha);
+
+            return false;
+        }
+
+        public bool Equals(DhcpServerIpRange other)
+        {
+            return
+                startAddress == other.startAddress &&
+                endAddress == other.endAddress &&
+                type == other.type &&
+                bootpClientsAllocated == other.bootpClientsAllocated &&
+                maxBootpAllowed == other.maxBootpAllowed;
+        }
+
+        public static bool operator ==(DhcpServerIpRange lhs, DhcpServerIpRange rhs) => lhs.Equals(rhs);
+
+        public static bool operator !=(DhcpServerIpRange lhs, DhcpServerIpRange rhs) => !lhs.Equals(rhs);
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Dhcp
 {
@@ -58,14 +56,5 @@ namespace Dhcp
         /// <returns>The scope reservation</returns>
         public DhcpServerScopeReservation AddReservation(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, DhcpServerClientTypes allowedClientTypes)
             => DhcpServerScopeReservation.CreateReservation(Scope, address, hardwareAddress, allowedClientTypes);
-        
-
-        /// <summary>
-        /// Deletes the specified scope
-        /// </summary>
-        /// <param name="scope">The scope to be deleted</param>
-        /// <param name="retainClientDnsRecords">If true registered client DNS records are not removed. Useful in failover scenarios. Default = false</param>
-        public void RemoveScope(DhcpServerScope scope, bool retainClientDnsRecords = false)
-            => scope.Delete(retainClientDnsRecords);
     }
 }

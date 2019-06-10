@@ -6,7 +6,7 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public abstract class DhcpServerOptionElement
+    public abstract class DhcpServerOptionElement : IEquatable<DhcpServerOptionElement>
     {
         public abstract DhcpServerOptionElementType Type { get; }
 
@@ -90,6 +90,25 @@ namespace Dhcp
         internal abstract DHCP_OPTION_DATA_ELEMENT_Managed ToNative();
 
         public override string ToString() => $"{Type}: {ValueFormatted}";
+
+        public override int GetHashCode()
+        {
+            // GetHashCode must be overridden by all implementing classes
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (obj is DhcpServerOptionElement oe)
+                return Equals(oe);
+
+            return false;
+        }
+
+        public abstract bool Equals(DhcpServerOptionElement other);
     }
 
     public class DhcpServerOptionElementByte : DhcpServerOptionElement
@@ -110,6 +129,20 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementByte oe)
+                return RawValue == oe.RawValue;
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => RawValue;
     }
 
     public class DhcpServerOptionElementWord : DhcpServerOptionElement
@@ -130,6 +163,20 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementWord oe)
+                return RawValue == oe.RawValue;
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => RawValue;
     }
 
     public class DhcpServerOptionElementDWord : DhcpServerOptionElement
@@ -150,6 +197,20 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementDWord oe)
+                return RawValue == oe.RawValue;
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => RawValue;
     }
 
     public class DhcpServerOptionElementDWordDWord : DhcpServerOptionElement
@@ -170,6 +231,20 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementDWordDWord oe)
+                return RawValue == oe.RawValue;
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => ((int)(RawValue >> 32) * 397) ^ ((int)RawValue);
     }
 
     public class DhcpServerOptionElementIpAddress : DhcpServerOptionElement
@@ -194,6 +269,20 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(new DHCP_IP_ADDRESS(RawValue));
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementIpAddress oe)
+                return address == oe.address;
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => address.GetHashCode();
     }
 
     public class DhcpServerOptionElementString : DhcpServerOptionElement
@@ -214,6 +303,20 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, RawValue);
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementString oe)
+                return string.Equals(RawValue, oe.RawValue, StringComparison.Ordinal);
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => RawValue.GetHashCode();
     }
 
     public class DhcpServerOptionElementBinary : DhcpServerOptionElement
@@ -237,6 +340,39 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, new DHCP_BINARY_DATA_Managed(RawValue));
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementBinary oe)
+            {
+                if (RawValue == null && oe.RawValue == null)
+                    return true;
+
+                if (RawValue == null || oe.RawValue == null)
+                    return false;
+
+                if (RawValue.Length == 0 && oe.RawValue.Length == 0)
+                    return true;
+
+                return Enumerable.SequenceEqual(RawValue, oe.RawValue);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            var result = 0;
+            if (RawValue != null && RawValue.Length > 0)
+            {
+                foreach (var b in RawValue)
+                    result = (result * 397) ^ b;
+            }
+            return result;
+        }
     }
 
     public class DhcpServerOptionElementIpv6Address : DhcpServerOptionElement
@@ -257,5 +393,19 @@ namespace Dhcp
 
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, RawValue);
+
+        public override bool Equals(DhcpServerOptionElement other)
+        {
+            if (other == null)
+                return false;
+
+            if (other is DhcpServerOptionElementIpv6Address oe)
+                return string.Equals(RawValue, oe.RawValue, StringComparison.Ordinal);
+
+            return false;
+        }
+
+        public override int GetHashCode()
+            => RawValue.GetHashCode();
     }
 }

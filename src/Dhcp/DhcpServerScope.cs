@@ -33,8 +33,12 @@ namespace Dhcp
             set => SetComment(value);
         }
         public DhcpServerScopeState State => info.State;
-        public DhcpServerIpRange IpRange { get; }
-        
+        public DhcpServerIpRange IpRange
+        {
+            get => info.IpRange;
+            set => SetIpRange(value);
+        }
+
         public TimeSpan? LeaseDuration
         {
             get => GetLeaseDuration(Server, Address);
@@ -70,13 +74,12 @@ namespace Dhcp
         /// </summary>
         public DhcpServerScopeClientCollection Clients { get; }
 
-        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerIpRange ipRange, DhcpServerDnsSettings dnsSettings, SubnetInfo info)
+        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerDnsSettings dnsSettings, SubnetInfo info)
         {
             Server = server;
             Address = address;
-            IpRange = ipRange;
-            DnsSettings = dnsSettings;
             this.info = info;
+            DnsSettings = dnsSettings;
 
             ExcludedIpRanges = new DhcpServerScopeExcludedIpRangeCollection(this);
             Options = new DhcpServerScopeOptionValueCollection(this);
@@ -124,6 +127,96 @@ namespace Dhcp
         public DhcpServerScopeFailoverStatistics GetFailoverStatistics()
             => DhcpServerScopeFailoverStatistics.GetScopeFailoverStatistics(Server, this);
 
+        public void ReplicateFailoverPartner()
+            => DhcpServerFailoverRelationship.ReplicateScopeRelationship(GetFailoverRelationship(), this);
+
+        /// <summary>
+        /// Configures a failover relationship for this scope
+        /// </summary>
+        /// <param name="partnerServer">The failover partner server</param>
+        /// <param name="sharedSecret">Secret used by the relationship</param>
+        /// <param name="mode">Failover mode to configure</param>
+        /// <returns>The created failover relationship</returns>
+        public DhcpServerFailoverRelationship ConfigureFailover(DhcpServer partnerServer, string sharedSecret, DhcpServerFailoverMode mode)
+            => DhcpServerFailoverRelationship.CreateFailoverRelationship(this, partnerServer, name: null, sharedSecret, mode);
+
+        /// <summary>
+        /// Configures a failover relationship for this scope
+        /// </summary>
+        /// <param name="partnerServer">The failover partner server</param>
+        /// <param name="name">Name of the failover relationship</param>
+        /// <param name="sharedSecret">Secret used by the relationship</param>
+        /// <param name="mode">Failover mode to configure</param>
+        /// <returns>The created failover relationship</returns>
+        public DhcpServerFailoverRelationship ConfigureFailover(DhcpServer partnerServer, string name, string sharedSecret, DhcpServerFailoverMode mode)
+            => DhcpServerFailoverRelationship.CreateFailoverRelationship(this, partnerServer, name, sharedSecret, mode);
+
+        /// <summary>
+        /// Configures a failover relationship for this scope
+        /// </summary>
+        /// <param name="partnerServer">The failover partner server</param>
+        /// <param name="sharedSecret">Secret used by the relationship</param>
+        /// <param name="mode">Failover mode to configure</param>
+        /// <param name="modePercentage">Percentage argument for the failover mode</param>
+        /// <returns>The created failover relationship</returns>
+        public DhcpServerFailoverRelationship ConfigureFailover(DhcpServer partnerServer, string sharedSecret, DhcpServerFailoverMode mode, byte modePercentage)
+            => DhcpServerFailoverRelationship.CreateFailoverRelationship(this, partnerServer, name: null, sharedSecret, mode, modePercentage);
+
+        /// <summary>
+        /// Configures a failover relationship for this scope
+        /// </summary>
+        /// <param name="partnerServer">The failover partner server</param>
+        /// <param name="name">Name of the failover relationship</param>
+        /// <param name="sharedSecret">Secret used by the relationship</param>
+        /// <param name="mode">Failover mode to configure</param>
+        /// <param name="modePercentage">Percentage argument for the failover mode</param>
+        /// <returns>The created failover relationship</returns>
+        public DhcpServerFailoverRelationship ConfigureFailover(DhcpServer partnerServer, string name, string sharedSecret, DhcpServerFailoverMode mode, byte modePercentage)
+            => DhcpServerFailoverRelationship.CreateFailoverRelationship(this, partnerServer, name, sharedSecret, mode, modePercentage);
+
+        /// <summary>
+        /// Configures a failover relationship for this scope
+        /// </summary>
+        /// <param name="partnerServer">The failover partner server</param>
+        /// <param name="name">Name of the failover relationship</param>
+        /// <param name="sharedSecret">Secret used by the relationship</param>
+        /// <param name="mode">Failover mode to configure</param>
+        /// <param name="modePercentage">Percentage argument for the failover mode</param>
+        /// <param name="maximumClientLeadTime">Maximum client lead time</param>
+        /// <param name="stateSwitchInterval">State switch interval or null to disable</param>
+        /// <returns>The created failover relationship</returns>
+        public DhcpServerFailoverRelationship ConfigureFailover(DhcpServer partnerServer, string sharedSecret, DhcpServerFailoverMode mode, byte modePercentage, TimeSpan maximumClientLeadTime, TimeSpan? stateSwitchInterval)
+            => DhcpServerFailoverRelationship.CreateFailoverRelationship(this, partnerServer, name: null, sharedSecret, mode, modePercentage, maximumClientLeadTime, stateSwitchInterval);
+
+        /// <summary>
+        /// Configures a failover relationship for this scope
+        /// </summary>
+        /// <param name="partnerServer">The failover partner server</param>
+        /// <param name="name">Name of the failover relationship</param>
+        /// <param name="sharedSecret">Secret used by the relationship</param>
+        /// <param name="mode">Failover mode to configure</param>
+        /// <param name="modePercentage">Percentage argument for the failover mode</param>
+        /// <param name="maximumClientLeadTime">Maximum client lead time</param>
+        /// <param name="stateSwitchInterval">State switch interval or null to disable</param>
+        /// <returns>The created failover relationship</returns>
+        public DhcpServerFailoverRelationship ConfigureFailover(DhcpServer partnerServer, string name, string sharedSecret, DhcpServerFailoverMode mode, byte modePercentage, TimeSpan maximumClientLeadTime, TimeSpan? stateSwitchInterval)
+            => DhcpServerFailoverRelationship.CreateFailoverRelationship(this, partnerServer, name, sharedSecret, mode, modePercentage, maximumClientLeadTime, stateSwitchInterval);
+
+        /// <summary>
+        /// Adds this scope to an existing failover relationship
+        /// </summary>
+        /// <param name="failoverRelationship">Failover relationship into which this failover relationship is to be added</param>
+        public void ConfigureFailover(DhcpServerFailoverRelationship failoverRelationship)
+        {
+            DhcpServerFailoverRelationship.AddScopeToFailoverRelationship(failoverRelationship, this);
+        }
+
+        /// <summary>
+        /// Removes the scope from its failover relationship. This will delete the scope from the partner server.
+        /// </summary>
+        public void DeconfigureFailover()
+            => DhcpServerFailoverRelationship.DeconfigureScopeFailover(this);
+
         private void SetName(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -147,21 +240,133 @@ namespace Dhcp
             }
         }
 
+        private void SetIpRange(DhcpServerIpRange ipRange)
+        {
+            if (IpRange != ipRange)
+            {
+                var scopeRange = Mask.GetDhcpIpRange(Address);
+
+                if (!scopeRange.Contains(ipRange))
+                    throw new ArgumentOutOfRangeException(nameof(ipRange), "The supplied range is invalid for this subnet");
+
+                var proposedInfo = info.UpdateIpRange(ipRange);
+                AddSubnetScopeIpRangeElement(Server, Address, ipRange);
+
+                // update cache
+                info = proposedInfo;
+            }
+        }
+
+        internal void ReplicateTo(DhcpServerScope destinationScope)
+        {
+            // can only replicate identical subnets
+            if (Address != destinationScope.Address)
+                throw new ArgumentException("Scopes are incompatible and cannot be replicated", nameof(destinationScope));
+
+            // replicate properties
+            if (!Name.Equals(destinationScope.Name, StringComparison.Ordinal) || !Comment.Equals(destinationScope.Comment, StringComparison.Ordinal) || QuarantineOn != destinationScope.QuarantineOn)
+            {
+                var scopeInfo = destinationScope.info.Replicate(info);
+                destinationScope.SetInfo(scopeInfo);
+            }
+
+            // replicate address
+            if (IpRange != destinationScope.IpRange)
+                destinationScope.IpRange = IpRange;
+
+            // replicate exclusions
+            var destExclusions = destinationScope.ExcludedIpRanges.ToList();
+            var srcExclusions = ExcludedIpRanges.ToList();
+            // remove exclusions
+            foreach (var range in destExclusions.Except(srcExclusions))
+                destinationScope.ExcludedIpRanges.RemoveExcludedIpRange(range);
+            // add exclusions
+            foreach (var range in srcExclusions.Except(destExclusions))
+                destinationScope.ExcludedIpRanges.AddExcludedIpRange(range);
+
+            // replicate option values
+            var destOptions = destinationScope.Options.ToDictionary(o => o.OptionId);
+            var srcOptions = Options.ToDictionary(o => o.OptionId);
+            // remove option values
+            foreach (var optionId in destOptions.Keys.Except(srcOptions.Keys))
+                destinationScope.Options.RemoveOptionValue(optionId);
+            // add option values
+            foreach (var optionId in srcOptions.Keys.Except(destOptions.Keys))
+                destinationScope.Options.AddOrSetOptionValue(srcOptions[optionId]);
+            // update option values
+            foreach (var optionId in srcOptions.Keys.Intersect(destOptions.Keys))
+            {
+                var srcOption = srcOptions[optionId];
+                var dstOption = destOptions[optionId];
+                if (!Enumerable.SequenceEqual(srcOption.Values, dstOption.Values))
+                    destinationScope.Options.AddOrSetOptionValue(srcOption);
+            }
+
+            // replicate reservations
+            var destReservations = destinationScope.Reservations.ToDictionary(r => r.Address);
+            var srcReservations = Reservations.ToDictionary(r => r.Address);
+            // remove updated
+            foreach (var address in srcReservations.Keys.Intersect(destReservations.Keys))
+            {
+                // remove from destination (and re-create later)
+                if (srcReservations[address].HardwareAddress != destReservations[address].HardwareAddress)
+                {
+                    var destReservation = destReservations[address];
+                    destReservation.Delete();
+                    destReservations.Remove(address);
+                }
+            }
+            // remove reservations
+            foreach (var address in destReservations.Keys.Except(srcReservations.Keys))
+                destReservations[address].Delete();
+            // add reservations
+            foreach (var address in srcReservations.Keys.Except(destReservations.Keys))
+            {
+                var srcReservation = srcReservations[address];
+                var destReservation = destinationScope.Reservations.AddReservation(srcReservation.Address, srcReservation.HardwareAddress, srcReservation.AllowedClientTypes);
+                foreach (var optionValue in srcReservation.Options.ToList())
+                    destReservation.Options.AddOrSetOptionValue(optionValue);
+            }
+            // update reservation options
+            foreach (var address in srcReservations.Keys.Intersect(destReservations.Keys))
+            {
+                var srcRes = srcReservations[address];
+                var srcResOptions = srcRes.Options.ToDictionary(o => o.OptionId);
+                var destRes = destReservations[address];
+                var destResOptions = destRes.Options.ToDictionary(o => o.OptionId);
+
+                // remove option values
+                foreach (var optionId in destResOptions.Keys.Except(srcResOptions.Keys))
+                    destRes.Options.RemoveOptionValue(optionId);
+                // add option values
+                foreach (var optionId in srcResOptions.Keys.Except(destResOptions.Keys))
+                    destRes.Options.AddOrSetOptionValue(srcResOptions[optionId]);
+                // update option values
+                foreach (var optionId in srcResOptions.Keys.Intersect(destResOptions.Keys))
+                {
+                    var srcResOption = srcResOptions[optionId];
+                    var destResOption = destResOptions[optionId];
+                    if (!Enumerable.SequenceEqual(srcResOption.Values, destResOption.Values))
+                        destRes.Options.AddOrSetOptionValue(srcResOption);
+                }
+            }
+        }
+
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange)
-            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
-        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange)
-            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+            => CreateScope(server, name, comment: null, ipRange, mask: ipRange.SmallestMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string comment, DhcpServerIpRange ipRange)
+            => CreateScope(server, name, comment, ipRange, mask: ipRange.SmallestMask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
-            => CreateScope(server, name, description: null, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
-        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
-            => CreateScope(server, name, description, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+            => CreateScope(server, name, comment: null, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string comment, DhcpServerIpRange ipRange, DhcpServerIpMask mask)
+            => CreateScope(server, name, comment, ipRange, mask, timeDelayOffer: DefaultTimeDelayOffer, leaseDuration: DefaultLeaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
-            => CreateScope(server, name, description: null, ipRange, mask: ipRange.SmallestMask, timeDelayOffer, leaseDuration);
-        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
-            => CreateScope(server, name, description, ipRange, mask: ipRange.SmallestMask, timeDelayOffer, leaseDuration);
+            => CreateScope(server, name, comment: null, ipRange, mask: ipRange.SmallestMask, timeDelayOffer, leaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string comment, DhcpServerIpRange ipRange, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
+            => CreateScope(server, name, comment, ipRange, mask: ipRange.SmallestMask, timeDelayOffer, leaseDuration);
         internal static DhcpServerScope CreateScope(DhcpServer server, string name, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
-            => CreateScope(server, name, description: null, ipRange, mask, timeDelayOffer, leaseDuration);
-        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string description, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
+            => CreateScope(server, name, comment: null, ipRange, mask, timeDelayOffer, leaseDuration);
+        internal static DhcpServerScope CreateScope(DhcpServer server, string name, string comment, DhcpServerIpRange ipRange, DhcpServerIpMask mask, TimeSpan timeDelayOffer, TimeSpan? leaseDuration)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
@@ -184,7 +389,7 @@ namespace Dhcp
             var scopeInfo = new DHCP_SUBNET_INFO_Managed(subnetAddress: subnetAddress.ToNativeAsNetwork(),
                                                          subnetMask: mask.ToNativeAsNetwork(),
                                                          subnetName: name,
-                                                         subnetComment: description,
+                                                         subnetComment: comment,
                                                          primaryHost: primaryHost,
                                                          subnetState: DHCP_SUBNET_STATE.DhcpSubnetDisabled);
 
@@ -245,9 +450,10 @@ namespace Dhcp
         {
             var info = GetInfo(server, address);
             var ipRange = EnumSubnetElements(server, address, DHCP_SUBNET_ELEMENT_TYPE.DhcpIpRangesDhcpBootp).First();
+            info = info.UpdateIpRange(ipRange);
             var dnsSettings = DhcpServerDnsSettings.GetScopeDnsSettings(server, address);
 
-            return new DhcpServerScope(server, address, ipRange, dnsSettings, info);
+            return new DhcpServerScope(server, address, dnsSettings, info);
         }
 
         internal static IEnumerable<DhcpServerIpRange> EnumSubnetElements(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_TYPE enumElementType)
@@ -369,8 +575,6 @@ namespace Dhcp
 
         internal static void AddSubnetReservationElement(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, DhcpServerHardwareAddress hardwareAddress, DhcpServerClientTypes allowedClientTypes)
         {
-            
-
             if (server.IsCompatible(DhcpServerVersions.Windows2003))
             {
                 var reservation = new DHCP_IP_RESERVATION_V4_Managed(reservationAddress, hardwareAddress, allowedClientTypes);
@@ -418,14 +622,13 @@ namespace Dhcp
             }
         }
 
-        //private static void RemoveSubnetElementV5(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_V5_Managed element)
-        //{
-        //    var elementRef = element;
-        //    var result = Api.DhcpRemoveSubnetElementV5(server.IpAddress, address.ToNativeAsNetwork(), ref elementRef, DHCP_FORCE_FLAG.DhcpFullForce);
-
-        //    if (result != DhcpErrors.SUCCESS)
-        //        throw new DhcpServerException(nameof(Api.DhcpRemoveSubnetElementV5), result);
-        //}
+        internal static void RemoveSubnetReservationElement(DhcpServer server, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress)
+        {
+            using (var element = new DHCP_SUBNET_ELEMENT_DATA_Managed(DHCP_SUBNET_ELEMENT_TYPE.DhcpReservedIps, new DHCP_IP_RESERVATION_Managed(address, hardwareAddress)))
+            {
+                RemoveSubnetElementV0(server, address, element);
+            }
+        }
 
         private static void RemoveSubnetElementV0(DhcpServer server, DhcpServerIpAddress address, DHCP_SUBNET_ELEMENT_DATA_Managed element)
         {
@@ -582,12 +785,16 @@ namespace Dhcp
         private class SubnetInfo
         {
             public readonly DHCP_IP_ADDRESS SubnetAddress;
+
+            public readonly DhcpServerIpRange IpRange;
+
             public readonly DhcpServerIpMask Mask;
             public readonly string Name;
             public readonly string Comment;
             public readonly DhcpServerHost PrimaryHost;
             public readonly DhcpServerScopeState State;
             public bool QuarantineOn => vqQuarantineOn != 0;
+
 
             private readonly uint vqQuarantineOn;
             private readonly uint vqReserved1;
@@ -606,9 +813,11 @@ namespace Dhcp
                 vqQuarantineOn = 0;
             }
 
-            private SubnetInfo(DHCP_IP_ADDRESS subnetAddress, DhcpServerIpMask mask, string name, string comment, DhcpServerHost primaryHost, DhcpServerScopeState state, uint quarantineOn, uint reserved1, uint reserved2, ulong reserved3, ulong reserved4)
+            private SubnetInfo(DHCP_IP_ADDRESS subnetAddress, DhcpServerIpRange ipRange, DhcpServerIpMask mask, string name, string comment, DhcpServerHost primaryHost, DhcpServerScopeState state, uint quarantineOn, uint reserved1, uint reserved2, ulong reserved3, ulong reserved4)
                 : this(subnetAddress, mask, name, comment, primaryHost, state)
             {
+                IpRange = ipRange;
+
                 vqQuarantineOn = quarantineOn;
                 vqReserved1 = reserved1;
                 vqReserved2 = reserved2;
@@ -629,6 +838,7 @@ namespace Dhcp
             public static SubnetInfo FromNative(DHCP_SUBNET_INFO_VQ info)
             {
                 return new SubnetInfo(subnetAddress: info.SubnetAddress,
+                                      ipRange: new DhcpServerIpRange(),
                                       mask: info.SubnetMask.AsNetworkToIpMask(),
                                       name: info.SubnetName,
                                       comment: info.SubnetComment,
@@ -641,12 +851,18 @@ namespace Dhcp
                                       reserved4: info.Reserved4);
             }
 
+            public SubnetInfo UpdateIpRange(DhcpServerIpRange ipRange)
+                => new SubnetInfo(SubnetAddress, ipRange, Mask, Name, Comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+
             public SubnetInfo UpdateName(string name)
-                => new SubnetInfo(SubnetAddress, Mask, name, Comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+                => new SubnetInfo(SubnetAddress, IpRange, Mask, name, Comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
             public SubnetInfo UpdateComment(string comment)
-                => new SubnetInfo(SubnetAddress, Mask, Name, comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+                => new SubnetInfo(SubnetAddress, IpRange, Mask, Name, comment, PrimaryHost, State, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
             public SubnetInfo UpdateState(DhcpServerScopeState state)
-                => new SubnetInfo(SubnetAddress, Mask, Name, Comment, PrimaryHost, state, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+                => new SubnetInfo(SubnetAddress, IpRange, Mask, Name, Comment, PrimaryHost, state, vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
+
+            public SubnetInfo Replicate(SubnetInfo partnerSubnetInfo)
+                => new SubnetInfo(SubnetAddress, IpRange, Mask, partnerSubnetInfo.Name, partnerSubnetInfo.Comment, PrimaryHost, State, partnerSubnetInfo.vqQuarantineOn, vqReserved1, vqReserved2, vqReserved3, vqReserved4);
 
             public DHCP_SUBNET_INFO_Managed ToNativeV0()
                 => new DHCP_SUBNET_INFO_Managed(SubnetAddress, Mask.ToNativeAsNetwork(), Name, Comment, PrimaryHost.ToNative(), (DHCP_SUBNET_STATE)State);

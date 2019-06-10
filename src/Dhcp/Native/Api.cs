@@ -584,7 +584,7 @@ namespace Dhcp.Native
         /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains both the scope information to add and the failover relationship to modify.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, out IntPtr pRelationship);
+        public static extern DhcpErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, ref DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
 
         /// <summary>
         /// The DhcpV4FailoverCreateRelationship function creates a new DHCPv4 failover relationship between two servers.

@@ -29,6 +29,9 @@ namespace Dhcp
             Options = new DhcpServerScopeReservationOptionValueCollection(this);
         }
 
+        public void Delete()
+            => DhcpServerScope.RemoveSubnetReservationElement(Scope.Server, Address, HardwareAddress);
+
         internal static DhcpServerScopeReservation CreateReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress)
             => CreateReservation(scope, address, hardwareAddress, DhcpServerClientTypes.DhcpAndBootp);
         internal static DhcpServerScopeReservation CreateReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, DhcpServerClientTypes allowedClientTypes)

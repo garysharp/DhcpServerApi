@@ -15,6 +15,9 @@ namespace Dhcp
         public DhcpServerFailoverRelationship GetRelationship(string relationshipName)
             => DhcpServerFailoverRelationship.GetFailoverRelationship(Server, relationshipName);
 
+        public void RemoveRelationship(DhcpServerFailoverRelationship relationship)
+            => relationship.Delete();
+
         public IEnumerator<DhcpServerFailoverRelationship> GetEnumerator()
             => DhcpServerFailoverRelationship.GetFailoverRelationships(Server).GetEnumerator();
 
