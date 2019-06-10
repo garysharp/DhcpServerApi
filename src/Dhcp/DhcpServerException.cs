@@ -7,48 +7,32 @@ namespace Dhcp
     public class DhcpServerException : Exception
     {
         private readonly DhcpErrors error;
-        private readonly string additionalMessage;
-        private string errorMessage;
+        private readonly string message;
 
-        internal DhcpServerException(string apiFunction, DhcpErrors error)
+        internal DhcpServerException(string apiFunction, DhcpErrors error, string additionalMessage)
         {
             ApiFunction = apiFunction;
             this.error = error;
+            ApiErrorMessage = BuildApiErrorMessage(error);
+            message = BuildMessage(apiFunction, additionalMessage, error, ApiErrorMessage);
         }
 
-        internal DhcpServerException(string apiFunction, DhcpErrors error, string additionalMessage)
-            : this(apiFunction, error)
-        {
-            this.additionalMessage = additionalMessage;
-        }
+        internal DhcpServerException(string apiFunction, DhcpErrors error)
+            : this(apiFunction, error, null)
+        { }
 
         public string ApiFunction { get; }
 
         public string ApiError => error.ToString();
 
+        internal DhcpErrors ApiErrorNative => error;
         public uint ApiErrorId => (uint)error;
 
-        public string ApiErrorMessage => errorMessage ??= GetApiErrorMessage();
+        public string ApiErrorMessage { get; }
 
-        public override string Message
-        {
-            get
-            {
-                var builder = new StringBuilder();
+        public override string Message => message;
 
-                if (ApiFunction != null)
-                    builder.Append("An error occurred calling '").Append(ApiFunction).Append("'. ");
-
-                if (additionalMessage != null)
-                    builder.Append(additionalMessage).Append(". ");
-
-                builder.Append(ApiErrorMessage).Append(" [").Append(error.ToString()).Append(' ').Append((uint)error).Append(']');
-
-                return builder.ToString();
-            }
-        }
-
-        private string GetApiErrorMessage()
+        private string BuildApiErrorMessage(DhcpErrors error)
         {
             var errorType = typeof(DhcpErrors).GetMember(error.ToString());
             if (errorType.Length != 0)
@@ -62,6 +46,19 @@ namespace Dhcp
             return "Unknown Error";
         }
 
-        public override string ToString() => Message;
+        private string BuildMessage(string apiFunction, string additionalMessage, DhcpErrors error, string apiErrorMessage)
+        {
+            var builder = new StringBuilder();
+
+            if (apiFunction != null)
+                builder.Append("An error occurred calling '").Append(apiFunction).Append("'. ");
+
+            if (additionalMessage != null)
+                builder.Append(additionalMessage).Append(". ");
+
+            builder.Append(apiErrorMessage).Append(" [").Append(error.ToString()).Append(' ').Append((uint)error).Append(']');
+
+            return builder.ToString();
+        }
     }
 }
