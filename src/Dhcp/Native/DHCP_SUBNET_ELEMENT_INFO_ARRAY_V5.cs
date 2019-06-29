@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_ELEMENT_INFO_ARRAY_V5 structure defines an array of subnet element data. Element data in the V5 structure is BOOTP specific.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_ELEMENT_INFO_ARRAY_V5 : IDisposable
+    internal readonly struct DHCP_SUBNET_ELEMENT_INFO_ARRAY_V5 : IDisposable
     {
         /// <summary>
         /// Specifies the number of elements in Elements.
@@ -18,7 +18,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of DHCP_SUBNET_ELEMENT_DATA_V5 structures that contain the data for the corresponding subnet elements.
         /// </summary>
-        private IntPtr ElementsPointer;
+        private readonly IntPtr ElementsPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_SUBNET_ELEMENT_DATA_V5 structures that contain the data for the corresponding subnet elements.
@@ -45,7 +45,7 @@ namespace Dhcp.Native
             foreach (var element in Elements)
                 element.Dispose();
 
-            Api.FreePointer(ref ElementsPointer);
+            Api.FreePointer(ElementsPointer);
         }
     }
 }

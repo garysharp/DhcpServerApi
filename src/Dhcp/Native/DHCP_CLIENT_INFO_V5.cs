@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO_V5 structure defines a client information record used by the DHCP server, extending the definition provided in DHCP_CLIENT_INFO by including client type and address state information.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_V5 : IDisposable
+    internal readonly struct DHCP_CLIENT_INFO_V5 : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the assigned IP address of the DHCP client.
@@ -24,11 +24,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a Unicode string that specifies the network name of the DHCP client. This member is optional.
         /// </summary>
-        private IntPtr ClientNamePointer;
+        private readonly IntPtr ClientNamePointer;
         /// <summary>
         /// Pointer to a Unicode string that contains a comment associated with the DHCP client. This member is optional.
         /// </summary>
-        private IntPtr ClientCommentPointer;
+        private readonly IntPtr ClientCommentPointer;
         /// <summary>
         /// DATE_TIME structure that contains the date and time the DHCP client lease will expire, in UTC time.
         /// </summary>
@@ -59,8 +59,8 @@ namespace Dhcp.Native
         public void Dispose()
         {
             ClientHardwareAddress.Dispose();
-            Api.FreePointer(ref ClientNamePointer);
-            Api.FreePointer(ref ClientCommentPointer);
+            Api.FreePointer(ClientNamePointer);
+            Api.FreePointer(ClientCommentPointer);
             OwnerHost.Dispose();
         }
     }

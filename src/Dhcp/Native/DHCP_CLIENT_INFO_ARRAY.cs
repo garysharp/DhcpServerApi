@@ -5,16 +5,16 @@ using System.Runtime.InteropServices;
 namespace Dhcp.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_ARRAY : IDisposable
+    internal readonly struct DHCP_CLIENT_INFO_ARRAY : IDisposable
     {
         /// <summary>
         /// Specifies the number of elements present in Clients.
         /// </summary>
-        public int NumElements;
+        public readonly int NumElements;
         /// <summary>
         /// Pointer to a list of DHCP_CLIENT_INFO structures that contain information on specific DHCP subnet clients.).
         /// </summary>
-        private IntPtr ClientsPointer;
+        private readonly IntPtr ClientsPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_CLIENT_INFO structures that contain information on specific DHCP subnet clients.).
@@ -48,7 +48,7 @@ namespace Dhcp.Native
                 Api.FreePointer(client.Pointer);
             }
 
-            Api.FreePointer(ref ClientsPointer);
+            Api.FreePointer(ClientsPointer);
         }
 
         internal struct ClientTuple

@@ -6,7 +6,7 @@ namespace Dhcp.Native
     /// The DHCPDS_SERVER structure defines information on a DHCP server in the context of directory services.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCPDS_SERVER
+    internal readonly struct DHCPDS_SERVER
     {
         /// <summary>
         /// Reserved. This value should be set to 0.

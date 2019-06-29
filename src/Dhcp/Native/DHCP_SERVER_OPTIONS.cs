@@ -7,107 +7,107 @@ namespace Dhcp.Native
     /// The DHCP_SERVER_OPTIONS structure specifies requested DHCP Server options.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SERVER_OPTIONS
+    internal readonly struct DHCP_SERVER_OPTIONS
     {
         /// <summary>
         /// Pointer to DHCP message type.
         /// </summary>
-        public IntPtr MessageType;
+        public readonly IntPtr MessageType;
         /// <summary>
         /// Pointer to Subnet mask.
         /// </summary>
-        public IntPtr SubnetMask;
+        public readonly IntPtr SubnetMask;
         /// <summary>
         /// Pointer to Requested IP address.
         /// </summary>
-        public IntPtr RequestedAddress;
+        public readonly IntPtr RequestedAddress;
         /// <summary>
         /// Pointer to Requested duration of the IP address lease, in seconds.
         /// </summary>
-        public IntPtr RequestLeaseTime;
+        public readonly IntPtr RequestLeaseTime;
         /// <summary>
         /// Pointer to Overlay fields to apply to the request.
         /// </summary>
-        public IntPtr OverlayFields;
+        public readonly IntPtr OverlayFields;
         /// <summary>
         /// Pointer to IP address of the default gateway.
         /// </summary>
-        public IntPtr RouterAddress;
+        public readonly IntPtr RouterAddress;
         /// <summary>
         /// Pointer to IP address of the DHCP Server.
         /// </summary>
-        public IntPtr Server;
+        public readonly IntPtr Server;
         /// <summary>
         /// Pointer to List of requested parameters.
         /// </summary>
-        public IntPtr ParameterRequestList;
+        public readonly IntPtr ParameterRequestList;
         /// <summary>
         /// Length of ParameterRequestList, in bytes.
         /// </summary>
-        public uint ParameterRequestListLength;
+        public readonly uint ParameterRequestListLength;
         /// <summary>
         /// Pointer to Machine name (host name) of the computer making the request.
         /// </summary>
-        public IntPtr MachineName;
+        public readonly IntPtr MachineName;
         /// <summary>
         /// Length of MachineName, in bytes.
         /// </summary>
-        public uint MachineNameLength;
+        public readonly uint MachineNameLength;
         /// <summary>
         /// Type of hardware address expressed in ClientHardwareAddress.
         /// </summary>
-        public DhcpServerHardwareType ClientHardwareAddressType;
+        public readonly DhcpServerHardwareType ClientHardwareAddressType;
         /// <summary>
         /// Length of ClientHardwareAddress, in bytes.
         /// </summary>
-        public byte ClientHardwareAddressLength;
+        public readonly byte ClientHardwareAddressLength;
         /// <summary>
         /// Pointer to Client hardware address.
         /// </summary>
-        public IntPtr ClientHardwareAddress;
+        public readonly IntPtr ClientHardwareAddress;
         /// <summary>
         /// Pointer to Class identifier for the client.
         /// </summary>
-        public IntPtr ClassIdentifier;
+        public readonly IntPtr ClassIdentifier;
         /// <summary>
         /// Length of ClassIdentifier, in bytes.
         /// </summary>
-        public uint ClassIdentifierLength;
+        public readonly uint ClassIdentifierLength;
         /// <summary>
         /// Pointer to Vendor class, if applicable.
         /// </summary>
-        public IntPtr VendorClass;
+        public readonly IntPtr VendorClass;
         /// <summary>
         /// Length of VendorClass, in bytes.
         /// </summary>
-        public uint VendorClassLength;
+        public readonly uint VendorClassLength;
         /// <summary>
         /// Flags used for DNS.
         /// </summary>
-        public uint DNSFlags;
+        public readonly uint DNSFlags;
         /// <summary>
         /// Length of DNSName, in bytes.
         /// </summary>
-        public uint DNSNameLength;
+        public readonly uint DNSNameLength;
         /// <summary>
         /// Pointer to the DNS name.
         /// </summary>
-        public IntPtr DNSName;
+        public readonly IntPtr DNSName;
         /// <summary>
         /// Specifies whether the domain name is requested.
         /// </summary>
-        public bool DSDomainNameRequested;
+        public readonly bool DSDomainNameRequested;
         /// <summary>
         /// Pointer to the domain name.
         /// </summary>
-        public IntPtr DSDomainName;
+        public readonly IntPtr DSDomainName;
         /// <summary>
         /// Length of DSDomainName, in characters.
         /// </summary>
-        public uint DSDomainNameLen;
+        public readonly uint DSDomainNameLen;
         /// <summary>
         /// Scope identifier for the IP address.
         /// </summary>
-        public IntPtr ScopeId;
+        public readonly IntPtr ScopeId;
     }
 }

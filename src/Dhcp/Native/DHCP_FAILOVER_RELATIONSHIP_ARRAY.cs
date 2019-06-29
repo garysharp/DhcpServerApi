@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Dhcp.Native
 {
-    internal struct DHCP_FAILOVER_RELATIONSHIP_ARRAY : IDisposable
+    internal readonly struct DHCP_FAILOVER_RELATIONSHIP_ARRAY : IDisposable
     {
         /// <summary>
         /// This member is of type DWORD and contains the number of DHCP_FAILOVER_RELATIONSHIP elements specified in the subsequent pRelationships field.

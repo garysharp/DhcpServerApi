@@ -6,7 +6,7 @@ namespace Dhcp.Native
     /// The DHCP_BOOTP_IP_RANGE structure defines a suite of IPs for lease to BOOTP-specific clients.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BOOTP_IP_RANGE
+    internal readonly struct DHCP_BOOTP_IP_RANGE
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the start of the IP range used for BOOTP service.

@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_VALUE_ARRAY structure defines a list of DHCP option values (just the option data with associated ID tags).
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_VALUE_ARRAY : IDisposable
+    internal readonly struct DHCP_OPTION_VALUE_ARRAY : IDisposable
     {
         /// <summary>
         /// Specifies the number of option values listed in Values.

@@ -9,12 +9,13 @@ namespace Dhcp
     /// <summary>
     /// Defines a DHCP option class
     /// </summary>
-    public class DhcpServerClass
+    public class DhcpServerClass : IDhcpServerClass
     {
         /// <summary>
         /// The associated DHCP Server
         /// </summary>
         public DhcpServer Server { get; }
+        IDhcpServer IDhcpServerClass.Server => Server;
 
         /// <summary>
         /// Name of the Class
@@ -48,7 +49,7 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of all Options associated with this class
         /// </summary>
-        public IEnumerable<DhcpServerOption> Options
+        public IEnumerable<IDhcpServerOption> Options
         {
             get
             {
@@ -62,7 +63,7 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of all Global Option Values associated with this class
         /// </summary>
-        public IEnumerable<DhcpServerOptionValue> GlobalOptionValues
+        public IEnumerable<IDhcpServerOptionValue> GlobalOptionValues
         {
             get
             {
@@ -72,8 +73,6 @@ namespace Dhcp
                     return DhcpServerOptionValue.EnumGlobalUserOptionValues(Server, Name);
             }
         }
-
-        public DhcpServerClass Value { get; internal set; }
 
         private DhcpServerClass(DhcpServer server, string name, string comment, bool isVendorClass, byte[] data)
         {
@@ -86,12 +85,9 @@ namespace Dhcp
 
         internal static DhcpServerClass GetClass(DhcpServer server, string name)
         {
-            var query = new DHCP_CLASS_INFO_Managed()
-            {
-                ClassName = name,
-                ClassDataLength = 0,
-                ClassData = IntPtr.Zero
-            };
+            var query = new DHCP_CLASS_INFO_Managed(className: name,
+                                                    classDataLength: 0,
+                                                    classData: IntPtr.Zero);
 
             var result = Api.DhcpGetClassInfo(ServerIpAddress: server.Address,
                                               ReservedMustBeZero: 0,
@@ -105,8 +101,7 @@ namespace Dhcp
             {
                 using (var classInfo = classIntoPtr.MarshalToStructure<DHCP_CLASS_INFO>())
                 {
-                    var classInfoRef = classInfo;
-                    return FromNative(server, ref classInfoRef);
+                    return FromNative(server, in classInfo);
                 }
             }
             finally
@@ -140,10 +135,7 @@ namespace Dhcp
                 using (var enumInfo = enumInfoPtr.MarshalToStructure<DHCP_CLASS_INFO_ARRAY>())
                 {
                     foreach (var element in enumInfo.Classes)
-                    {
-                        var elementRef = element;
-                        yield return FromNative(server, ref elementRef);
-                    }
+                        yield return FromNative(server, in element);
                 }
             }
             finally
@@ -152,7 +144,7 @@ namespace Dhcp
             }
         }
 
-        internal static DhcpServerClass FromNative(DhcpServer server, ref DHCP_CLASS_INFO native)
+        internal static DhcpServerClass FromNative(DhcpServer server, in DHCP_CLASS_INFO native)
         {
             var data = new byte[native.ClassDataLength];
             Marshal.Copy(native.ClassData, data, 0, native.ClassDataLength);

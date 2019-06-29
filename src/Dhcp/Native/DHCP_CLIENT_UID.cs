@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Dhcp.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_UID : IDisposable
+    internal readonly struct DHCP_CLIENT_UID : IDisposable
     {
         /// <summary>
         /// Specifies the size of Data, in bytes.
@@ -14,7 +14,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to an opaque blob of byte (binary) data.
         /// </summary>
-        private IntPtr DataPointer;
+        private readonly IntPtr DataPointer;
 
         /// <summary>
         /// Blob of byte (binary) data.
@@ -56,12 +56,12 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref DataPointer);
+            Api.FreePointer(DataPointer);
         }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_UID_Managed : IDisposable
+    internal readonly struct DHCP_CLIENT_UID_Managed : IDisposable
     {
         /// <summary>
         /// Specifies the size of Data, in bytes.

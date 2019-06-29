@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Dhcp
 {
-    public class DhcpServerClassCollection : IEnumerable<DhcpServerClass>
+    public class DhcpServerClassCollection : IDhcpServerClassCollection
     {
         public DhcpServer Server { get; }
+        IDhcpServer IDhcpServerClassCollection.Server => Server;
 
         internal DhcpServerClassCollection(DhcpServer server)
         {
@@ -17,10 +18,10 @@ namespace Dhcp
         /// </summary>
         /// <param name="name">The name of the User or Vendor Class to retrieve</param>
         /// <returns>A <see cref="DhcpServerClass"/>.</returns>
-        public DhcpServerClass GetClass(string name)
+        public IDhcpServerClass GetClass(string name)
             => DhcpServerClass.GetClass(Server, name);
 
-        public IEnumerator<DhcpServerClass> GetEnumerator()
+        public IEnumerator<IDhcpServerClass> GetEnumerator()
             => DhcpServerClass.GetClasses(Server).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()

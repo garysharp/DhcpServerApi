@@ -3,7 +3,7 @@
 namespace Dhcp.Native
 {
     [StructLayout(LayoutKind.Sequential, Size = 4)]
-    internal struct DHCP_IP_MASK
+    internal readonly struct DHCP_IP_MASK
     {
         private readonly uint ipMask;
 

@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_VALUE structure defines a DHCP option value (just the option data with an associated ID tag).
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_VALUE : IDisposable
+    internal readonly struct DHCP_OPTION_VALUE : IDisposable
     {
         /// <summary>
         /// DHCP_OPTION_ID value that specifies a unique ID number for the option.

@@ -1,8 +1,6 @@
 ﻿using Dhcp;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 
 namespace DhcpDemo
 {
@@ -34,7 +32,7 @@ namespace DhcpDemo
             Console.ReadKey(true);
         }
 
-        static void DumpDhcpInfo(DhcpServer dhcpServer)
+        static void DumpDhcpInfo(IDhcpServer dhcpServer)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{dhcpServer.Name} (v{dhcpServer.VersionMajor}.{dhcpServer.VersionMinor} - {dhcpServer.Address})");

@@ -10,7 +10,7 @@ namespace Dhcp.Native
     /// When this structure is populated by the DHCP Server, the HostName and NetBiosName members may be set to NULL.
     /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_HOST_INFO : IDisposable
+    internal readonly struct DHCP_HOST_INFO : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the IP address of the DHCP server.
@@ -19,11 +19,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the NetBIOS name of the DHCP server.
         /// </summary>
-        private IntPtr NetBiosNamePointer;
+        private readonly IntPtr NetBiosNamePointer;
         /// <summary>
         /// Unicode string that contains the network name of the DHCP server.
         /// </summary>
-        private IntPtr ServerNamePointer;
+        private readonly IntPtr ServerNamePointer;
 
         /// <summary>
         /// Unicode string that contains the NetBIOS name of the DHCP server.
@@ -37,10 +37,10 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref NetBiosNamePointer);
+            Api.FreePointer(NetBiosNamePointer);
 
             // Freeing ServerName causes heap corruption ?!?!?
-            // Api.FreePointer(ref ServerNamePointer);
+            // Api.FreePointer(ServerNamePointer);
         }
     }
 
@@ -51,7 +51,7 @@ namespace Dhcp.Native
     /// When this structure is populated by the DHCP Server, the HostName and NetBiosName members may be set to NULL.
     /// </remarks>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct DHCP_HOST_INFO_Managed
+    internal readonly struct DHCP_HOST_INFO_Managed
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the IP address of the DHCP server.

@@ -6,7 +6,7 @@ namespace Dhcp
     /// <summary>
     /// Defines Dynamic DNS settings
     /// </summary>
-    public class DhcpServerDnsSettings
+    public class DhcpServerDnsSettings : IDhcpServerDnsSettings
     {
         private const uint flagDefaultSettings = Constants.DNS_FLAG_ENABLED | Constants.DNS_FLAG_CLEANUP_EXPIRED;
         private readonly uint flags;

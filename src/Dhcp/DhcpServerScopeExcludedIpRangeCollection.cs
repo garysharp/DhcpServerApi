@@ -3,10 +3,12 @@ using System.Collections.Generic;
 
 namespace Dhcp
 {
-    public class DhcpServerScopeExcludedIpRangeCollection : IEnumerable<DhcpServerIpRange>
+    public class DhcpServerScopeExcludedIpRangeCollection : IDhcpServerScopeExcludedIpRangeCollection
     {
         public DhcpServer Server { get; }
+        IDhcpServer IDhcpServerScopeExcludedIpRangeCollection.Server => Server;
         public DhcpServerScope Scope { get; }
+        IDhcpServerScope IDhcpServerScopeExcludedIpRangeCollection.Scope => Scope;
 
         internal DhcpServerScopeExcludedIpRangeCollection(DhcpServerScope scope)
         {

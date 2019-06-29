@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_INFO structure defines information describing a subnet.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_INFO : IDisposable
+    internal readonly struct DHCP_SUBNET_INFO : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet ID.
@@ -20,11 +20,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that specifies the network name of the subnet.
         /// </summary>
-        private IntPtr SubnetNamePointer;
+        private readonly IntPtr SubnetNamePointer;
         /// <summary>
         /// Unicode string that contains an optional comment particular to this subnet.
         /// </summary>
-        private IntPtr SubnetCommentPointer;
+        private readonly IntPtr SubnetCommentPointer;
         /// <summary>
         /// DHCP_HOST_INFO structure that contains information about the DHCP server servicing this subnet.
         /// </summary>
@@ -45,7 +45,7 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref SubnetNamePointer);
+            Api.FreePointer(SubnetNamePointer);
             
             // Freeing SubnetComment causes heap corruption ?!?!?
             // Api.FreePointer(ref SubnetCommentPointer);
@@ -58,7 +58,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_INFO structure defines information describing a subnet.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct DHCP_SUBNET_INFO_Managed
+    internal readonly struct DHCP_SUBNET_INFO_Managed
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet ID.
@@ -83,7 +83,7 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_SUBNET_STATE enumeration value indicating the current state of the subnet (enabled/disabled).
         /// </summary>
-        public DHCP_SUBNET_STATE SubnetState;
+        public readonly DHCP_SUBNET_STATE SubnetState;
 
         public DHCP_SUBNET_INFO_Managed(DHCP_IP_ADDRESS subnetAddress, DHCP_IP_MASK subnetMask, string subnetName, string subnetComment, DHCP_HOST_INFO_Managed primaryHost, DHCP_SUBNET_STATE subnetState)
         {

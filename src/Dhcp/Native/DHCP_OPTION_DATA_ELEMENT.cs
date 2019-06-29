@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_DATA_ELEMENT structure defines a data element present (either singly or as a member of an array) within a DHCP_OPTION_DATA structure. 
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_DATA_ELEMENT : IDisposable
+    internal readonly struct DHCP_OPTION_DATA_ELEMENT : IDisposable
     {
         /// <summary>
         /// A DHCP_OPTION_DATA_TYPE enumeration value that indicates the type of data that is present in the subsequent field, Element.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to the element data
         /// </summary>
-        public IntPtr DataOffset;
+        public readonly IntPtr DataOffset;
 
         public DHCP_OPTION_DATA_ELEMENT(DHCP_OPTION_DATA_TYPE OptionType, IntPtr DataOffset)
         {
@@ -88,8 +88,6 @@ namespace Dhcp.Native
                     var data = DataOffset.MarshalToStructure<DHCP_BINARY_DATA>();
                     data.Dispose();
                 }
-
-                DataOffset = IntPtr.Zero;
             }
         }
     }
@@ -98,7 +96,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_DATA_ELEMENT structure defines a data element present (either singly or as a member of an array) within a DHCP_OPTION_DATA structure. 
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_DATA_ELEMENT_Managed : IDisposable
+    internal readonly struct DHCP_OPTION_DATA_ELEMENT_Managed : IDisposable
     {
         /// <summary>
         /// A DHCP_OPTION_DATA_TYPE enumeration value that indicates the type of data that is present in the subsequent field, Element.

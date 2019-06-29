@@ -4,20 +4,22 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public class DhcpServerScopeReservation
+    public class DhcpServerScopeReservation : IDhcpServerScopeReservation
     {
         public DhcpServer Server => Scope.Server;
+        IDhcpServer IDhcpServerScopeReservation.Server => Server;
         public DhcpServerScope Scope { get; }
+        IDhcpServerScope IDhcpServerScopeReservation.Scope => Scope;
 
-        private DhcpServerClient client;
+        private IDhcpServerClient client;
         public DhcpServerIpAddress Address { get; }
         public DhcpServerHardwareAddress HardwareAddress { get; }
 
         public DhcpServerClientTypes AllowedClientTypes { get; }
 
-        public DhcpServerClient Client => client ??= DhcpServerClient.GetClient(Server, Scope, Address);
+        public IDhcpServerClient Client => client ??= DhcpServerClient.GetClient(Server, Scope, Address);
 
-        public DhcpServerScopeReservationOptionValueCollection Options { get; }
+        public IDhcpServerScopeReservationOptionValueCollection Options { get; }
 
         private DhcpServerScopeReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, DhcpServerClientTypes allowedClientTypes)
         {
@@ -30,7 +32,7 @@ namespace Dhcp
         }
 
         public void Delete()
-            => DhcpServerScope.RemoveSubnetReservationElement(Scope.Server, Address, HardwareAddress);
+            => DhcpServerScope.RemoveSubnetReservationElement(Server, Address, HardwareAddress);
 
         internal static DhcpServerScopeReservation CreateReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress)
             => CreateReservation(scope, address, hardwareAddress, DhcpServerClientTypes.DhcpAndBootp);
@@ -72,7 +74,7 @@ namespace Dhcp
                     foreach (var element in reservations.Elements)
                     {
                         var elementIp = element.ReadReservedIp();
-                        yield return FromNative(scope, ref elementIp);
+                        yield return FromNative(scope, in elementIp);
                     }
                 }
             }
@@ -82,7 +84,7 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerScopeReservation FromNative(DhcpServerScope scope, ref DHCP_IP_RESERVATION_V4 native)
+        private static DhcpServerScopeReservation FromNative(DhcpServerScope scope, in DHCP_IP_RESERVATION_V4 native)
         {
             var reservedForClient = native.ReservedForClient;
 

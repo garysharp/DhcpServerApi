@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Dhcp.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_INFO_VQ : IDisposable
+    internal readonly struct DHCP_SUBNET_INFO_VQ : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet ID.
@@ -73,7 +73,7 @@ namespace Dhcp.Native
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct DHCP_SUBNET_INFO_VQ_Managed
+    internal readonly struct DHCP_SUBNET_INFO_VQ_Managed
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that specifies the subnet ID.

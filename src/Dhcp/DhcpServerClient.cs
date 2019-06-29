@@ -5,10 +5,12 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public class DhcpServerClient
+    public class DhcpServerClient : IDhcpServerClient
     {
         public DhcpServer Server { get; }
+        IDhcpServer IDhcpServerClient.Server => Server;
         public DhcpServerScope Scope { get; }
+        IDhcpServerScope IDhcpServerClient.Scope => Scope;
 
         public DhcpServerIpAddress IpAddress { get; }
         private ClientInfo info;
@@ -27,7 +29,7 @@ namespace Dhcp
             set => SetComment(value);
         }
 
-        [Obsolete("Caused confusion. Use LeaseExpiresUtc or LeaseExpiresLocal instead.")]
+        [Obsolete("Caused confusion. Use " + nameof(LeaseExpiresUtc) + " or " + nameof(LeaseExpiresLocal) + " instead.")]
         public DateTime LeaseExpires => info.LeaseExpiresUtc;
         public DateTime LeaseExpiresUtc => info.LeaseExpiresUtc;
         public DateTime LeaseExpiresLocal => info.LeaseExpiresUtc.ToLocalTime();
@@ -58,7 +60,7 @@ namespace Dhcp
         public void Delete()
             => Delete(Server, IpAddress);
 
-        public DhcpServerScopeReservation ConvertToReservation()
+        public IDhcpServerScopeReservation ConvertToReservation()
         {
             if (Scope == null)
                 throw new NullReferenceException("This client is not associated with a DHCP scope");
@@ -92,11 +94,7 @@ namespace Dhcp
 
         internal static DhcpServerClient GetClient(DhcpServer server, DhcpServerScope scope, DhcpServerIpAddress ipAddress)
         {
-            var searchInfo = new DHCP_SEARCH_INFO_Managed_IpAddress
-            {
-                SearchType = DHCP_SEARCH_INFO_TYPE.DhcpClientIpAddress,
-                ClientIpAddress = ipAddress.ToNativeAsNetwork()
-            };
+            var searchInfo = new DHCP_SEARCH_INFO_Managed_IpAddress(ipAddress.ToNativeAsNetwork());
 
             using (var searchInfoPtr = BitHelper.StructureToPtr(searchInfo))
             {
@@ -123,8 +121,7 @@ namespace Dhcp
             {
                 using (var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO>())
                 {
-                    var clientRef = client;
-                    return FromNative(server, scope, ref clientRef);
+                    return FromNative(server, scope, in client);
                 }
             }
             finally
@@ -147,8 +144,7 @@ namespace Dhcp
             {
                 using (var client = clientPtr.MarshalToStructure<DHCP_CLIENT_INFO_VQ>())
                 {
-                    var clientRef = client;
-                    return FromNative(server, scope, ref clientRef);
+                    return FromNative(server, scope, in client);
                 }
             }
             finally
@@ -196,14 +192,14 @@ namespace Dhcp
                         {
                             var clientValue = client.Value;
                             var scope = scopeLookup.TryGetValue(clientValue.SubnetAddress, out var s) ? s : null;
-                            yield return FromNative(server, scope, ref clientValue);
+                            yield return FromNative(server, (DhcpServerScope)scope, in clientValue);
                         }
                     }
 
                     if (result == DhcpErrors.SUCCESS)
                         yield break; // Last results
 
-                    Api.FreePointer(ref clientsPtr);
+                    Api.FreePointer(clientsPtr);
                     result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.Address,
                                                        SubnetAddress: (DHCP_IP_ADDRESS)0,
                                                        ResumeHandle: ref resultHandle,
@@ -251,14 +247,14 @@ namespace Dhcp
                         {
                             var clientValue = client.Value;
                             var scope = scopeLookup.TryGetValue(clientValue.SubnetAddress, out var s) ? s : null;
-                            yield return FromNative(server, scope, ref clientValue);
+                            yield return FromNative(server, (DhcpServerScope)scope, in clientValue);
                         }
                     }
 
                     if (result == DhcpErrors.SUCCESS)
                         yield break; // Last results
 
-                    Api.FreePointer(ref clientsPtr);
+                    Api.FreePointer(clientsPtr);
                     result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.Address,
                                                          SubnetAddress: (DHCP_IP_ADDRESS)0,
                                                          ResumeHandle: ref resultHandle,
@@ -312,16 +308,13 @@ namespace Dhcp
                     using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY>())
                     {
                         foreach (var client in clients.Clients)
-                        {
-                            var clientValue = client.Value;
-                            yield return FromNative(scope.Server, scope, ref clientValue);
-                        }
+                            yield return FromNative(scope.Server, scope, in client.Value);
                     }
 
                     if (result == DhcpErrors.SUCCESS)
                         yield break; // Last results
 
-                    Api.FreePointer(ref clientsPtr);
+                    Api.FreePointer(clientsPtr);
                     result = Api.DhcpEnumSubnetClients(ServerIpAddress: scope.Server.Address,
                                                        SubnetAddress: scope.Address.ToNativeAsNetwork(),
                                                        ResumeHandle: ref resultHandle,
@@ -365,16 +358,13 @@ namespace Dhcp
                     using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_VQ>())
                     {
                         foreach (var client in clients.Clients)
-                        {
-                            var clientValue = client.Value;
-                            yield return FromNative(scope.Server, scope, ref clientValue);
-                        }
+                            yield return FromNative(scope.Server, scope, in client.Value);
                     }
 
                     if (result == DhcpErrors.SUCCESS)
                         yield break; // Last results
 
-                    Api.FreePointer(ref clientsPtr);
+                    Api.FreePointer(clientsPtr);
                     result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: scope.Server.Address,
                                                          SubnetAddress: scope.Address.ToNativeAsNetwork(),
                                                          ResumeHandle: ref resultHandle,
@@ -484,9 +474,8 @@ namespace Dhcp
         {
             using (var infoNative = info.ToNativeV0())
             {
-                var infoNativeRef = infoNative;
                 var result = Api.DhcpSetClientInfo(ServerIpAddress: Server.Address,
-                                                   ClientInfo: ref infoNativeRef);
+                                                   ClientInfo: in infoNative);
 
                 if (result != DhcpErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpSetClientInfo), result);
@@ -495,11 +484,7 @@ namespace Dhcp
 
         private static void Delete(DhcpServer server, DhcpServerIpAddress address)
         {
-            var searchInfo = new DHCP_SEARCH_INFO_Managed_IpAddress
-            {
-                SearchType = DHCP_SEARCH_INFO_TYPE.DhcpClientIpAddress,
-                ClientIpAddress = address.ToNativeAsNetwork()
-            };
+            var searchInfo = new DHCP_SEARCH_INFO_Managed_IpAddress(address.ToNativeAsNetwork());
 
             using (var searchInfoPtr = BitHelper.StructureToPtr(searchInfo))
             {
@@ -510,9 +495,9 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_CLIENT_INFO native)
+        private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, in DHCP_CLIENT_INFO native)
         {
-            var info = ClientInfo.FromNative(native);
+            var info = ClientInfo.FromNative(in native);
 
             return new DhcpServerClient(server: server,
                                         scope: scope,
@@ -520,9 +505,9 @@ namespace Dhcp
                                         info: info);
         }
 
-        private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_CLIENT_INFO_VQ native)
+        private static DhcpServerClient FromNative(DhcpServer server, DhcpServerScope scope, in DHCP_CLIENT_INFO_VQ native)
         {
-            var info = ClientInfo.FromNative(native);
+            var info = ClientInfo.FromNative(in native);
 
             return new DhcpServerClient(server: server,
                                         scope: scope,
@@ -573,7 +558,7 @@ namespace Dhcp
                 QuarantineCapable = quarantineCapable;
             }
 
-            public static ClientInfo FromNative(DHCP_CLIENT_INFO native)
+            public static ClientInfo FromNative(in DHCP_CLIENT_INFO native)
             {
                 return new ClientInfo(address: native.ClientIpAddress,
                                       subnetMask: native.SubnetMask.AsNetworkToIpMask(),
@@ -591,7 +576,7 @@ namespace Dhcp
                                       quarantineCapable: false);
             }
 
-            public static ClientInfo FromNative(DHCP_CLIENT_INFO_VQ native)
+            public static ClientInfo FromNative(in DHCP_CLIENT_INFO_VQ native)
             {
                 return new ClientInfo(address: native.ClientIpAddress,
                                       subnetMask: native.SubnetMask.AsNetworkToIpMask(),

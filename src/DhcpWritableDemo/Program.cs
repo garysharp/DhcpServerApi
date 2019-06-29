@@ -14,7 +14,7 @@ namespace DhcpWritableDemo
             CreateScope(server);
         }
 
-        static void CreateScope(DhcpServer dhcpServer)
+        static void CreateScope(IDhcpServer dhcpServer)
         {
             // gather name and range information
             var name = "Test Scope";
@@ -169,7 +169,7 @@ namespace DhcpWritableDemo
             relationship.Delete();
         }
 
-        static void DumpScope(DhcpServerScope scope)
+        static void DumpScope(IDhcpServerScope scope)
         {
             Console.WriteLine($"   {scope.Address}");
             Console.WriteLine($"            IP Range: {scope.IpRange}");

@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// <summary>
     /// The DHCP_CLIENT_INFO_ARRAY_VQ structure specifies an array of DHCP_CLIENT_INFO_VQ structures.
     /// </summary>
-    internal struct DHCP_CLIENT_INFO_ARRAY_VQ : IDisposable
+    internal readonly struct DHCP_CLIENT_INFO_ARRAY_VQ : IDisposable
     {
 #pragma warning disable CS0649
         /// <summary>
@@ -19,7 +19,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to the first element in the array of DHCP_CLIENT_INFO_VQ structures.
         /// </summary>
-        private IntPtr ClientsPointer;
+        private readonly IntPtr ClientsPointer;
 
         public IEnumerable<ClientTuple> Clients
         {
@@ -50,7 +50,7 @@ namespace Dhcp.Native
                 Api.FreePointer(client.Pointer);
             }
 
-            Api.FreePointer(ref ClientsPointer);
+            Api.FreePointer(ClientsPointer);
         }
 
         internal struct ClientTuple

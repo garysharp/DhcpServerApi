@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_ALL_OPTIONS structure defines the set of all options available on a DHCP server.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_ALL_OPTIONS : IDisposable
+    internal readonly struct DHCP_ALL_OPTIONS : IDisposable
     {
         /// <summary>
         /// Reserved. This value should be set to 0.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_OPTION_ARRAY structure that contains the set of non-vendor options.
         /// </summary>
-        public IntPtr NonVendorOptionsPointer;
+        private readonly IntPtr NonVendorOptionsPointer;
         /// <summary>
         /// Specifies the number of vendor options listed in VendorOptions.
         /// </summary>
@@ -28,7 +28,7 @@ namespace Dhcp.Native
         /// - VendorName: Unicode string that contains the name of the vendor for the option.
         /// - ClassName: Unicode string that contains the name of the DHCP class for the option.
         /// </summary>
-        public IntPtr VendorOptionsPointer;
+        private readonly IntPtr VendorOptionsPointer;
 
         /// <summary>
         /// DHCP_OPTION_ARRAY structure that contains the set of non-vendor options.
@@ -59,12 +59,12 @@ namespace Dhcp.Native
         {
             foreach (var option in VendorOptions)
                 option.Dispose();
-            Api.FreePointer(ref VendorOptionsPointer);
+            Api.FreePointer(VendorOptionsPointer);
 
             if (NonVendorOptionsPointer != IntPtr.Zero)
             {
                 NonVendorOptions.Dispose();
-                Api.FreePointer(ref NonVendorOptionsPointer);
+                Api.FreePointer(NonVendorOptionsPointer);
             }
         }
     }

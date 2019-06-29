@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_ELEMENT_DATA_V5 structure defines an element that describes a feature or restriction of a subnet. Together, a set of elements describes the set of IP addresses served for a subnet by DHCP or BOOTP. DHCP_SUBNET_ELEMENT_DATA_V5 specifically allows for the definition of BOOTP-served addresses.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_ELEMENT_DATA_V5 : IDisposable
+    internal readonly struct DHCP_SUBNET_ELEMENT_DATA_V5 : IDisposable
     {
         /// <summary>
         /// DHCP_SUBNET_ELEMENT_TYPE enumeration value describing the type of element in the subsequent field.
@@ -65,7 +65,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_ELEMENT_DATA_V5 structure defines an element that describes a feature or restriction of a subnet. Together, a set of elements describes the set of IP addresses served for a subnet by DHCP or BOOTP. DHCP_SUBNET_ELEMENT_DATA_V5 specifically allows for the definition of BOOTP-served addresses.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_ELEMENT_DATA_V5_Managed : IDisposable
+    internal readonly struct DHCP_SUBNET_ELEMENT_DATA_V5_Managed : IDisposable
     {
         /// <summary>
         /// DHCP_SUBNET_ELEMENT_TYPE enumeration value describing the type of element in the subsequent field.

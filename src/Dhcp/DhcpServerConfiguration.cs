@@ -3,9 +3,9 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public class DhcpServerConfiguration
+    public class DhcpServerConfiguration : IDhcpServerConfiguration
     {
-        public DhcpServer Server { get; }
+        public IDhcpServer Server { get; }
 
         /// <summary>
         /// Specifies a set of bit flags that contain the RPC protocols supported by the DHCP server.
@@ -65,7 +65,7 @@ namespace Dhcp
             try
             {
                 var configInfo = configInfoPtr.MarshalToStructure<DHCP_SERVER_CONFIG_INFO>();
-                return FromNative(server, ref configInfo);
+                return FromNative(server, in configInfo);
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerConfiguration FromNative(DhcpServer server, ref DHCP_SERVER_CONFIG_INFO native)
+        private static DhcpServerConfiguration FromNative(DhcpServer server, in DHCP_SERVER_CONFIG_INFO native)
         {
             return new DhcpServerConfiguration(server,
                 apiProtocolSupport: (DhcpServerApiProtocol)native.APIProtocolSupport,

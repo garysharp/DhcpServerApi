@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_ALL_OPTION_VALUES structure defines the set of all option values defined on a DHCP server, organized according to class/vendor pairing.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_ALL_OPTION_VALUES : IDisposable
+    internal readonly struct DHCP_ALL_OPTION_VALUES : IDisposable
     {
         /// <summary>
         /// Reserved. This value should be set to 0.
@@ -21,7 +21,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of structures that contain the option values for specific class/vendor pairs.
         /// </summary>
-        private IntPtr OptionsPointer;
+        private readonly IntPtr OptionsPointer;
 
         /// <summary>
         /// A list of <see cref="DHCP_ALL_OPTION_VALUE_ITEM"/> structures containing the option values for specific class/vendor pairs.
@@ -48,7 +48,7 @@ namespace Dhcp.Native
             foreach (var option in Options)
                 option.Dispose();
 
-            Api.FreePointer(ref OptionsPointer);
+            Api.FreePointer(OptionsPointer);
         }
     }
 }

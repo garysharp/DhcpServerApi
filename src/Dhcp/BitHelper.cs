@@ -35,13 +35,10 @@ namespace Dhcp
         };
 
         #region Marshalling
-        public static T MarshalToStructure<T>(this IntPtr ptr)
+        public static T MarshalToStructure<T>(this IntPtr ptr) where T : struct
             => (T)Marshal.PtrToStructure(ptr, typeof(T));
 
-        public static V MarshalToStructure<T, V>(this UnmanagedDisposer<T> ptr)
-            => (V)Marshal.PtrToStructure(ptr, typeof(V));
-
-        public static UnmanagedDisposer<T> StructureToPtr<T>(T structure)
+        public static UnmanagedDisposer<T> StructureToPtr<T>(T structure) where T : struct
             => new UnmanagedDisposer<T>(structure);
         #endregion
 
@@ -120,9 +117,9 @@ namespace Dhcp
         {
             if (BitConverter.IsLittleEndian)
             {
-                return ((int)buffer[index++] << 24) |
-                    ((int)buffer[index++] << 16) |
-                    ((int)buffer[index++] << 8) |
+                return (buffer[index++] << 24) |
+                    (buffer[index++] << 16) |
+                    (buffer[index++] << 8) |
                     buffer[index];
             }
             else

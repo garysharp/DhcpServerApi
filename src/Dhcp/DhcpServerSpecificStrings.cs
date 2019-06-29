@@ -2,7 +2,7 @@
 
 namespace Dhcp
 {
-    public class DhcpServerSpecificStrings
+    public class DhcpServerSpecificStrings : IDhcpServerSpecificStrings
     {
         public string DefaultVendorClassName { get; }
         public string DefaultUserClassName { get; }
