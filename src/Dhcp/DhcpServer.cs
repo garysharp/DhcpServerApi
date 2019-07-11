@@ -10,12 +10,12 @@ namespace Dhcp
     /// <summary>
     /// Represents a DHCP Server
     /// </summary>
-    public class DhcpServer
+    public class DhcpServer : IDhcpServer
     {
-        private DhcpServerConfiguration configuration;
-        private DhcpServerAuditLog auditLog;
-        private DhcpServerDnsSettings dnsSettings;
-        private DhcpServerSpecificStrings specificStrings;
+        private IDhcpServerConfiguration configuration;
+        private IDhcpServerAuditLog auditLog;
+        private IDhcpServerDnsSettings dnsSettings;
+        private IDhcpServerSpecificStrings specificStrings;
 
         public DhcpServerIpAddress Address { get; }
         public string Name { get; }
@@ -23,13 +23,13 @@ namespace Dhcp
         public int VersionMinor { get; }
         public DhcpServerVersions Version => (DhcpServerVersions)(((ulong)VersionMajor << 16) | (uint)VersionMinor);
 
-        public DhcpServerConfiguration Configuration => configuration ??= DhcpServerConfiguration.GetConfiguration(this);
+        public IDhcpServerConfiguration Configuration => configuration ??= DhcpServerConfiguration.GetConfiguration(this);
         /// <summary>
         /// The audit log configuration settings from the DHCP server.
         /// </summary>
-        public DhcpServerAuditLog AuditLog => auditLog ??= DhcpServerAuditLog.GetAuditLog(this);
-        public DhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
-        public DhcpServerSpecificStrings SpecificStrings => specificStrings ??= DhcpServerSpecificStrings.GetSpecificStrings(this);
+        public IDhcpServerAuditLog AuditLog => auditLog ??= DhcpServerAuditLog.GetAuditLog(this);
+        public IDhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
+        public IDhcpServerSpecificStrings SpecificStrings => specificStrings ??= DhcpServerSpecificStrings.GetSpecificStrings(this);
 
         private DhcpServer(DhcpServerIpAddress address, string name)
         {
@@ -51,32 +51,32 @@ namespace Dhcp
         /// <summary>
         /// DHCP Server Classes
         /// </summary>
-        public DhcpServerClassCollection Classes { get; }
+        public IDhcpServerClassCollection Classes { get; }
 
         /// <summary>
         /// DHCP Server Options
         /// </summary>
-        public DhcpServerOptionCollection Options { get; }
+        public IDhcpServerOptionCollection Options { get; }
 
         /// <summary>
         /// DHCP Server Scopes
         /// </summary>
-        public DhcpServerScopeCollection Scopes { get; }
+        public IDhcpServerScopeCollection Scopes { get; }
 
         /// <summary>
         /// Enumerates a list of all Clients (in all Scopes) associated with the DHCP Server
         /// </summary>
-        public DhcpServerClientCollection Clients { get; }
+        public IDhcpServerClientCollection Clients { get; }
 
         /// <summary>
         /// Enumerates a list of Binding Elements associated with the DHCP Server
         /// </summary>
-        public DhcpServerBindingElementCollection BindingElements { get; }
+        public IDhcpServerBindingElementCollection BindingElements { get; }
 
         /// <summary>
         /// DHCP Server Failover Relationships
         /// </summary>
-        public DhcpServerFailoverRelationshipCollection FailoverRelationships { get; }
+        public IDhcpServerFailoverRelationshipCollection FailoverRelationships { get; }
 
         /// <summary>
         /// Calculates if this server version is greater than or equal to the supplied <paramref name="version"/>
@@ -88,7 +88,7 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of DHCP servers found in the directory service. 
         /// </summary>
-        public static IEnumerable<DhcpServer> Servers
+        public static IEnumerable<IDhcpServer> Servers
         {
             get
             {
@@ -106,7 +106,7 @@ namespace Dhcp
                     var servers = serversPtr.MarshalToStructure<DHCPDS_SERVERS>();
 
                     foreach (var server in servers.Servers)
-                        yield return FromNative(server);
+                        yield return FromNative(in server);
                 }
                 finally
                 {
@@ -119,7 +119,7 @@ namespace Dhcp
         /// Connects to a DHCP server
         /// </summary>
         /// <param name="hostNameOrAddress"></param>
-        public static DhcpServer Connect(string hostNameOrAddress)
+        public static IDhcpServer Connect(string hostNameOrAddress)
         {
             if (string.IsNullOrWhiteSpace(hostNameOrAddress))
                 throw new ArgumentNullException(nameof(hostNameOrAddress));
@@ -146,7 +146,7 @@ namespace Dhcp
                 throw new DhcpServerException(nameof(Api.DhcpGetVersion), result);
         }
 
-        private static DhcpServer FromNative(DHCPDS_SERVER native)
+        private static DhcpServer FromNative(in DHCPDS_SERVER native)
             => new DhcpServer(native.ServerAddress.AsNetworkToIpAddress(), native.ServerName);
 
         public override string ToString() => $"{Name} ({Address})";

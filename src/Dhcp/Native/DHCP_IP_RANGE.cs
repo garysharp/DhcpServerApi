@@ -6,7 +6,7 @@ namespace Dhcp.Native
     /// The DHCP_IP_RANGE structure defines a range of IP addresses.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_IP_RANGE
+    internal readonly struct DHCP_IP_RANGE
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the first IP address in the range.

@@ -181,7 +181,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, DHCP_OPTION_DATA_Managed OptionValue);
+        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpSetOptionValueV5 function sets information for a specific option value on the DHCP server. This function extends the functionality provided by DhcpSetOptionValue by allowing the caller to specify a class and/or vendor for the option.
@@ -195,7 +195,7 @@ namespace Dhcp.Native
         /// <param name="OptionValue">Pointer to a DHCP_OPTION_DATA structure that contains the data value corresponding to the DHCP option code specified by OptionID.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = false, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, DHCP_OPTION_DATA_Managed OptionValue);
+        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpRemoveOptionValue function removes the option value for a specific option on the DHCP4 server for the default user class and vendor class, for the specified scope.
@@ -258,7 +258,7 @@ namespace Dhcp.Native
         /// <param name="AddElementInfo">Pointer to a DHCP_SUBNET_ELEMENT_DATA structure that contains information about the subnet element corresponding to the IPv4 subnet specified in SubnetAddress.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAddSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_Managed AddElementInfo);
+        public static extern DhcpErrors DhcpAddSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_Managed AddElementInfo);
 
         /// <summary>
         /// The DhcpAddSubnetElementV5 function adds an element describing a feature or aspect of the subnet to the subnet entry in the DHCP database. Windows 2000 and earlier:  This function is not available.
@@ -268,7 +268,7 @@ namespace Dhcp.Native
         /// <param name="AddElementInfo">Pointer to a <see cref="DHCP_SUBNET_ELEMENT_DATA_V5"/> structure that contains the element data to add to the subnet. The V5 structure adds support for BOOTP clients.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAddSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_V5_Managed AddElementInfo);
+        public static extern DhcpErrors DhcpAddSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_V5_Managed AddElementInfo);
 
         /// <summary>
         /// The DhcpRemoveSubnetElement function removes an IPv4 subnet element from an IPv4 subnet defined on the DHCPv4 server.
@@ -282,7 +282,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpRemoveSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
+        public static extern DhcpErrors DhcpRemoveSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
 
         /// <summary>
         /// The DhcpRemoveSubnetElement function removes an IPv4 subnet element from an IPv4 subnet defined on the DHCPv4 server.
@@ -296,7 +296,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpRemoveSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_ELEMENT_DATA_V5_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
+        public static extern DhcpErrors DhcpRemoveSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_V5_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
 
         /// <summary>
         /// The DhcpCreateSubnet function creates a new subnet on the DHCP server.
@@ -306,7 +306,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo"><see cref="DHCP_SUBNET_INFO"/> structure that contains specific settings for the subnet, including the subnet mask and IP address of the subnet gateway.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_Managed SubnetInfo);
+        public static extern DhcpErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpDeleteSubnet function deletes a subnet from the DHCP server.
@@ -360,7 +360,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo">Pointer to a <see cref="DHCP_SUBNET_INFO"/> structure that contains the information about the subnet.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_Managed SubnetInfo);
+        public static extern DhcpErrors DhcpSetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpSetSubnetInfo function sets information about a subnet defined on the DHCP server.
@@ -370,7 +370,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo">Pointer to a <see cref="DHCP_SUBNET_INFO_VQ"/> structure that contains the information about the subnet.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref DHCP_SUBNET_INFO_VQ_Managed SubnetInfo);
+        public static extern DhcpErrors DhcpSetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_VQ_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpGetAllOptions function returns an array that contains all options defined on the DHCP server.
@@ -553,7 +553,7 @@ namespace Dhcp.Native
         /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO structure that contains the information on a client in a subnet served by the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetClientInfo(string ServerIpAddress, ref DHCP_CLIENT_INFO_Managed ClientInfo);
+        public static extern DhcpErrors DhcpSetClientInfo(string ServerIpAddress, in DHCP_CLIENT_INFO_Managed ClientInfo);
 
         /// <summary>
         /// The DhcpDeleteClientInfo function deletes a client information record from the DHCP server.
@@ -584,7 +584,7 @@ namespace Dhcp.Native
         /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains both the scope information to add and the failover relationship to modify.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, ref DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
+        public static extern DhcpErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
 
         /// <summary>
         /// The DhcpV4FailoverCreateRelationship function creates a new DHCPv4 failover relationship between two servers.
@@ -593,7 +593,7 @@ namespace Dhcp.Native
         /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the DHCPv4 failover relationship to create.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverCreateRelationship(string ServerIpAddress, ref DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
+        public static extern DhcpErrors DhcpV4FailoverCreateRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
 
         /// <summary>
         /// The DhcpV4FailoverDeleteRelationship function deletes a DHCPv4 failover relationship between two servers.
@@ -611,7 +611,7 @@ namespace Dhcp.Native
         /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains the scopes to delete. The scopes are defined in the pScopes member of this structure.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverDeleteScopeFromRelationship(string ServerIpAddress, ref DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
+        public static extern DhcpErrors DhcpV4FailoverDeleteScopeFromRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
 
         /// <summary>
         /// The DhcpV4FailoverEnumRelationship function enumerates all failover relationships present on the server.
@@ -690,7 +690,7 @@ namespace Dhcp.Native
         /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains update information about the fields in the DHCPv4 failover relationship.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverSetRelationship(string ServerIpAddress, DHCP_FAILOVER_RELATIONSHIP_SET_FLAGS Flags, ref DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
+        public static extern DhcpErrors DhcpV4FailoverSetRelationship(string ServerIpAddress, DHCP_FAILOVER_RELATIONSHIP_SET_FLAGS Flags, in DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
 
         /// <summary>
         /// The DhcpV4FailoverTriggerAddrAllocation function redistributes the free addresses between the primary server and the secondary server that are part of a failover relationship.
@@ -710,26 +710,12 @@ namespace Dhcp.Native
         public static extern void DhcpRpcFreeMemory(IntPtr BufferPointer);
 
         /// <summary>
-        /// Helper which calls <see cref="DhcpRpcFreeMemory(IntPtr)"/> and clears the pointer if != <see cref="IntPtr.Zero"/>
-        /// </summary>
-        public static void FreePointer(ref IntPtr Pointer)
-        {
-            if (Pointer != IntPtr.Zero)
-            {
-                DhcpRpcFreeMemory(Pointer);
-                Pointer = IntPtr.Zero;
-            }
-        }
-
-        /// <summary>
         /// Helper which calls <see cref="DhcpRpcFreeMemory(IntPtr)"/> if the pointer != <see cref="IntPtr.Zero"/>
         /// </summary>
         public static void FreePointer(IntPtr Pointer)
         {
             if (Pointer != IntPtr.Zero)
-            {
                 DhcpRpcFreeMemory(Pointer);
-            }
         }
     }
 }

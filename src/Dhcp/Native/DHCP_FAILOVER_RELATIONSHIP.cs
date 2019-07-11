@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_FAILOVER_RELATIONSHIP structure defines information about a DHCPv4 server failover relationship.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_FAILOVER_RELATIONSHIP : IDisposable
+    internal readonly struct DHCP_FAILOVER_RELATIONSHIP : IDisposable
     {
         /// <summary>
         /// This member specifies the IPv4 address of the primary server in the failover relationship.
@@ -101,7 +101,7 @@ namespace Dhcp.Native
     /// The DHCP_FAILOVER_RELATIONSHIP structure defines information about a DHCPv4 server failover relationship.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct DHCP_FAILOVER_RELATIONSHIP_Managed : IDisposable
+    internal readonly struct DHCP_FAILOVER_RELATIONSHIP_Managed : IDisposable
     {
         /// <summary>
         /// This member specifies the IPv4 address of the primary server in the failover relationship.

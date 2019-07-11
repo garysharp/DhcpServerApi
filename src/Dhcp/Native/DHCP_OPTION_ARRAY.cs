@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_ARRAY structure defines an array of DHCP server options.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_ARRAY : IDisposable
+    internal readonly struct DHCP_OPTION_ARRAY : IDisposable
     {
         /// <summary>
         /// Specifies the number of option elements in Options.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION"/> structures containing DHCP server options and the associated data.
         /// </summary>
-        private IntPtr OptionsPointer;
+        private readonly IntPtr OptionsPointer;
 
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION"/> structures containing DHCP server options and the associated data.
@@ -44,7 +44,7 @@ namespace Dhcp.Native
             foreach (var option in Options)
                 option.Dispose();
 
-            Api.FreePointer(ref OptionsPointer);
+            Api.FreePointer(OptionsPointer);
         }
     }
 }

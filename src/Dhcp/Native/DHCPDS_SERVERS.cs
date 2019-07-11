@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCPDS_SERVERS structure defines a list of DHCP servers in the context of directory services.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCPDS_SERVERS
+    internal readonly struct DHCPDS_SERVERS
     {
         /// <summary>
         /// Reserved. This value should be 0.

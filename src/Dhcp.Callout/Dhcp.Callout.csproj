@@ -14,7 +14,8 @@
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>DHCP Win32 Windows Callout</PackageTags>
     <LangVersion>preview</LangVersion>
@@ -34,11 +35,7 @@
     <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
     <DllExportTimeout>30000</DllExportTimeout>
     <DllExportPeCheck>2</DllExportPeCheck>
-    <Version>1.0.1-alpha</Version>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
+    <Version>1.0.3-alpha</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub">

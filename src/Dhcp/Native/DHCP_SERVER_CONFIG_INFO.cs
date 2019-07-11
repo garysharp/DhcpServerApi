@@ -6,7 +6,7 @@ namespace Dhcp.Native
     /// The DHCP_SERVER_CONFIG_INFO structure defines the data used to configure the DHCP server.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SERVER_CONFIG_INFO
+    internal readonly struct DHCP_SERVER_CONFIG_INFO
     {
         /// <summary>
         /// Specifies a set of bit flags that contain the RPC protocols supported by the DHCP server.

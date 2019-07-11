@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_IP_ARRAY structure defines an array of IP addresses.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_IP_ARRAY : IDisposable
+    internal readonly struct DHCP_IP_ARRAY : IDisposable
     {
         /// <summary>
         /// Specifies the number of IP addresses in Elements.
@@ -49,7 +49,7 @@ namespace Dhcp.Native
     /// The DHCP_IP_ARRAY structure defines an array of IP addresses.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_IP_ARRAY_Managed : IDisposable
+    internal readonly struct DHCP_IP_ARRAY_Managed : IDisposable
     {
         /// <summary>
         /// Specifies the number of IP addresses in Elements.

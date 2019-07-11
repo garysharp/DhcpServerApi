@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_BINARY_DATA structure defines an opaque blob of binary data.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BINARY_DATA : IDisposable
+    internal readonly struct DHCP_BINARY_DATA : IDisposable
     {
         /// <summary>
         /// Specifies the size of Data, in bytes.
@@ -67,7 +67,7 @@ namespace Dhcp.Native
     /// The DHCP_BINARY_DATA structure defines an opaque blob of binary data.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BINARY_DATA_Managed : IDisposable
+    internal readonly struct DHCP_BINARY_DATA_Managed : IDisposable
     {
         /// <summary>
         /// Specifies the size of Data, in bytes.

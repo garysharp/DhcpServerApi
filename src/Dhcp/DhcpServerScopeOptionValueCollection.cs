@@ -3,10 +3,12 @@ using System.Collections.Generic;
 
 namespace Dhcp
 {
-    public class DhcpServerScopeOptionValueCollection : IEnumerable<DhcpServerOptionValue>
+    public class DhcpServerScopeOptionValueCollection : IDhcpServerScopeOptionValueCollection
     {
         public DhcpServer Server { get; }
+        IDhcpServer IDhcpServerScopeOptionValueCollection.Server => Server;
         public DhcpServerScope Scope { get; }
+        IDhcpServerScope IDhcpServerScopeOptionValueCollection.Scope => Scope;
 
         internal DhcpServerScopeOptionValueCollection(DhcpServerScope scope)
         {
@@ -17,7 +19,7 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
         /// </summary>
-        public IEnumerator<DhcpServerOptionValue> GetEnumerator()
+        public IEnumerator<IDhcpServerOptionValue> GetEnumerator()
             => DhcpServerOptionValue.GetAllScopeOptionValues(Scope).GetEnumerator();
 
         /// <summary>
@@ -29,13 +31,13 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of Default Option Values associated with the DHCP Scope
         /// </summary>
-        public IEnumerable<DhcpServerOptionValue> GetDefaultOptionValues()
+        public IEnumerable<IDhcpServerOptionValue> GetDefaultOptionValues()
             => DhcpServerOptionValue.EnumScopeDefaultOptionValues(Scope);
 
-        public IEnumerable<DhcpServerOptionValue> GetUserOptionValues(string className)
+        public IEnumerable<IDhcpServerOptionValue> GetUserOptionValues(string className)
             => DhcpServerOptionValue.EnumScopeUserOptionValues(Scope, className);
 
-        public IEnumerable<DhcpServerOptionValue> GetVendorOptionValues(string vendorName)
+        public IEnumerable<IDhcpServerOptionValue> GetVendorOptionValues(string vendorName)
             => DhcpServerOptionValue.EnumScopeVendorOptionValues(Scope, vendorName);
 
         /// <summary>
@@ -43,21 +45,21 @@ namespace Dhcp
         /// </summary>
         /// <param name="option">The associated option to retrieve the option value for</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetOptionValue(DhcpServerOption option) => option.GetScopeValue(Scope);
+        public IDhcpServerOptionValue GetOptionValue(IDhcpServerOption option) => ((DhcpServerOption)option).GetScopeValue(Scope);
 
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope from the Default options
         /// </summary>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetDefaultOptionValue(int optionId)
+        public IDhcpServerOptionValue GetDefaultOptionValue(int optionId)
             => DhcpServerOptionValue.GetScopeDefaultOptionValue(Scope, optionId);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope from the Default options
         /// </summary>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetDefaultOptionValue(DhcpServerOptionIds optionId)
+        public IDhcpServerOptionValue GetDefaultOptionValue(DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeDefaultOptionValue(Scope, (int)optionId);
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace Dhcp
         /// <param name="className">The name of the User Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetUserOptionValue(string className, int optionId)
+        public IDhcpServerOptionValue GetUserOptionValue(string className, int optionId)
             => DhcpServerOptionValue.GetScopeUserOptionValue(Scope, optionId, className);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope within a User Class
@@ -74,7 +76,7 @@ namespace Dhcp
         /// <param name="className">The name of the User Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetUserOptionValue(string className, DhcpServerOptionIds optionId)
+        public IDhcpServerOptionValue GetUserOptionValue(string className, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeUserOptionValue(Scope, (int)optionId, className);
 
         /// <summary>
@@ -83,7 +85,7 @@ namespace Dhcp
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId)
+        public IDhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId)
             => DhcpServerOptionValue.GetScopeVendorOptionValue(Scope, optionId, vendorName);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope within a Vendor Class
@@ -91,13 +93,13 @@ namespace Dhcp
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
         /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
+        public IDhcpServerOptionValue GetVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeVendorOptionValue(Scope, (int)optionId, vendorName);
 
-        public void SetOptionValue(DhcpServerOptionValue value)
-            => DhcpServerOptionValue.SetScopeOptionValue(Scope, value);
-        public void AddOrSetOptionValue(DhcpServerOptionValue value)
-            => DhcpServerOptionValue.SetScopeOptionValue(Scope, value);
+        public void SetOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.SetScopeOptionValue(Scope, (DhcpServerOptionValue)value);
+        public void AddOrSetOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.SetScopeOptionValue(Scope, (DhcpServerOptionValue)value);
 
         /// <summary>
         /// Deletes the Option Value associated with the Option and Scope within a User Class
@@ -135,8 +137,8 @@ namespace Dhcp
             => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, optionId);
         public void RemoveOptionValue(DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, (int)optionId);
-        public void RemoveOptionValue(DhcpServerOptionValue value)
-            => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, value);
+        public void RemoveOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.DeleteScopeOptionValue(Scope, (DhcpServerOptionValue)value);
 
     }
 }

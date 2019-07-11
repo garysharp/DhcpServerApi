@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_IP_RESERVATION_V4 structure defines a client IP reservation. This structure extends an IP reservation by including the type of client (DHCP or BOOTP) holding the reservation.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_IP_RESERVATION_V4 : IDisposable
+    internal readonly struct DHCP_IP_RESERVATION_V4 : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the reserved IP address.
@@ -16,7 +16,7 @@ namespace Dhcp.Native
         /// <summary>
         /// DHCP_CLIENT_UID structure that contains the hardware address (MAC address) of the DHCPv4 client that holds this reservation.
         /// </summary>
-        private IntPtr ReservedForClientPointer;
+        private readonly IntPtr ReservedForClientPointer;
         /// <summary>
         /// Value that specifies the DHCPv4 reserved client type.
         /// </summary>
@@ -32,7 +32,7 @@ namespace Dhcp.Native
             if (ReservedForClientPointer != IntPtr.Zero)
             {
                 ReservedForClient.Dispose();
-                Api.FreePointer(ref ReservedForClientPointer);
+                Api.FreePointer(ReservedForClientPointer);
             }
         }
     }
@@ -41,7 +41,7 @@ namespace Dhcp.Native
     /// The DHCP_IP_RESERVATION_V4 structure defines a client IP reservation. This structure extends an IP reservation by including the type of client (DHCP or BOOTP) holding the reservation.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_IP_RESERVATION_V4_Managed : IDisposable
+    internal readonly struct DHCP_IP_RESERVATION_V4_Managed : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the reserved IP address.

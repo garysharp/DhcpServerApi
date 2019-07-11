@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// Additional fields are added to support Vendor Options in DHCP_ALL_OPTIONS
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_VENDOR_OPTION : IDisposable
+    internal readonly struct DHCP_VENDOR_OPTION : IDisposable
     {
         /// <summary>
         /// DHCP_OPTION_ID value that specifies a unique ID number (also called a "code") for this option.
@@ -17,11 +17,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the name of this option.
         /// </summary>
-        private IntPtr OptionNamePointer;
+        private readonly IntPtr OptionNamePointer;
         /// <summary>
         /// Unicode string that contains a comment about this option.
         /// </summary>
-        private IntPtr OptionCommentPointer;
+        private readonly IntPtr OptionCommentPointer;
         /// <summary>
         /// <see cref="DHCP_OPTION_DATA"/> structure that contains the data associated with this option.
         /// </summary>
@@ -33,11 +33,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the name of the vendor for the option.
         /// </summary>
-        private IntPtr VendorNamePointer;
+        private readonly IntPtr VendorNamePointer;
         /// <summary>
         /// Unicode string that contains the name of the DHCP class for the option.
         /// </summary>
-        private IntPtr ClassNamePointer;
+        private readonly IntPtr ClassNamePointer;
 
         /// <summary>
         /// Unicode string that contains the name of this option.
@@ -58,13 +58,13 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref OptionNamePointer);
-            Api.FreePointer(ref OptionCommentPointer);
+            Api.FreePointer(OptionNamePointer);
+            Api.FreePointer(OptionCommentPointer);
 
             DefaultValue.Dispose();
 
-            Api.FreePointer(ref VendorNamePointer);
-            Api.FreePointer(ref ClassNamePointer);
+            Api.FreePointer(VendorNamePointer);
+            Api.FreePointer(ClassNamePointer);
         }
     }
 }

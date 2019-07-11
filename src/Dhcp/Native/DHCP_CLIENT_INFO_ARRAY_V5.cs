@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO_ARRAY_V5 structure defines an array of DHCP_CLIENT_INFO_V5 structures for use with enumeration functions. 
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_ARRAY_V5 : IDisposable
+    internal readonly struct DHCP_CLIENT_INFO_ARRAY_V5 : IDisposable
     {
         /// <summary>
         /// Specifies the number of elements present in Clients.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of DHCP_CLIENT_INFO_V5 structures that contain information on specific DHCP subnet clients, including the dynamic address type (DHCP and/or BOOTP) and address state information.
         /// </summary>
-        private IntPtr ClientsPointer;
+        private readonly IntPtr ClientsPointer;
 
         /// <summary>
         /// Pointer to a list of DHCP_CLIENT_INFO_V5 structures that contain information on specific DHCP subnet clients, including the dynamic address type (DHCP and/or BOOTP) and address state information.
@@ -51,7 +51,7 @@ namespace Dhcp.Native
                 Api.FreePointer(client.Pointer);
             }
 
-            Api.FreePointer(ref ClientsPointer);
+            Api.FreePointer(ClientsPointer);
         }
 
         internal struct ClientTuple

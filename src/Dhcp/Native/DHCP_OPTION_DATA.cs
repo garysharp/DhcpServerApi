@@ -8,7 +8,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_DATA structure defines a data container for one or more data elements associated with a DHCP option.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_DATA : IDisposable
+    internal readonly struct DHCP_OPTION_DATA : IDisposable
     {
         /// <summary>
         /// Specifies the number of option data elements listed in Elements.
@@ -17,7 +17,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION_DATA_ELEMENT"/> structures that contain the data elements associated with this particular option element.
         /// </summary>
-        private IntPtr ElementsPointer;
+        private readonly IntPtr ElementsPointer;
 
         /// <summary>
         /// Pointer to a list of <see cref="DHCP_OPTION_DATA_ELEMENT"/> structures that contain the data elements associated with this particular option element.
@@ -46,7 +46,7 @@ namespace Dhcp.Native
             foreach (var element in Elements)
                 element.Dispose();
 
-            Api.FreePointer(ref ElementsPointer);
+            Api.FreePointer(ElementsPointer);
         }
     }
 
@@ -54,7 +54,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION_DATA structure defines a data container for one or more data elements associated with a DHCP option.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION_DATA_Managed : IDisposable
+    internal readonly struct DHCP_OPTION_DATA_Managed : IDisposable
     {
         /// <summary>
         /// Specifies the number of option data elements listed in Elements.

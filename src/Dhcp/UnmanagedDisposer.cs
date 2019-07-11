@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Dhcp
 {
-    internal struct UnmanagedDisposer<T> : IDisposable
+    internal readonly struct UnmanagedDisposer<T> : IDisposable
     {
 #pragma warning disable IDE0032 // Use auto property
         private readonly IntPtr pointer;

@@ -3,10 +3,8 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public class DhcpServerHost
+    public class DhcpServerHost : IDhcpServerHost
     {
-        private static readonly DhcpServerHost emptyInstance = new DhcpServerHost(DhcpServerIpAddress.Empty, null, null);
-
         public DhcpServerIpAddress Address { get; }
         public string NetBiosName { get; }
         public string ServerName { get; }
@@ -18,7 +16,7 @@ namespace Dhcp
             ServerName = serverName;
         }
 
-        public static DhcpServerHost Empty => emptyInstance;
+        public static DhcpServerHost Empty { get; } = new DhcpServerHost(DhcpServerIpAddress.Empty, null, null);
 
         internal static DhcpServerHost FromNative(ref DHCP_HOST_INFO native)
         {

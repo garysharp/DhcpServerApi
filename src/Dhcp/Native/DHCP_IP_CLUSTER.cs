@@ -6,7 +6,7 @@ namespace Dhcp.Native
     /// The DHCP_IP_CLUSTER structure defines the address and mast for a network cluster.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_IP_CLUSTER
+    internal readonly struct DHCP_IP_CLUSTER
     {
         /// <summary>
         /// DHCP_IP_ADDRESS value that contains the IP address of the cluster.

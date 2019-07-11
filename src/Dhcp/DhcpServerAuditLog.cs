@@ -2,12 +2,12 @@
 
 namespace Dhcp
 {
-    public class DhcpServerAuditLog
+    public class DhcpServerAuditLog : IDhcpServerAuditLog
     {
         /// <summary>
         /// The associated DHCP Server
         /// </summary>
-        public DhcpServer Server { get; }
+        public IDhcpServer Server { get; }
 
         /// <summary>
         /// The directory where the audit log is stored as an absolute path within the file system.
@@ -23,7 +23,7 @@ namespace Dhcp
         /// The maximum log file size, in bytes.
         /// </summary>
         public int MaxLogFilesSize { get; }
-        
+
         /// <summary>
         /// The minimum required disk space, in bytes, for audit log storage.
         /// </summary>

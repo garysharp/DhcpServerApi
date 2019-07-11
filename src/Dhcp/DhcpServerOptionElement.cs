@@ -6,7 +6,7 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public abstract class DhcpServerOptionElement : IEquatable<DhcpServerOptionElement>
+    public abstract class DhcpServerOptionElement : IDhcpServerOptionElement
     {
         public abstract DhcpServerOptionElementType Type { get; }
 
@@ -56,9 +56,9 @@ namespace Dhcp
                 yield return ReadNative(element);
         }
 
-        internal static DHCP_OPTION_DATA_Managed WriteNative(IEnumerable<DhcpServerOptionElement> elements)
+        internal static DHCP_OPTION_DATA_Managed WriteNative(IEnumerable<IDhcpServerOptionElement> elements)
         {
-            return new DHCP_OPTION_DATA_Managed(elements.Select(e => e.ToNative()).ToArray());
+            return new DHCP_OPTION_DATA_Managed(elements.Select(e => ((DhcpServerOptionElement)e).ToNative()).ToArray());
         }
 
         private static DhcpServerOptionElement ReadNative(DHCP_OPTION_DATA_ELEMENT element)
@@ -108,7 +108,7 @@ namespace Dhcp
             return false;
         }
 
-        public abstract bool Equals(DhcpServerOptionElement other);
+        public abstract bool Equals(IDhcpServerOptionElement other);
     }
 
     public class DhcpServerOptionElementByte : DhcpServerOptionElement
@@ -130,7 +130,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -164,7 +164,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -198,7 +198,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -232,7 +232,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(RawValue);
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -270,7 +270,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed(new DHCP_IP_ADDRESS(RawValue));
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -304,7 +304,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, RawValue);
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -341,7 +341,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, new DHCP_BINARY_DATA_Managed(RawValue));
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;
@@ -394,7 +394,7 @@ namespace Dhcp
         internal override DHCP_OPTION_DATA_ELEMENT_Managed ToNative()
             => new DHCP_OPTION_DATA_ELEMENT_Managed((DHCP_OPTION_DATA_TYPE)Type, RawValue);
 
-        public override bool Equals(DhcpServerOptionElement other)
+        public override bool Equals(IDhcpServerOptionElement other)
         {
             if (other == null)
                 return false;

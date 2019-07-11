@@ -4,14 +4,14 @@ using Dhcp.Native;
 
 namespace Dhcp
 {
-    public class DhcpServerBindingElement
+    public class DhcpServerBindingElement : IDhcpServerBindingElement
     {
         private readonly byte[] interfaceId;
 
         /// <summary>
         /// The associated DHCP Server
         /// </summary>
-        public DhcpServer Server { get; }
+        public IDhcpServer Server { get; }
 
         /// <summary>
         /// The binding specified in this structure cannot be modified.
@@ -80,10 +80,7 @@ namespace Dhcp
                 using (var elements = elementsPtr.MarshalToStructure<DHCP_BIND_ELEMENT_ARRAY>())
                 {
                     foreach (var element in elements.Elements)
-                    {
-                        var elementRef = element;
-                        yield return FromNative(server, ref elementRef);
-                    }
+                        yield return FromNative(server, in element);
                 }
             }
             finally
@@ -92,7 +89,7 @@ namespace Dhcp
             }
         }
 
-        private static DhcpServerBindingElement FromNative(DhcpServer server, ref DHCP_BIND_ELEMENT native)
+        private static DhcpServerBindingElement FromNative(DhcpServer server, in DHCP_BIND_ELEMENT native)
         {
             return new DhcpServerBindingElement(server: server,
                                                 cantModify: (native.Flags & Constants.DHCP_ENDPOINT_FLAG_CANT_MODIFY) == Constants.DHCP_ENDPOINT_FLAG_CANT_MODIFY,

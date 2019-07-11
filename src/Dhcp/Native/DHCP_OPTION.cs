@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_OPTION structure defines a single DHCP option and any data elements associated with it.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_OPTION : IDisposable
+    internal readonly struct DHCP_OPTION : IDisposable
     {
         /// <summary>
         /// DHCP_OPTION_ID value that specifies a unique ID number (also called a "code") for this option.
@@ -16,11 +16,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that contains the name of this option.
         /// </summary>
-        private IntPtr OptionNamePointer;
+        private readonly IntPtr OptionNamePointer;
         /// <summary>
         /// Unicode string that contains a comment about this option.
         /// </summary>
-        private IntPtr OptionCommentPointer;
+        private readonly IntPtr OptionCommentPointer;
         /// <summary>
         /// <see cref="DHCP_OPTION_DATA"/> structure that contains the data associated with this option.
         /// </summary>
@@ -41,8 +41,8 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref OptionNamePointer);
-            Api.FreePointer(ref OptionCommentPointer);
+            Api.FreePointer(OptionNamePointer);
+            Api.FreePointer(OptionCommentPointer);
 
             DefaultValue.Dispose();
         }

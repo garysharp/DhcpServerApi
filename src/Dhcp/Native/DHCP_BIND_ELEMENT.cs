@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_BIND_ELEMENT structure defines an individual network binding for the DHCP server. A single DHCP server can contain multiple bindings and serve multiple networks.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_BIND_ELEMENT : IDisposable
+    internal readonly struct DHCP_BIND_ELEMENT : IDisposable
     {
         /// <summary>
         /// Specifies a set of bit flags indicating properties of the network binding.
@@ -29,7 +29,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Unicode string that specifies the name assigned to this network interface device.
         /// </summary>
-        private IntPtr IfDescriptionPointer;
+        private readonly IntPtr IfDescriptionPointer;
         /// <summary>
         /// Specifies the size of the network interface device ID, in bytes.
         /// </summary>
@@ -37,7 +37,7 @@ namespace Dhcp.Native
         /// <summary>
         /// Specifies the network interface device ID.
         /// </summary>
-        private IntPtr IfIdPointer;
+        private readonly IntPtr IfIdPointer;
 
         /// <summary>
         /// Unicode string that specifies the name assigned to this network interface device.
@@ -74,8 +74,8 @@ namespace Dhcp.Native
 
         public void Dispose()
         {
-            Api.FreePointer(ref IfDescriptionPointer);
-            Api.FreePointer(ref IfIdPointer);
+            Api.FreePointer(IfDescriptionPointer);
+            Api.FreePointer(IfIdPointer);
         }
     }
 }

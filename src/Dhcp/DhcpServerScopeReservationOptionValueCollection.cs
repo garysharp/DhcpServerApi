@@ -3,11 +3,14 @@ using System.Collections.Generic;
 
 namespace Dhcp
 {
-    public class DhcpServerScopeReservationOptionValueCollection : IEnumerable<DhcpServerOptionValue>
+    public class DhcpServerScopeReservationOptionValueCollection : IDhcpServerScopeReservationOptionValueCollection
     {
         public DhcpServer Server { get; }
+        IDhcpServer IDhcpServerScopeReservationOptionValueCollection.Server => Server;
         public DhcpServerScope Scope { get; }
+        IDhcpServerScope IDhcpServerScopeReservationOptionValueCollection.Scope => Scope;
         public DhcpServerScopeReservation Reservation { get; }
+        IDhcpServerScopeReservation IDhcpServerScopeReservationOptionValueCollection.Reservation => Reservation;
 
         internal DhcpServerScopeReservationOptionValueCollection(DhcpServerScopeReservation reservation)
         {
@@ -19,7 +22,7 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope Reservation
         /// </summary>
-        public IEnumerator<DhcpServerOptionValue> GetEnumerator()
+        public IEnumerator<IDhcpServerOptionValue> GetEnumerator()
             => DhcpServerOptionValue.GetAllScopeReservationOptionValues(Reservation).GetEnumerator();
 
         /// <summary>
@@ -31,35 +34,35 @@ namespace Dhcp
         /// <summary>
         /// Enumerates a list of Default Option Values associated with the DHCP Scope Reservation
         /// </summary>
-        public IEnumerable<DhcpServerOptionValue> GetDefaultOptionValues()
+        public IEnumerable<IDhcpServerOptionValue> GetDefaultOptionValues()
             => DhcpServerOptionValue.EnumScopeReservationDefaultOptionValues(Reservation);
 
-        public IEnumerable<DhcpServerOptionValue> GetUserOptionValues(string className)
+        public IEnumerable<IDhcpServerOptionValue> GetUserOptionValues(string className)
             => DhcpServerOptionValue.EnumScopeReservationUserOptionValues(Reservation, className);
 
-        public IEnumerable<DhcpServerOptionValue> GetVendorOptionValues(string vendorName)
+        public IEnumerable<IDhcpServerOptionValue> GetVendorOptionValues(string vendorName)
             => DhcpServerOptionValue.EnumScopeReservationVendorOptionValues(Reservation, vendorName);
 
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Reservation Scope
         /// </summary>
         /// <param name="option">The associated option to retrieve the option value for</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetOptionValue(DhcpServerOption option) => option.GetScopeReservationValue(Reservation);
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetOptionValue(IDhcpServerOption option) => ((DhcpServerOption)option).GetScopeReservationValue(Reservation);
 
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope Reservation from the Default options
         /// </summary>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetDefaultOptionValue(int optionId)
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetDefaultOptionValue(int optionId)
             => DhcpServerOptionValue.GetScopeReservationDefaultOptionValue(Reservation, optionId);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope Reservation from the Default options
         /// </summary>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetDefaultOptionValue(DhcpServerOptionIds optionId)
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetDefaultOptionValue(DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeReservationDefaultOptionValue(Reservation, (int)optionId);
 
         /// <summary>
@@ -67,16 +70,16 @@ namespace Dhcp
         /// </summary>
         /// <param name="className">The name of the User Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetUserOptionValue(string className, int optionId)
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetUserOptionValue(string className, int optionId)
             => DhcpServerOptionValue.GetScopeReservationUserOptionValue(Reservation, optionId, className);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope Reservation within a User Class
         /// </summary>
         /// <param name="className">The name of the User Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetUserOptionValue(string className, DhcpServerOptionIds optionId)
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetUserOptionValue(string className, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeReservationUserOptionValue(Reservation, (int)optionId, className);
 
         /// <summary>
@@ -84,22 +87,22 @@ namespace Dhcp
         /// </summary>
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId)
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId)
             => DhcpServerOptionValue.GetScopeReservationVendorOptionValue(Reservation, optionId, vendorName);
         /// <summary>
         /// Retrieves the Option Value associated with the Option and Scope Reservation within a Vendor Class
         /// </summary>
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
-        public DhcpServerOptionValue GetVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
+        /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
+        public IDhcpServerOptionValue GetVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetScopeReservationVendorOptionValue(Reservation, (int)optionId, vendorName);
 
-        public void SetOptionValue(DhcpServerOptionValue value)
-            => DhcpServerOptionValue.SetScopeReservationOptionValue(Reservation, value);
-        public void AddOrSetOptionValue(DhcpServerOptionValue value)
-            => DhcpServerOptionValue.SetScopeReservationOptionValue(Reservation, value);
+        public void SetOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.SetScopeReservationOptionValue(Reservation, (DhcpServerOptionValue)value);
+        public void AddOrSetOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.SetScopeReservationOptionValue(Reservation, (DhcpServerOptionValue)value);
 
         /// <summary>
         /// Deletes the Option Value associated with the Option and Scope Reservation within a User Class
@@ -113,7 +116,6 @@ namespace Dhcp
         /// </summary>
         /// <param name="className">The name of the User Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
         public void RemoveUserOptionValue(string className, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.DeleteScopeReservationUserOptionValue(Reservation, (int)optionId, className);
 
@@ -122,7 +124,6 @@ namespace Dhcp
         /// </summary>
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
         public void RemoveVendorOptionValue(string vendorName, int optionId)
             => DhcpServerOptionValue.DeleteScopeReservationVendorOptionValue(Reservation, optionId, vendorName);
         /// <summary>
@@ -130,15 +131,14 @@ namespace Dhcp
         /// </summary>
         /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
         /// <param name="optionId">The identifier for the option value to retrieve</param>
-        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
         public void RemoveVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.DeleteScopeReservationVendorOptionValue(Reservation, (int)optionId, vendorName);
         public void RemoveOptionValue(int optionId)
             => DhcpServerOptionValue.DeleteScopeReservationOptionValue(Reservation, optionId);
         public void RemoveOptionValue(DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.DeleteScopeReservationOptionValue(Reservation, (int)optionId);
-        public void RemoveOptionValue(DhcpServerOptionValue value)
-            => DhcpServerOptionValue.DeleteScopeReservationOptionValue(Reservation, value);
+        public void RemoveOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.DeleteScopeReservationOptionValue(Reservation, (DhcpServerOptionValue)value);
 
     }
 }

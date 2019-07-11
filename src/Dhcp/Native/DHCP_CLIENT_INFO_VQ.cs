@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO_VQ structure defines information about the DHCPv4 client.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_CLIENT_INFO_VQ : IDisposable
+    internal readonly struct DHCP_CLIENT_INFO_VQ : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS type value that contains the DHCPv4 client's IPv4 address. 
@@ -24,11 +24,11 @@ namespace Dhcp.Native
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the DHCPv4 client's machine name.
         /// </summary>
-        private IntPtr ClientNamePointer;
+        private readonly IntPtr ClientNamePointer;
         /// <summary>
         /// Pointer to a null-terminated Unicode string that represents the description given to the DHCPv4 client.
         /// </summary>
-        private IntPtr ClientCommentPointer;
+        private readonly IntPtr ClientCommentPointer;
         /// <summary>
         /// DATE_TIME structure that contains the lease expiry time for the DHCPv4 client. This is UTC time represented in the FILETIME format.
         /// </summary>
@@ -73,8 +73,8 @@ namespace Dhcp.Native
         public void Dispose()
         {
             ClientHardwareAddress.Dispose();
-            Api.FreePointer(ref ClientNamePointer);
-            Api.FreePointer(ref ClientCommentPointer);
+            Api.FreePointer(ClientNamePointer);
+            Api.FreePointer(ClientCommentPointer);
             OwnerHost.Dispose();
         }
     }
@@ -83,7 +83,7 @@ namespace Dhcp.Native
     /// The DHCP_CLIENT_INFO_VQ structure defines information about the DHCPv4 client.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct DHCP_CLIENT_INFO_VQ_Managed : IDisposable
+    internal readonly struct DHCP_CLIENT_INFO_VQ_Managed : IDisposable
     {
         /// <summary>
         /// DHCP_IP_ADDRESS type value that contains the DHCPv4 client's IPv4 address. 

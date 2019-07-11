@@ -2,11 +2,11 @@
 
 namespace Dhcp
 {
-    public class DhcpServerScopeFailoverStatistics
+    public class DhcpServerScopeFailoverStatistics : IDhcpServerScopeFailoverStatistics
     {
-        public DhcpServer Server { get; }
+        public IDhcpServer Server { get; }
 
-        public DhcpServerScope Scope { get; }
+        public IDhcpServerScope Scope { get; }
 
         /// <summary>
         /// The total number of IPv4 addresses that can be leased out to DHCPv4 clients on an IPv4 subnet that is part of a failover relationship.
@@ -72,7 +72,7 @@ namespace Dhcp
             {
                 var statistics = statisticsPtr.MarshalToStructure<DHCP_FAILOVER_STATISTICS>();
 
-                return FromNative(server, scope, ref statistics);
+                return FromNative(server, scope, in statistics);
             }
             finally
             {
@@ -81,7 +81,7 @@ namespace Dhcp
 
         }
 
-        private static DhcpServerScopeFailoverStatistics FromNative(DhcpServer server, DhcpServerScope scope, ref DHCP_FAILOVER_STATISTICS native)
+        private static DhcpServerScopeFailoverStatistics FromNative(DhcpServer server, DhcpServerScope scope, in DHCP_FAILOVER_STATISTICS native)
             => new DhcpServerScopeFailoverStatistics(server, scope, native.NumAddr, native.AddrFree, native.AddrInUse, native.PartnerAddrFree, native.ThisAddrFree, native.PartnerAddrInUse, native.ThisAddrInUse);
 
     }

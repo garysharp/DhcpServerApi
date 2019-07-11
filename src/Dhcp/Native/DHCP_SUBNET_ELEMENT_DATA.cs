@@ -7,7 +7,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_ELEMENT_DATA structure defines an element that describes a feature or restriction of a subnet. Together, a set of elements describes the set of IP addresses served for a subnet by DHCP.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_ELEMENT_DATA : IDisposable
+    internal readonly struct DHCP_SUBNET_ELEMENT_DATA : IDisposable
     {
         /// <summary>
         /// DHCP_SUBNET_ELEMENT_TYPE enumeration value describing the type of element in the subsequent field.
@@ -65,7 +65,7 @@ namespace Dhcp.Native
     /// The DHCP_SUBNET_ELEMENT_DATA structure defines an element that describes a feature or restriction of a subnet. Together, a set of elements describes the set of IP addresses served for a subnet by DHCP.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DHCP_SUBNET_ELEMENT_DATA_Managed : IDisposable
+    internal readonly struct DHCP_SUBNET_ELEMENT_DATA_Managed : IDisposable
     {
         /// <summary>
         /// DHCP_SUBNET_ELEMENT_TYPE enumeration value describing the type of element in the subsequent field.
