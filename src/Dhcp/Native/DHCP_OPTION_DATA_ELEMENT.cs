@@ -95,59 +95,56 @@ namespace Dhcp.Native
     /// <summary>
     /// The DHCP_OPTION_DATA_ELEMENT structure defines a data element present (either singly or as a member of an array) within a DHCP_OPTION_DATA structure. 
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     internal readonly struct DHCP_OPTION_DATA_ELEMENT_Managed : IDisposable
     {
         /// <summary>
         /// A DHCP_OPTION_DATA_TYPE enumeration value that indicates the type of data that is present in the subsequent field, Element.
         /// </summary>
-        public readonly int OptionType;
+        public readonly IntPtr OptionType;
 
         private readonly DHCP_OPTION_DATA_ELEMENT_ManagedValue Data;
 
         public DHCP_OPTION_DATA_ELEMENT_Managed(byte dataByte)
         {
-            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpByteOption;
+            OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpByteOption;
             Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataByte = dataByte };
         }
 
         public DHCP_OPTION_DATA_ELEMENT_Managed(short dataWord)
         {
-            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpWordOption;
+            OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpWordOption;
             Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataWord = dataWord };
         }
 
         public DHCP_OPTION_DATA_ELEMENT_Managed(int dataDWord)
         {
-            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpDWordOption;
+            OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpDWordOption;
             Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataDWord = dataDWord };
         }
 
         public DHCP_OPTION_DATA_ELEMENT_Managed(long dataDWordDWord)
         {
-            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpDWordDWordOption;
+            OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpDWordDWordOption;
             Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataDWordDWord = dataDWordDWord };
         }
 
         public DHCP_OPTION_DATA_ELEMENT_Managed(DHCP_IP_ADDRESS dataIpAddress)
         {
-            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpIpAddressOption;
+            OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpIpAddressOption;
             Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataIpAddress = dataIpAddress };
         }
 
         public DHCP_OPTION_DATA_ELEMENT_Managed(DHCP_OPTION_DATA_TYPE type, string dataString)
         {
-            OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpStringDataOption;
-            Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataString = Marshal.StringToHGlobalUni(dataString) };
-
             switch (type)
             {
                 case DHCP_OPTION_DATA_TYPE.DhcpStringDataOption:
-                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpStringDataOption;
+                    OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpStringDataOption;
                     Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataString = Marshal.StringToHGlobalUni(dataString) };
                     break;
                 case DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption:
-                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption;
+                    OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpIpv6AddressOption;
                     Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataIpv6Address = Marshal.StringToHGlobalUni(dataString) };
                     break;
                 default:
@@ -160,11 +157,11 @@ namespace Dhcp.Native
             switch (type)
             {
                 case DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption:
-                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption;
+                    OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpBinaryDataOption;
                     Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataBinary = dataBinary };
                     break;
                 case DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption:
-                    OptionType = (int)DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption;
+                    OptionType = (IntPtr)DHCP_OPTION_DATA_TYPE.DhcpEncapsulatedDataOption;
                     Data = new DHCP_OPTION_DATA_ELEMENT_ManagedValue() { DataBinary = dataBinary };
                     break;
                 default:

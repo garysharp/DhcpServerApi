@@ -533,13 +533,16 @@ namespace Dhcp
         {
             using (var valueNative = DhcpServerOptionElement.WriteNative(values))
             {
-                var result = Api.DhcpSetOptionValue(ServerIpAddress: server.Address,
+                using (var valueNativePtr = BitHelper.StructureToPtr(valueNative))
+                {
+                    var result = Api.DhcpSetOptionValue(ServerIpAddress: server.Address,
                                                     OptionID: optionId,
                                                     ScopeInfo: scopeInfo,
-                                                    OptionValue: valueNative);
+                                                    OptionValue: valueNativePtr);
 
-                if (result != DhcpErrors.SUCCESS)
-                    throw new DhcpServerException(nameof(Api.DhcpSetOptionValue), result);
+                    if (result != DhcpErrors.SUCCESS)
+                        throw new DhcpServerException(nameof(Api.DhcpSetOptionValue), result);
+                }
             }
         }
 
@@ -547,16 +550,19 @@ namespace Dhcp
         {
             using (var valueNative = DhcpServerOptionElement.WriteNative(values))
             {
-                var result = Api.DhcpSetOptionValueV5(ServerIpAddress: server.Address,
-                                              Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
-                                              OptionID: optionId,
-                                              ClassName: className,
-                                              VendorName: vendorName,
-                                              ScopeInfo: scopeInfo,
-                                              OptionValue: valueNative);
+                using (var valueNativePtr = BitHelper.StructureToPtr(valueNative))
+                {
+                    var result = Api.DhcpSetOptionValueV5(ServerIpAddress: server.Address,
+                                                          Flags: (vendorName == null) ? 0 : Constants.DHCP_FLAGS_OPTION_IS_VENDOR,
+                                                          OptionID: optionId,
+                                                          ClassName: className,
+                                                          VendorName: vendorName,
+                                                          ScopeInfo: scopeInfo,
+                                                          OptionValue: valueNativePtr);
 
-                if (result != DhcpErrors.SUCCESS)
-                    throw new DhcpServerException(nameof(Api.DhcpSetOptionValueV5), result);
+                    if (result != DhcpErrors.SUCCESS)
+                        throw new DhcpServerException(nameof(Api.DhcpSetOptionValueV5), result);
+                }
             }
         }
 

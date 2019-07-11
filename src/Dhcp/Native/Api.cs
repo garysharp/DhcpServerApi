@@ -181,7 +181,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, DHCP_OPTION_DATA_Managed OptionValue);
+        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpSetOptionValueV5 function sets information for a specific option value on the DHCP server. This function extends the functionality provided by DhcpSetOptionValue by allowing the caller to specify a class and/or vendor for the option.
@@ -195,7 +195,7 @@ namespace Dhcp.Native
         /// <param name="OptionValue">Pointer to a DHCP_OPTION_DATA structure that contains the data value corresponding to the DHCP option code specified by OptionID.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = false, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, DHCP_OPTION_DATA_Managed OptionValue);
+        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpRemoveOptionValue function removes the option value for a specific option on the DHCP4 server for the default user class and vendor class, for the specified scope.
