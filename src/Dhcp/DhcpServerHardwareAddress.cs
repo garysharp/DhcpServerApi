@@ -10,7 +10,7 @@ namespace Dhcp
 
 #pragma warning disable IDE0032 // Use auto property
         private readonly DhcpServerHardwareType hwAddrType;
-        private readonly byte hwAddrLen;
+        private readonly int hwAddrLen;
         private readonly ulong hwAddr1;
         private readonly ulong hwAddr2;
 #pragma warning restore IDE0032 // Use auto property
@@ -32,17 +32,17 @@ namespace Dhcp
         {
             get
             {
+                // throw if the data has been truncated
+                EnsureNotTruncated();
+
                 var addr = new byte[hwAddrLen];
                 ToNative(addr, 0, hwAddrLen);
                 return addr;
             }
         }
 
-        internal DhcpServerHardwareAddress(DhcpServerHardwareType type, byte length, ulong addr1, ulong addr2)
+        internal DhcpServerHardwareAddress(DhcpServerHardwareType type, int length, ulong addr1, ulong addr2)
         {
-            if (length > MaximumLength)
-                throw new ArgumentOutOfRangeException(nameof(length), $"Exceeds maximum length {MaximumLength}");
-
             hwAddrType = type;
             hwAddrLen = length;
             hwAddr1 = addr1;
@@ -53,6 +53,8 @@ namespace Dhcp
         {
             if (length < hwAddrLen)
                 throw new ArgumentOutOfRangeException(nameof(length));
+            // throw if the data has been truncated
+            EnsureNotTruncated();
 
             for (var i = 0; i < length; i++)
             {
@@ -64,9 +66,19 @@ namespace Dhcp
         }
 
         internal DHCP_BINARY_DATA_Managed ToNativeBinaryData()
-            => new DHCP_BINARY_DATA_Managed(hwAddr1, hwAddr2, hwAddrLen);
+        {
+            // throw if the data has been truncated
+            EnsureNotTruncated();
+
+            return new DHCP_BINARY_DATA_Managed(hwAddr1, hwAddr2, hwAddrLen);
+        }
         internal DHCP_CLIENT_UID_Managed ToNativeClientUid()
-            => new DHCP_CLIENT_UID_Managed(hwAddr1, hwAddr2, hwAddrLen);
+        {
+            // throw if the data has been truncated
+            EnsureNotTruncated();
+
+            return new DHCP_CLIENT_UID_Managed(hwAddr1, hwAddr2, hwAddrLen);
+        }
 
         public static DhcpServerHardwareAddress FromNativeEthernet(ulong nativeHardwareAddress)
             => new DhcpServerHardwareAddress(DhcpServerHardwareType.Ethernet, 6, nativeHardwareAddress, 0UL);
@@ -122,10 +134,10 @@ namespace Dhcp
                 }
             }
 
-            return new DhcpServerHardwareAddress(DhcpServerHardwareType.Ethernet, (byte)hwLength, hwAddr1, hwAddr2);
+            return new DhcpServerHardwareAddress(DhcpServerHardwareType.Ethernet, hwLength, hwAddr1, hwAddr2);
         }
 
-        internal static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, byte hardwareAddressLength, ulong hardwareAddress1, ulong hardwareAddress2)
+        internal static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, int hardwareAddressLength, ulong hardwareAddress1, ulong hardwareAddress2)
         {
             return new DhcpServerHardwareAddress(type, hardwareAddressLength, hardwareAddress1, hardwareAddress2);
         }
@@ -137,7 +149,7 @@ namespace Dhcp
 
             return new DhcpServerHardwareAddress(
                 type,
-                (byte)hardwareAddress.Length,
+                hardwareAddress.Length,
                 Marshal(hardwareAddress, 0),
                 hardwareAddress.Length > 8 ? Marshal(hardwareAddress, 8) : 0UL);
         }
@@ -153,7 +165,7 @@ namespace Dhcp
 
             return new DhcpServerHardwareAddress(
                 type,
-                (byte)hardwareAddressLength,
+                hardwareAddressLength,
                 Marshal(buffer, hardwareAddressOffset, hardwareAddressLength),
                 hardwareAddressLength > 8 ? Marshal(buffer, hardwareAddressOffset + 8, hardwareAddressLength - 8) : 0UL);
         }
@@ -162,21 +174,19 @@ namespace Dhcp
         {
             if (pointer == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(pointer));
-            if (length > MaximumLength)
-                throw new ArgumentOutOfRangeException(nameof(length));
 
             var hwAddr1 = 0UL;
             var hwAddr2 = 0UL;
 
             if (length == 0)
-                return new DhcpServerHardwareAddress(type, (byte)length, hwAddr1, hwAddr2);
+                return new DhcpServerHardwareAddress(type, length, hwAddr1, hwAddr2);
 
             hwAddr1 = (ulong)BitHelper.ReadIntVar(pointer, 0, length > 7 ? 8 : length);
 
             if (length > 8)
-                hwAddr2 = (ulong)BitHelper.ReadIntVar(pointer, 8, length - 8);
+                hwAddr2 = (ulong)BitHelper.ReadIntVar(pointer, 8, Math.Min(length - 8, 8));
 
-            return new DhcpServerHardwareAddress(type, (byte)length, hwAddr1, hwAddr2);
+            return new DhcpServerHardwareAddress(type, length, hwAddr1, hwAddr2);
         }
 
         private static ulong Marshal(byte[] address, int offset)
@@ -209,6 +219,13 @@ namespace Dhcp
             return result;
         }
 
+        
+        public void EnsureNotTruncated()
+        {
+            if (hwAddrLen > MaximumLength)
+                throw new InvalidCastException($"Invalid hardware address, the maximum length ({MaximumLength}) is exceeded ({hwAddrLen}).");
+        }
+
         public override int GetHashCode()
         {
             return
@@ -216,7 +233,7 @@ namespace Dhcp
                 (int)(hwAddr1 & 0xFFFFFFFF) ^
                 (int)(hwAddr2 >> 32) ^
                 ((int)hwAddrType << 24) ^
-                (hwAddrLen << 16);
+                (hwAddrLen);
         }
 
         public override bool Equals(object obj)
@@ -245,6 +262,16 @@ namespace Dhcp
         public static implicit operator string(DhcpServerHardwareAddress address) => address.ToString();
         public static implicit operator DhcpServerHardwareAddress(string address) => FromEthernetString(address);
 
-        public override string ToString() => BitHelper.ReadHexString(hwAddr1, hwAddr2, 0, hwAddrLen, ':');
+        public override string ToString()
+        {
+            var hexString = BitHelper.ReadHexString(hwAddr1, hwAddr2, 0, Math.Min(hwAddrLen, MaximumLength), ':');
+
+            if (hwAddrLen > MaximumLength)
+            {
+                return hexString + "...";
+            }
+
+            return hexString;
+        }
     }
 }
