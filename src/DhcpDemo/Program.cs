@@ -217,6 +217,12 @@ namespace DhcpDemo
                 foreach (var reservation in scope.Reservations.ToList())
                 {
                     Console.WriteLine($"        {reservation}");
+                    if (!reservation.HardwareAddress.IsValid)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        Console.WriteLine($"        Invalid Hardware Address ({reservation.HardwareAddress.Length} bytes)");
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                    }
                     Console.WriteLine($"        Client: {reservation.Client}");
                     Console.WriteLine("          Options:");
                     Console.ForegroundColor = ConsoleColor.Gray;

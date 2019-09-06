@@ -26,14 +26,18 @@ namespace Dhcp
         public int Length => hwAddrLen;
 
         /// <summary>
+        /// True unless the source of the hardware address is invalid (beyond the 16 byte storage limit)
+        /// </summary>
+        public bool IsValid => hwAddrLen <= MaximumLength;
+
+        /// <summary>
         /// Native hardware address as a byte array
         /// </summary>
         public byte[] Native
         {
             get
             {
-                // throw if the data has been truncated
-                EnsureNotTruncated();
+                EnsureValid();
 
                 var addr = new byte[hwAddrLen];
                 ToNative(addr, 0, hwAddrLen);
@@ -43,6 +47,9 @@ namespace Dhcp
 
         internal DhcpServerHardwareAddress(DhcpServerHardwareType type, int length, ulong addr1, ulong addr2)
         {
+            if (length < 0)
+                throw new ArgumentOutOfRangeException(nameof(length));
+
             hwAddrType = type;
             hwAddrLen = length;
             hwAddr1 = addr1;
@@ -53,8 +60,8 @@ namespace Dhcp
         {
             if (length < hwAddrLen)
                 throw new ArgumentOutOfRangeException(nameof(length));
-            // throw if the data has been truncated
-            EnsureNotTruncated();
+
+            EnsureValid();
 
             for (var i = 0; i < length; i++)
             {
@@ -67,15 +74,13 @@ namespace Dhcp
 
         internal DHCP_BINARY_DATA_Managed ToNativeBinaryData()
         {
-            // throw if the data has been truncated
-            EnsureNotTruncated();
+            EnsureValid();
 
             return new DHCP_BINARY_DATA_Managed(hwAddr1, hwAddr2, hwAddrLen);
         }
         internal DHCP_CLIENT_UID_Managed ToNativeClientUid()
         {
-            // throw if the data has been truncated
-            EnsureNotTruncated();
+            EnsureValid();
 
             return new DHCP_CLIENT_UID_Managed(hwAddr1, hwAddr2, hwAddrLen);
         }
@@ -156,7 +161,7 @@ namespace Dhcp
 
         public static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, byte[] buffer, int hardwareAddressOffset, int hardwareAddressLength)
         {
-            if (hardwareAddressLength > MaximumLength)
+            if (hardwareAddressLength < 0 || hardwareAddressLength > MaximumLength)
                 throw new ArgumentOutOfRangeException(nameof(hardwareAddressLength));
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
@@ -172,6 +177,8 @@ namespace Dhcp
 
         public static DhcpServerHardwareAddress FromNative(DhcpServerHardwareType type, IntPtr pointer, int length)
         {
+            if (length < 0)
+                throw new ArgumentOutOfRangeException(nameof(length));
             if (pointer == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(pointer));
 
@@ -219,11 +226,13 @@ namespace Dhcp
             return result;
         }
 
-        
-        public void EnsureNotTruncated()
+
+        private void EnsureValid()
         {
-            if (hwAddrLen > MaximumLength)
+            if (!IsValid)
+            {
                 throw new InvalidCastException($"Invalid hardware address, the maximum length ({MaximumLength}) is exceeded ({hwAddrLen}).");
+            }
         }
 
         public override int GetHashCode()
