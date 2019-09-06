@@ -14,231 +14,227 @@ namespace DhcpDemo
                 foreach (var dhcpServer in DhcpServer.Servers.ToList())
                 {
                     DumpDhcpInfo(dhcpServer);
-                    Console.WriteLine();
+                    WriteLine();
                 }
             }
             catch (DhcpServerException ex) when (ex.ApiError == "DDS_NO_DS_AVAILABLE")
             {
-                Console.WriteLine("No DHCP Servers could be automatically discovered");
+                WriteLine("No DHCP Servers could be automatically discovered", ConsoleColor.Magenta);
             }
 
             // Directly Connect to DHCP Server
             var server = DhcpServer.Connect("localhost");
             DumpDhcpInfo(server);
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine();
-            Console.WriteLine("<Press any key to continue>");
+            WriteLine();
+            WriteLine("<Press any key to continue>", ConsoleColor.Yellow);
             Console.ReadKey(true);
         }
 
         static void DumpDhcpInfo(IDhcpServer dhcpServer)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"{dhcpServer.Name} (v{dhcpServer.VersionMajor}.{dhcpServer.VersionMinor} - {dhcpServer.Address})");
+            WriteLine($"{dhcpServer.Name} (v{dhcpServer.VersionMajor}.{dhcpServer.VersionMinor} - {dhcpServer.Address})", ConsoleColor.Yellow);
 
             // Configuration
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Configuration:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" Configuration:", ConsoleColor.White);
             var config = dhcpServer.Configuration;
-            Console.WriteLine($"      Api Protocol Support: {config.ApiProtocolSupport}");
-            Console.WriteLine($"             Database Name: {config.DatabaseName}");
-            Console.WriteLine($"             Database Path: {config.DatabasePath}");
-            Console.WriteLine($"               Backup Path: {config.BackupPath}");
-            Console.WriteLine($"           Backup Interval: {config.BackupInterval}");
-            Console.WriteLine($"  Database Logging Enabled: {config.DatabaseLoggingEnabled}");
-            Console.WriteLine($"          Cleanup Interval: {config.DatabaseCleanupInterval}");
+            WriteLine($"      API Protocol Support: {config.ApiProtocolSupport}");
+            WriteLine($"             Database Name: {config.DatabaseName}");
+            WriteLine($"             Database Path: {config.DatabasePath}");
+            WriteLine($"               Backup Path: {config.BackupPath}");
+            WriteLine($"           Backup Interval: {config.BackupInterval}");
+            WriteLine($"  Database Logging Enabled: {config.DatabaseLoggingEnabled}");
+            WriteLine($"          Cleanup Interval: {config.DatabaseCleanupInterval}");
 
             // Audit Logging
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Audit Log:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" Audit Log:", ConsoleColor.White);
             var auditLog = dhcpServer.AuditLog;
-            Console.WriteLine($"        Log Directory: {auditLog.AuditLogDirectory}");
-            Console.WriteLine($"  Disk Check Interval: {auditLog.DiskCheckInterval}");
-            Console.WriteLine($"   Max Log Files Size: {auditLog.MaxLogFilesSize}");
-            Console.WriteLine($"    Min Space On Disk: {auditLog.MinSpaceOnDisk}");
+            WriteLine($"        Log Directory: {auditLog.AuditLogDirectory}");
+            WriteLine($"  Disk Check Interval: {auditLog.DiskCheckInterval}");
+            WriteLine($"   Max Log Files Size: {auditLog.MaxLogFilesSize}");
+            WriteLine($"    Min Space On Disk: {auditLog.MinSpaceOnDisk}");
 
             // DNS Settings
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" DNS Settings:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" DNS Settings:", ConsoleColor.White);
             var dnsSettings = dhcpServer.DnsSettings;
-            Console.WriteLine($"              Dynamic DNS Updates Enabled: {dnsSettings.DynamicDnsUpdatesEnabled}");
-            Console.WriteLine($"  Dynamic DNS Updates Only When Requested: {dnsSettings.DynamicDnsUpdatedOnlyWhenRequested}");
-            Console.WriteLine($"               Dynamic DNS Updates Always: {dnsSettings.DynamicDnsUpdatedAlways}");
-            Console.WriteLine($"      Discard Records When Leases Deleted: {dnsSettings.DiscardRecordsWhenLeasesDeleted}");
-            Console.WriteLine($"    Update Records for Down-Level Clients: {dnsSettings.UpdateRecordsForDownLevelClients}");
-            Console.WriteLine($"       Disable Dynamic PTR Record Updates: {dnsSettings.DisableDynamicPtrRecordUpdates}");
+            WriteLine($"              Dynamic DNS Updates Enabled: {dnsSettings.DynamicDnsUpdatesEnabled}");
+            WriteLine($"  Dynamic DNS Updates Only When Requested: {dnsSettings.DynamicDnsUpdatedOnlyWhenRequested}");
+            WriteLine($"               Dynamic DNS Updates Always: {dnsSettings.DynamicDnsUpdatedAlways}");
+            WriteLine($"      Discard Records When Leases Deleted: {dnsSettings.DiscardRecordsWhenLeasesDeleted}");
+            WriteLine($"    Update Records for Down-Level Clients: {dnsSettings.UpdateRecordsForDownLevelClients}");
+            WriteLine($"       Disable Dynamic PTR Record Updates: {dnsSettings.DisableDynamicPtrRecordUpdates}");
 
             // Binding Elements
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Binding Elements:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" Binding Elements:", ConsoleColor.White);
             foreach (var be in dhcpServer.BindingElements.ToList())
             {
-                Console.WriteLine($"  {be.InterfaceDescription} {be.InterfaceGuidId}");
-                Console.WriteLine($"       Unmodifiable Endpoint: {be.CantModify}");
-                Console.WriteLine($"                    Is Bound: {be.IsBound}");
-                Console.WriteLine($"  Adapter Primary IP Address: {be.AdapterPrimaryIpAddress}");
-                Console.WriteLine($"      Adapter Subnet Address: {be.AdapterSubnetAddress}");
+                WriteLine($"  {be.InterfaceDescription} {be.InterfaceGuidId}");
+                WriteLine($"       Unmodifiable Endpoint: {be.CantModify}");
+                WriteLine($"                    Is Bound: {be.IsBound}");
+                WriteLine($"  Adapter Primary IP Address: {be.AdapterPrimaryIpAddress}");
+                WriteLine($"      Adapter Subnet Address: {be.AdapterSubnetAddress}");
             }
 
             // Failover Relationships
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Failover Relationships:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" Failover Relationships:", ConsoleColor.White);
             foreach (var failoverRelationship in dhcpServer.FailoverRelationships.ToList())
             {
-                Console.WriteLine($"   Name: {failoverRelationship.Name}");
-                Console.WriteLine($"                            Mode: {failoverRelationship.Mode}");
-                Console.WriteLine($"                           State: {failoverRelationship.State}");
-                Console.WriteLine($"                     Server Type: {failoverRelationship.ServerType}");
-                Console.WriteLine($"                  Primary Server: {failoverRelationship.PrimaryServerName} [{failoverRelationship.PrimaryServerAddress}]");
-                Console.WriteLine($"                Secondary Server: {failoverRelationship.SecondaryServerName} [{failoverRelationship.SecondaryServerAddress}]");
-                Console.WriteLine($"                   Shared Secret: {failoverRelationship.SharedSecret}");
-                Console.WriteLine($"        Maximum Client Lead Time: {failoverRelationship.MaximumClientLeadTime}");
-                Console.WriteLine($"       State Switchover Interval: {failoverRelationship.StateSwitchoverInterval}");
-                Console.WriteLine($"                  Load Balance %: {failoverRelationship.LoadBalancePercentage}");
-                Console.WriteLine($"    Standby Addresses Reserved %: {failoverRelationship.HotStandbyAddressesReservedPercentage}");
-                Console.WriteLine($"               Associated Scopes:");
+                WriteLine($"   Name: {failoverRelationship.Name}");
+                WriteLine($"                            Mode: {failoverRelationship.Mode}");
+                WriteLine($"                           State: {failoverRelationship.State}");
+                WriteLine($"                     Server Type: {failoverRelationship.ServerType}");
+                WriteLine($"                  Primary Server: {failoverRelationship.PrimaryServerName} [{failoverRelationship.PrimaryServerAddress}]");
+                WriteLine($"                Secondary Server: {failoverRelationship.SecondaryServerName} [{failoverRelationship.SecondaryServerAddress}]");
+                WriteLine($"                   Shared Secret: {failoverRelationship.SharedSecret}");
+                WriteLine($"        Maximum Client Lead Time: {failoverRelationship.MaximumClientLeadTime}");
+                WriteLine($"       State Switchover Interval: {failoverRelationship.StateSwitchoverInterval}");
+                WriteLine($"                  Load Balance %: {failoverRelationship.LoadBalancePercentage}");
+                WriteLine($"    Standby Addresses Reserved %: {failoverRelationship.HotStandbyAddressesReservedPercentage}");
+                WriteLine($"               Associated Scopes:");
                 foreach (var failoverScope in failoverRelationship.Scopes.ToList())
                 {
-                    Console.WriteLine($"                    {failoverScope}");
+                    WriteLine($"                    {failoverScope}");
                 }
             }
 
             // Classes
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Classes:");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"  Default Vendor Class Name: {dhcpServer.SpecificStrings.DefaultVendorClassName}");
-            Console.WriteLine($"    Default User Class Name: {dhcpServer.SpecificStrings.DefaultUserClassName}");
+            WriteLine(" Classes:", ConsoleColor.White);
+            WriteLine($"  Default Vendor Class Name: {dhcpServer.SpecificStrings.DefaultVendorClassName}");
+            WriteLine($"    Default User Class Name: {dhcpServer.SpecificStrings.DefaultUserClassName}");
 
             foreach (var c in dhcpServer.Classes.ToList())
             {
-                Console.WriteLine($"  {c.Name}");
-                Console.WriteLine($"      Comment: {c.Comment}");
-                Console.WriteLine($"         Type: {(c.IsVendorClass ? "Vendor Class" : "User Class")}");
-                Console.WriteLine($"         Data: {c.DataText}");
+                WriteLine($"  {c.Name}");
+                WriteLine($"      Comment: {c.Comment}");
+                WriteLine($"         Type: {(c.IsVendorClass ? "Vendor Class" : "User Class")}");
+                WriteLine($"         Data: {c.DataText}");
 
-                // Enum Class Options
-                Console.WriteLine("      Options:");
+                // Enumerate Class Options
+                WriteLine("      Options:");
                 foreach (var option in c.Options.ToList())
                 {
-                    Console.WriteLine($"         {option}");
+                    WriteLine($"         {option}");
                 }
             }
 
             // Global Options
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Global Options:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" Global Options:", ConsoleColor.White);
             foreach (var option in dhcpServer.Options.ToList())
             {
-                Console.WriteLine($"  {option}");
+                WriteLine($"  {option}");
             }
 
             // Global Option Values
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("   Global Option Values:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine("   Global Option Values:", ConsoleColor.White);
             foreach (var value in dhcpServer.Options.GetOptionValues().ToList())
             {
-                Console.WriteLine($"     {value}");
+                WriteLine($"     {value}");
             }
 
             // Server Clients
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("      Server Clients:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine("      Server Clients:", ConsoleColor.White);
             foreach (var client in dhcpServer.Clients.ToList())
             {
-                Console.WriteLine($"          {client}");
+                WriteLine($"          {client}");
             }
 
             // Scopes
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" Scopes:");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            WriteLine(" Scopes:", ConsoleColor.White);
             foreach (var scope in dhcpServer.Scopes.ToList())
             {
-                Console.WriteLine($"   {scope.Address}");
-                Console.WriteLine($"            IP Range: {scope.IpRange}");
-                Console.WriteLine($"                Mask: {scope.Mask}");
-                Console.WriteLine($"               State: {scope.State}");
-                Console.WriteLine($"                Name: {scope.Name}");
-                Console.WriteLine($"             Comment: {scope.Comment}");
-                Console.WriteLine($"        Primary Host: {scope.PrimaryHost}");
-                Console.WriteLine($"      Lease Duration: {scope.LeaseDuration?.ToString() ?? "Unlimited"}");
-                Console.WriteLine($"         Delay Offer: {scope.TimeDelayOffer.TotalMilliseconds} milliseconds");
-                Console.WriteLine($"       Quarantine On: {scope.QuarantineOn}");
-                Console.ForegroundColor = ConsoleColor.White;
+                WriteLine($"   {scope.Address}");
+                WriteLine($"            IP Range: {scope.IpRange}");
+                WriteLine($"                Mask: {scope.Mask}");
+                WriteLine($"               State: {scope.State}");
+                WriteLine($"                Name: {scope.Name}");
+                WriteLine($"             Comment: {scope.Comment}");
+                WriteLine($"        Primary Host: {scope.PrimaryHost}");
+                WriteLine($"      Lease Duration: {scope.LeaseDuration?.ToString() ?? "Unlimited"}");
+                WriteLine($"         Delay Offer: {scope.TimeDelayOffer.TotalMilliseconds} milliseconds");
+                WriteLine($"       Quarantine On: {scope.QuarantineOn}");
+
+                // Scope Relationship
                 var failoverRelationship = scope.GetFailoverRelationship();
-                Console.Write("    Failover Relationship:");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Write("    Failover Relationship:", ConsoleColor.White);
                 if (failoverRelationship == null)
                 {
-                    Console.WriteLine($" Not in a Failover Relationship");
+                    WriteLine($" Not in a Failover Relationship");
                 }
                 else
                 {
-                    Console.WriteLine($" {failoverRelationship}");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine("      Failover Statistics:");
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    WriteLine($" {failoverRelationship}");
+                    WriteLine("      Failover Statistics:", ConsoleColor.White);
                     var failoverStatistics = scope.GetFailoverStatistics();
-                    Console.WriteLine($"            Addresses Total: {failoverStatistics.AddressesTotal}");
-                    Console.WriteLine($"             Addresses Free: {failoverStatistics.AddressesFree}");
-                    Console.WriteLine($"           Addresses In Use: {failoverStatistics.AddressesInUse}");
-                    Console.WriteLine($"     Partner Addresses Free: {failoverStatistics.PartnerAddressesFree}");
-                    Console.WriteLine($"   Partner Addresses In Use: {failoverStatistics.PartnerAddressesInUse}");
-                    Console.WriteLine($"       Local Addresses Free: {failoverStatistics.LocalAddressesFree}");
-                    Console.WriteLine($"     Local Addresses In Use: {failoverStatistics.LocalAddressesInUse}");
+                    WriteLine($"            Addresses Total: {failoverStatistics.AddressesTotal}");
+                    WriteLine($"             Addresses Free: {failoverStatistics.AddressesFree}");
+                    WriteLine($"           Addresses In Use: {failoverStatistics.AddressesInUse}");
+                    WriteLine($"     Partner Addresses Free: {failoverStatistics.PartnerAddressesFree}");
+                    WriteLine($"   Partner Addresses In Use: {failoverStatistics.PartnerAddressesInUse}");
+                    WriteLine($"       Local Addresses Free: {failoverStatistics.LocalAddressesFree}");
+                    WriteLine($"     Local Addresses In Use: {failoverStatistics.LocalAddressesInUse}");
                 }
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("      Excluded IP Ranges:");
-                Console.ForegroundColor = ConsoleColor.Gray;
+
+                // Scope IP Ranges
+                WriteLine("      Excluded IP Ranges:", ConsoleColor.White);
                 foreach (var ipRange in scope.ExcludedIpRanges)
                 {
-                    Console.WriteLine($"        {ipRange}");
+                    WriteLine($"        {ipRange}");
                 }
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("      Options:");
-                Console.ForegroundColor = ConsoleColor.Gray;
+
+                // Scope Options
+                WriteLine("      Options:", ConsoleColor.White);
                 foreach (var value in scope.Options.ToList())
                 {
-                    Console.WriteLine($"        {value}");
+                    WriteLine($"        {value}");
                 }
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("      Reservations:");
-                Console.ForegroundColor = ConsoleColor.Gray;
+
+                // Scope Reservations
+                WriteLine("      Reservations:", ConsoleColor.White);
                 foreach (var reservation in scope.Reservations.ToList())
                 {
-                    Console.WriteLine($"        {reservation}");
+                    WriteLine($"        {reservation}");
                     if (!reservation.HardwareAddress.IsValid)
                     {
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.WriteLine($"        Invalid Hardware Address ({reservation.HardwareAddress.Length} bytes)");
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        WriteLine($"        Invalid Hardware Address ({reservation.HardwareAddress.Length} bytes)", ConsoleColor.Magenta);
                     }
-                    Console.WriteLine($"        Client: {reservation.Client}");
-                    Console.WriteLine("          Options:");
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    WriteLine($"        Client: {reservation.Client}");
+                    WriteLine("          Options:");
                     foreach (var value in reservation.Options.ToList())
                     {
-                        Console.WriteLine($"            {value}");
+                        WriteLine($"            {value}");
                     }
                 }
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine("      Clients:");
-                Console.ForegroundColor = ConsoleColor.Gray;
+
+                // Scope Clients
+                WriteLine("      Clients:", ConsoleColor.White);
                 foreach (var client in scope.Clients.ToList())
                 {
-                    Console.WriteLine($"        {client}");
+                    WriteLine($"        {client}");
                 }
             }
         }
+
+        #region Console Helpers
+        static ConsoleColor consoleColour = Console.ForegroundColor;
+        static void SetColour(ConsoleColor colour)
+        {
+            if (consoleColour != colour)
+            {
+                Console.ForegroundColor = colour;
+                consoleColour = colour;
+            }
+        }
+        static void Write(string value, ConsoleColor colour = ConsoleColor.Gray)
+        {
+            SetColour(colour);
+            Console.Write(value);
+        }
+        static void WriteLine() => Console.WriteLine();
+        static void WriteLine(string value, ConsoleColor colour = ConsoleColor.Gray)
+        {
+            SetColour(colour);
+            Console.WriteLine(value);
+        }
+        #endregion
     }
 }
