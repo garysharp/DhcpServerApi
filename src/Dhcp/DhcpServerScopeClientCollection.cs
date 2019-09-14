@@ -10,6 +10,7 @@ namespace Dhcp
         IDhcpServer IDhcpServerScopeClientCollection.Server => Server;
         public DhcpServerScope Scope { get; }
         IDhcpServerScope IDhcpServerScopeClientCollection.Scope => Scope;
+        internal List<DhcpServerClient> clientCache = null;
 
         internal DhcpServerScopeClientCollection(DhcpServerScope scope)
         {
@@ -18,30 +19,51 @@ namespace Dhcp
         }
 
         public IEnumerator<IDhcpServerClient> GetEnumerator()
-            => DhcpServerClient.GetScopeClients(Scope).GetEnumerator();
+            => clientCache?.GetEnumerator() ?? DhcpServerClient.GetScopeClients(Scope).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
         public void RemoveClient(IDhcpServerClient client)
-            => client.Delete();
+        {
+            client.Delete();
+            clientCache = null;
+        }
 
         public IDhcpServerClient AddClient(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress)
-            => DhcpServerClient.CreateClient(Scope, address, hardwareAddress);
+        {
+            clientCache = null;
+            return DhcpServerClient.CreateClient(Scope, address, hardwareAddress);
+        }
         public IDhcpServerClient AddClient(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, string name)
-            => DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name);
+        {
+            clientCache = null;
+            return DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name);
+        }
 
         public IDhcpServerClient AddClient(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, string name, string comment)
-            => DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment);
+        {
+            clientCache = null;
+            return DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment);
+        }
 
         public IDhcpServerClient AddClient(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, string name, string comment, DateTime leaseExpires)
-            => DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment, leaseExpires);
+        {
+            clientCache = null;
+            return DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment, leaseExpires);
+        }
 
         public IDhcpServerClient AddClient(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, string name, string comment, DateTime leaseExpires, IDhcpServerHost ownerHost)
-            => DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment, leaseExpires, (DhcpServerHost)ownerHost);
+        {
+            clientCache = null;
+            return DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment, leaseExpires, (DhcpServerHost)ownerHost);
+        }
 
         public IDhcpServerClient AddClient(DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress, string name, string comment, DateTime leaseExpires, IDhcpServerHost ownerHost, DhcpServerClientTypes clientType, DhcpServerClientAddressStates addressState, DhcpServerClientQuarantineStatuses quarantineStatus, DateTime probationEnds, bool quarantineCapable)
-            => DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment, leaseExpires, (DhcpServerHost)ownerHost, clientType, addressState, quarantineStatus, probationEnds, quarantineCapable);
+        {
+            clientCache = null;
+            return DhcpServerClient.CreateClient(Scope, address, hardwareAddress, name, comment, leaseExpires, (DhcpServerHost)ownerHost, clientType, addressState, quarantineStatus, probationEnds, quarantineCapable);
+        }
 
     }
 }

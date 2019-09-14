@@ -6,6 +6,7 @@ namespace Dhcp
     {
         IDhcpServer Server { get; }
 
+        void AddOrSetOptionValue(IDhcpServerOptionValue value);
         IDhcpServerOption GetDefaultOption(DhcpServerOptionIds optionId);
         IDhcpServerOption GetDefaultOption(int optionId);
         IEnumerable<IDhcpServerOption> GetDefaultOptions();
@@ -23,5 +24,13 @@ namespace Dhcp
         IEnumerable<IDhcpServerOption> GetVendorOptions(string vendorName);
         IDhcpServerOptionValue GetVendorOptionValue(string vendorName, DhcpServerOptionIds optionId);
         IDhcpServerOptionValue GetVendorOptionValue(string vendorName, int optionId);
+        void RemoveOptionValue(int optionId);
+        void RemoveOptionValue(DhcpServerOptionIds optionId);
+        void RemoveOptionValue(IDhcpServerOptionValue value);
+        void RemoveUserOptionValue(string className, int optionId);
+        void RemoveUserOptionValue(string className, DhcpServerOptionIds optionId);
+        void RemoveVendorOptionValue(string vendorName, int optionId);
+        void RemoveVendorOptionValue(string vendorName, DhcpServerOptionIds optionId);
+        void SetOptionValue(IDhcpServerOptionValue value);
     }
 }

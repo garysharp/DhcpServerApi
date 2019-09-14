@@ -72,7 +72,7 @@ namespace Dhcp
                                                       Flags: 0,
                                                       BindElementsInfo: out var elementsPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetServerBindingInfo), result);
 
             try

@@ -6,18 +6,20 @@ namespace Dhcp
 {
     public class DhcpServerScopeReservation : IDhcpServerScopeReservation
     {
+        private DhcpServerClient client;
+        private DhcpServerDnsSettings dnsSettings;
+
         public DhcpServer Server => Scope.Server;
         IDhcpServer IDhcpServerScopeReservation.Server => Server;
         public DhcpServerScope Scope { get; }
         IDhcpServerScope IDhcpServerScopeReservation.Scope => Scope;
 
-        private IDhcpServerClient client;
         public DhcpServerIpAddress Address { get; }
         public DhcpServerHardwareAddress HardwareAddress { get; }
 
         public DhcpServerClientTypes AllowedClientTypes { get; }
-
         public IDhcpServerClient Client => client ??= DhcpServerClient.GetClient(Server, Scope, Address);
+        public IDhcpServerDnsSettings DnsSettings => (dnsSettings ??= DhcpServerDnsSettings.GetScopeReservationDnsSettings(this)).Clone();
 
         public IDhcpServerScopeReservationOptionValueCollection Options { get; }
 
@@ -33,6 +35,20 @@ namespace Dhcp
 
         public void Delete()
             => DhcpServerScope.RemoveSubnetReservationElement(Server, Address, HardwareAddress);
+
+        public IDhcpServerDnsSettings ConfigureDnsSettings(IDhcpServerDnsSettings dnsSettings)
+        {
+            if (dnsSettings == null)
+            {
+                // remove DNS settings at this level (reservation - returns to scope)
+                DhcpServerDnsSettings.RemoveScopeReservationDnsSettings(this);
+                return (this.dnsSettings = (DhcpServerDnsSettings)Scope.DnsSettings).Clone();
+            }
+            else
+            {
+                return (this.dnsSettings = DhcpServerDnsSettings.SetScopeReservationDnsSettings(this, (DhcpServerDnsSettings)dnsSettings)).Clone();
+            }
+        }
 
         internal static DhcpServerScopeReservation CreateReservation(DhcpServerScope scope, DhcpServerIpAddress address, DhcpServerHardwareAddress hardwareAddress)
             => CreateReservation(scope, address, hardwareAddress, DhcpServerClientTypes.DhcpAndBootp);
@@ -58,10 +74,10 @@ namespace Dhcp
                                                       ElementsRead: out var elementsRead,
                                                       ElementsTotal: out _);
 
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS || result == DhcpServerNativeErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetElementsV5), result);
 
             try

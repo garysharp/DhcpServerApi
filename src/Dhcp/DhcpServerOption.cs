@@ -253,7 +253,7 @@ namespace Dhcp
                                                OptionID: optionId,
                                                OptionInfo: out var optionPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetOptionInfo), result);
 
             try
@@ -276,7 +276,7 @@ namespace Dhcp
                                                  VendorName: vendorName,
                                                  OptionInfo: out var optionPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetOptionInfoV5), result);
 
             try
@@ -298,7 +298,7 @@ namespace Dhcp
                                                Flags: 0,
                                                OptionStruct: out var optionsPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetAllOptions), result);
 
             try
@@ -355,10 +355,10 @@ namespace Dhcp
                                              OptionsRead: out var elementsRead,
                                              OptionsTotal: out _);
 
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS || result == DhcpServerNativeErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumOptions), result);
 
             try
@@ -391,10 +391,10 @@ namespace Dhcp
                                                OptionsRead: out var elementsRead,
                                                OptionsTotal: out _);
 
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS || result == DhcpServerNativeErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumOptionsV5), result);
 
             try

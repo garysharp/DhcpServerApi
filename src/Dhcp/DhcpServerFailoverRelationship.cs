@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using Dhcp.Native;
 
@@ -109,7 +108,7 @@ namespace Dhcp
             var result = Api.DhcpV4FailoverTriggerAddrAllocation(ServerIpAddress: Server.Address,
                                                                  FailRelName: Name);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverTriggerAddrAllocation), result);
         }
 
@@ -122,7 +121,7 @@ namespace Dhcp
                                                            RelationshipName: relationshipName,
                                                            Relationship: out var relationshipPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverGetRelationship), result);
 
             try
@@ -145,10 +144,10 @@ namespace Dhcp
                                                                 ScopeId: subnetAddress.ToNativeAsNetwork(),
                                                                 Relationship: out var relationshipPtr);
 
-            if (result == DhcpErrors.FO_SCOPE_NOT_IN_RELATIONSHIP)
+            if (result == DhcpServerNativeErrors.FO_SCOPE_NOT_IN_RELATIONSHIP)
                 return null;
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverGetScopeRelationship), result);
 
             try
@@ -175,10 +174,10 @@ namespace Dhcp
                                                             RelationshipRead: out _,
                                                             RelationshipTotal: out _);
 
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverEnumRelationship), result);
 
             try
@@ -221,12 +220,12 @@ namespace Dhcp
             {
                 // update relationship on primary server
                 var result = Api.DhcpV4FailoverAddScopeToRelationship(primaryServer.Address, in relationshipNative);
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpV4FailoverAddScopeToRelationship), result, "Failed to add scope to failover relationship on primary server");
 
                 // update relationship on secondary server
                 result = Api.DhcpV4FailoverAddScopeToRelationship(secondaryServer.Address, in relationshipNative);
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpV4FailoverAddScopeToRelationship), result, "Failed to add scope to failover relationship on secondary server");
             }
 
@@ -260,15 +259,15 @@ namespace Dhcp
                 name = BuildRelationshipName(scope.Server, partnerServer);
 
             if (!scope.Server.IsCompatible(DhcpServerVersions.Windows2012) || !partnerServer.IsCompatible(DhcpServerVersions.Windows2012))
-                throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), DhcpErrors.ERROR_INVALID_PARAMETER, "Windows Server 2012 is required to establish a failover relationship");
+                throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), DhcpServerNativeErrors.ERROR_INVALID_PARAMETER, "Windows Server 2012 is required to establish a failover relationship");
 
             var primaryServerAddress = scope.Server.Address;
             if (primaryServerAddress == (DhcpServerIpAddress)0x7F_00_00_01) // localhost: 127.0.0.1
                 primaryServerAddress = scope.Server.BindingElements.First().AdapterPrimaryIpAddress;
 
-            var existingRelationship = scope.GetFailoverRelationship();
+            var existingRelationship = scope.FailoverRelationship;
             if (existingRelationship != null)
-                throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), DhcpErrors.FO_SCOPE_ALREADY_IN_RELATIONSHIP);
+                throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), DhcpServerNativeErrors.FO_SCOPE_ALREADY_IN_RELATIONSHIP);
 
             // create/replicate
             var partnerScope = CreateOrReplicatePartnerScope(partnerServer, scope);
@@ -292,12 +291,12 @@ namespace Dhcp
                 // create relationship on partner server
                 var partnerRelationship = primaryRelationship.InvertRelationship();
                 var result = Api.DhcpV4FailoverCreateRelationship(partnerServer.Address, in partnerRelationship);
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), result, "Failed to create relationship on partner server");
 
                 // create relationship on primary server
                 result = Api.DhcpV4FailoverCreateRelationship(scope.Server.Address, in primaryRelationship);
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), result, "Failed to create relationship on primary server");
 
                 // activate scope on partner (if the scope is active on primary)
@@ -320,14 +319,14 @@ namespace Dhcp
                 // retrieve scope from partner
                 partnerScope = (DhcpServerScope)partnerServer.Scopes.GetScope(sourceScope.Address);
 
-                var existingRelationship = partnerScope.GetFailoverRelationship();
+                var existingRelationship = partnerScope.FailoverRelationship;
                 if (existingRelationship != null)
-                    throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), DhcpErrors.FO_SCOPE_ALREADY_IN_RELATIONSHIP);
+                    throw new DhcpServerException(nameof(Api.DhcpV4FailoverCreateRelationship), DhcpServerNativeErrors.FO_SCOPE_ALREADY_IN_RELATIONSHIP);
 
                 // deactivate scope
                 partnerScope.Deactivate();
             }
-            catch (DhcpServerException ex) when (ex.ApiErrorNative == DhcpErrors.SUBNET_NOT_PRESENT)
+            catch (DhcpServerException ex) when (ex.ApiErrorNative == DhcpServerNativeErrors.SUBNET_NOT_PRESENT)
             {
                 // create scope (including excluded ranges)
                 partnerScope = (DhcpServerScope)partnerServer.Scopes.AddScope(sourceScope.Name, sourceScope.Comment, sourceScope.IpRange, sourceScope.Mask, sourceScope.TimeDelayOffer, sourceScope.LeaseDuration);
@@ -377,7 +376,7 @@ namespace Dhcp
 
         internal static void DeconfigureScopeFailover(DhcpServerScope scope)
         {
-            var relationship = scope.GetFailoverRelationship();
+            var relationship = scope.FailoverRelationship;
             var partner = relationship.ConnectToPartner();
             var partnerScope = partner.Scopes.GetScope(scope.Address);
 
@@ -389,12 +388,12 @@ namespace Dhcp
             {
                 // remove scope from failover relationship on partner server
                 var result = Api.DhcpV4FailoverDeleteScopeFromRelationship(partner.Address, in relationshipNative);
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpV4FailoverDeleteScopeFromRelationship), result, "Failed to delete scope from relationship on partner server");
 
                 // remove scope from failover relationship on server
                 result = Api.DhcpV4FailoverDeleteScopeFromRelationship(scope.Server.Address, in relationshipNative);
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpV4FailoverDeleteScopeFromRelationship), result, "Failed to delete scope from relationship");
             }
 
@@ -411,12 +410,12 @@ namespace Dhcp
                 throw new InvalidOperationException("This failover relationship contains configured scopes. Deconfigure the scopes before deleting the relationship.");
 
             var result = Api.DhcpV4FailoverDeleteRelationship(relationship.Server.Address, relationship.Name);
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverDeleteScopeFromRelationship), result, "Failed to delete relationship");
 
             var partnerServer = relationship.ConnectToPartner();
             result = Api.DhcpV4FailoverDeleteRelationship(partnerServer.Address, relationship.Name);
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverDeleteScopeFromRelationship), result, "Failed to delete relationship on partner server");
         }
 

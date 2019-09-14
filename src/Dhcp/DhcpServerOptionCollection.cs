@@ -137,5 +137,48 @@ namespace Dhcp
         /// <returns>A <see cref="IDhcpServerOptionValue"/>.</returns>
         public IDhcpServerOptionValue GetVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
             => DhcpServerOptionValue.GetGlobalVendorOptionValue(Server, vendorName, (int)optionId);
+
+        public void SetOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.SetGlobalOptionValue(Server, (DhcpServerOptionValue)value);
+        public void AddOrSetOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.SetGlobalOptionValue(Server, (DhcpServerOptionValue)value);
+
+        /// <summary>
+        /// Deletes the Global Option Value associated with the Option within a User Class
+        /// </summary>
+        /// <param name="className">The name of the User Class</param>
+        /// <param name="optionId">The identifier for the option value</param>
+        public void RemoveUserOptionValue(string className, int optionId)
+            => DhcpServerOptionValue.DeleteGlobalUserOptionValue(Server, optionId, className);
+        /// <summary>
+        /// Retrieves the Global Option Value associated with the Option within a User Class
+        /// </summary>
+        /// <param name="className">The name of the User Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option value to retrieve</param>
+        public void RemoveUserOptionValue(string className, DhcpServerOptionIds optionId)
+            => DhcpServerOptionValue.DeleteGlobalUserOptionValue(Server, (int)optionId, className);
+
+        /// <summary>
+        /// Retrieves the Global Option Value associated with the Option within a Vendor Class
+        /// </summary>
+        /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public void RemoveVendorOptionValue(string vendorName, int optionId)
+            => DhcpServerOptionValue.DeleteGlobalVendorOptionValue(Server, optionId, vendorName);
+        /// <summary>
+        /// Retrieves the Global Option Value associated with the Option within a Vendor Class
+        /// </summary>
+        /// <param name="vendorName">The name of the Vendor Class to retrieve the Option from</param>
+        /// <param name="optionId">The identifier for the option value to retrieve</param>
+        /// <returns>A <see cref="DhcpServerOptionValue"/>.</returns>
+        public void RemoveVendorOptionValue(string vendorName, DhcpServerOptionIds optionId)
+            => DhcpServerOptionValue.DeleteGlobalVendorOptionValue(Server, (int)optionId, vendorName);
+        public void RemoveOptionValue(int optionId)
+            => DhcpServerOptionValue.DeleteGlobalOptionValue(Server, optionId);
+        public void RemoveOptionValue(DhcpServerOptionIds optionId)
+            => DhcpServerOptionValue.DeleteGlobalOptionValue(Server, (int)optionId);
+        public void RemoveOptionValue(IDhcpServerOptionValue value)
+            => DhcpServerOptionValue.DeleteGlobalOptionValue(Server, (DhcpServerOptionValue)value);
     }
 }

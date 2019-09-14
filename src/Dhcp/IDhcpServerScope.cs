@@ -9,6 +9,8 @@ namespace Dhcp
         string Comment { get; set; }
         IDhcpServerDnsSettings DnsSettings { get; }
         IDhcpServerScopeExcludedIpRangeCollection ExcludedIpRanges { get; }
+        IDhcpServerFailoverRelationship FailoverRelationship { get; }
+        IDhcpServerScopeFailoverStatistics FailoverStatistics { get; }
         DhcpServerIpRange IpRange { get; set; }
         TimeSpan? LeaseDuration { get; set; }
         DhcpServerIpMask Mask { get; }
@@ -22,6 +24,7 @@ namespace Dhcp
         TimeSpan TimeDelayOffer { get; set; }
 
         void Activate();
+        IDhcpServerDnsSettings ConfigureDnsSettings(IDhcpServerDnsSettings dnsSettings);
         IDhcpServerFailoverRelationship ConfigureFailover(IDhcpServer partnerServer, string sharedSecret, DhcpServerFailoverMode mode);
         IDhcpServerFailoverRelationship ConfigureFailover(IDhcpServer partnerServer, string sharedSecret, DhcpServerFailoverMode mode, byte modePercentage);
         IDhcpServerFailoverRelationship ConfigureFailover(IDhcpServer partnerServer, string sharedSecret, DhcpServerFailoverMode mode, byte modePercentage, TimeSpan maximumClientLeadTime, TimeSpan? stateSwitchInterval);
@@ -32,8 +35,6 @@ namespace Dhcp
         void Deactivate();
         void DeconfigureFailover();
         void Delete(bool retainClientDnsRecords = false);
-        IDhcpServerFailoverRelationship GetFailoverRelationship();
-        IDhcpServerScopeFailoverStatistics GetFailoverStatistics();
         void ReplicateFailoverPartner();
     }
 }

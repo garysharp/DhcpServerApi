@@ -19,5 +19,6 @@
         int VersionMinor { get; }
 
         bool IsCompatible(DhcpServerVersions version);
+        IDhcpServerDnsSettings ConfigureDnsSettings(IDhcpServerDnsSettings dnsSettings);
     }
 }

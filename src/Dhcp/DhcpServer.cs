@@ -12,10 +12,10 @@ namespace Dhcp
     /// </summary>
     public class DhcpServer : IDhcpServer
     {
-        private IDhcpServerConfiguration configuration;
-        private IDhcpServerAuditLog auditLog;
-        private IDhcpServerDnsSettings dnsSettings;
-        private IDhcpServerSpecificStrings specificStrings;
+        private DhcpServerConfiguration configuration;
+        private DhcpServerAuditLog auditLog;
+        private DhcpServerDnsSettings dnsSettings;
+        private DhcpServerSpecificStrings specificStrings;
 
         public DhcpServerIpAddress Address { get; }
         public string Name { get; }
@@ -28,7 +28,7 @@ namespace Dhcp
         /// The audit log configuration settings from the DHCP server.
         /// </summary>
         public IDhcpServerAuditLog AuditLog => auditLog ??= DhcpServerAuditLog.GetAuditLog(this);
-        public IDhcpServerDnsSettings DnsSettings => dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this);
+        public IDhcpServerDnsSettings DnsSettings => (dnsSettings ??= DhcpServerDnsSettings.GetGlobalDnsSettings(this)).Clone();
         public IDhcpServerSpecificStrings SpecificStrings => specificStrings ??= DhcpServerSpecificStrings.GetSpecificStrings(this);
 
         private DhcpServer(DhcpServerIpAddress address, string name)
@@ -85,6 +85,19 @@ namespace Dhcp
         /// <returns>True if the server version is greater than or equal to the supplied <paramref name="version"/></returns>
         public bool IsCompatible(DhcpServerVersions version) => ((long)version <= (long)Version);
 
+        public IDhcpServerDnsSettings ConfigureDnsSettings(IDhcpServerDnsSettings dnsSettings)
+        {
+            if (dnsSettings == null)
+            {
+                // remove DNS settings at this level (global - returns to default)
+                return (this.dnsSettings = DhcpServerDnsSettings.RemoveGlobalDnsSettings(this)).Clone();
+            }
+            else
+            {
+                return (this.dnsSettings = DhcpServerDnsSettings.SetGlobalDnsSettings(this, (DhcpServerDnsSettings)dnsSettings)).Clone();
+            }
+        }
+
         /// <summary>
         /// Enumerates a list of DHCP servers found in the directory service. 
         /// </summary>
@@ -98,7 +111,7 @@ namespace Dhcp
                                                  CallbackFn: IntPtr.Zero,
                                                  CallbackData: IntPtr.Zero);
 
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpEnumServers), result);
 
                 try
@@ -142,7 +155,7 @@ namespace Dhcp
                                             MajorVersion: out versionMajor,
                                             MinorVersion: out versionMinor);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetVersion), result);
         }
 

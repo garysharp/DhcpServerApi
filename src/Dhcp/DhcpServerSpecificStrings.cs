@@ -21,7 +21,7 @@ namespace Dhcp
             var result = Api.DhcpGetServerSpecificStrings(ServerIpAddress: server.Address,
                                                           ServerSpecificStrings: out var stringsPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetServerSpecificStrings), result);
 
             try

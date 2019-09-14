@@ -146,7 +146,7 @@ namespace Dhcp
                                                  endAddress: bootpIpRange.EndAddress.AsNetworkToIpAddress(),
                                                  type: type);
                 default:
-                    throw new DhcpServerException(nameof(DHCP_SUBNET_ELEMENT_DATA_V5), DhcpErrors.ERROR_INVALID_PARAMETER, "An unexpected subnet element type was encountered");
+                    throw new DhcpServerException(nameof(DHCP_SUBNET_ELEMENT_DATA_V5), DhcpServerNativeErrors.ERROR_INVALID_PARAMETER, "An unexpected subnet element type was encountered");
             }
         }
 
@@ -172,7 +172,7 @@ namespace Dhcp
                                                  endAddress: ipRange.EndAddress.AsNetworkToIpAddress(),
                                                  type: DhcpServerIpRangeType.Excluded);
                 default:
-                    throw new DhcpServerException(nameof(DHCP_SUBNET_ELEMENT_DATA_V5), DhcpErrors.ERROR_INVALID_PARAMETER, "An unexpected subnet element type was encountered");
+                    throw new DhcpServerException(nameof(DHCP_SUBNET_ELEMENT_DATA_V5), DhcpServerNativeErrors.ERROR_INVALID_PARAMETER, "An unexpected subnet element type was encountered");
             }
         }
 

@@ -146,7 +146,7 @@ namespace DhcpWritableDemo
             var loadBalancedRelationship = scope.ConfigureFailover(partnerServer, "A Shared Secret", DhcpServerFailoverMode.LoadBalance);
 
             // retrieve scope failover relationship
-            var scopeRelationship = scope.GetFailoverRelationship();
+            var scopeRelationship = scope.FailoverRelationship;
 
             // replicate failover
             //  - all supported settings are pushed to the partner server

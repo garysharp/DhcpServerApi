@@ -55,42 +55,114 @@ namespace Dhcp
                                              values: DhcpServerOptionElement.ReadNativeElements(native.Value).ToList());
         }
 
-        internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationDefaultOptionValues(DhcpServerScopeReservation reservation)
-            => EnumScopeReservationOptionValues(reservation, null, null);
+        #region Global Option Values
 
-        internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationVendorOptionValues(DhcpServerScopeReservation reservation, string vendorName)
-            => EnumScopeReservationOptionValues(reservation, null, vendorName);
-
-        internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationUserOptionValues(DhcpServerScopeReservation reservation, string className)
-            => EnumScopeReservationOptionValues(reservation, className, null);
-
-        private static IEnumerable<DhcpServerOptionValue> EnumScopeReservationOptionValues(DhcpServerScopeReservation reservation, string className, string vendorName)
+        internal static IEnumerable<DhcpServerOptionValue> GetAllGlobalOptionValues(DhcpServer server)
         {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(reservation.Scope.Address.ToNativeAsNetwork(), reservation.Address.ToNativeAsNetwork());
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
 
             using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
             {
-                foreach (var value in EnumOptionValues(reservation.Server, scopeInfoPtr, className, vendorName))
+                foreach (var value in GetAllOptionValues(server, scopeInfoPtr))
                     yield return value;
             }
         }
 
-        internal static DhcpServerOptionValue GetScopeReservationDefaultOptionValue(DhcpServerScopeReservation reservation, int optionId)
-            => GetScopeReservationOptionValue(reservation, optionId, null, null);
 
-        internal static DhcpServerOptionValue GetScopeReservationVendorOptionValue(DhcpServerScopeReservation reservation, int optionId, string vendorName)
-            => GetScopeReservationOptionValue(reservation, optionId, null, vendorName);
+        internal static IEnumerable<DhcpServerOptionValue> EnumGlobalDefaultOptionValues(DhcpServer server)
+            => EnumGlobalOptionValues(server, null, null);
 
-        internal static DhcpServerOptionValue GetScopeReservationUserOptionValue(DhcpServerScopeReservation reservation, int optionId, string className)
-            => GetScopeReservationOptionValue(reservation, optionId, className, null);
+        internal static IEnumerable<DhcpServerOptionValue> EnumGlobalVendorOptionValues(DhcpServer server, string vendorName)
+            => EnumGlobalOptionValues(server, null, vendorName);
 
-        internal static DhcpServerOptionValue GetScopeReservationOptionValue(DhcpServerScopeReservation reservation, int optionId, string className, string vendorName)
+        internal static IEnumerable<DhcpServerOptionValue> EnumGlobalUserOptionValues(DhcpServer server, string className)
+            => EnumGlobalOptionValues(server, className, null);
+
+        private static IEnumerable<DhcpServerOptionValue> EnumGlobalOptionValues(DhcpServer server, string className, string vendorName)
         {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(reservation.Scope.Address.ToNativeAsNetwork(), reservation.Address.ToNativeAsNetwork());
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
 
             using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
             {
-                return GetOptionValue(reservation.Server, scopeInfoPtr, optionId, className, vendorName);
+                foreach (var value in EnumOptionValues(server, scopeInfoPtr, className, vendorName))
+                    yield return value;
+            }
+        }
+
+
+        internal static DhcpServerOptionValue GetGlobalDefaultOptionValue(DhcpServer server, int optionId)
+            => GetGlobalOptionValue(server, optionId, null, null);
+
+        internal static DhcpServerOptionValue GetGlobalVendorOptionValue(DhcpServer server, string vendorName, int optionId)
+            => GetGlobalOptionValue(server, optionId, null, vendorName);
+
+        internal static DhcpServerOptionValue GetGlobalUserOptionValue(DhcpServer server, string className, int optionId)
+            => GetGlobalOptionValue(server, optionId, className, null);
+
+        internal static DhcpServerOptionValue GetGlobalOptionValue(DhcpServer server, int optionId, string className, string vendorName)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                return GetOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
+            }
+        }
+
+
+        internal static void SetGlobalDefaultOptionValue(DhcpServer server, int optionId, IEnumerable<DhcpServerOptionElement> values)
+            => SetGlobalOptionValue(server, optionId, null, null, values);
+        internal static void SetGlobalVendorOptionValue(DhcpServer server, int optionId, string vendorName, IEnumerable<DhcpServerOptionElement> values)
+            => SetGlobalOptionValue(server, optionId, null, vendorName, values);
+        internal static void SetGlobalUserOptionValue(DhcpServer server, int optionId, string className, IEnumerable<DhcpServerOptionElement> values)
+            => SetGlobalOptionValue(server, optionId, className, null, values);
+
+        internal static void SetGlobalOptionValue(DhcpServer server, DhcpServerOptionValue optionValue)
+            => SetGlobalOptionValue(server, optionValue.OptionId, optionValue.ClassName, optionValue.VendorName, optionValue.Values);
+
+        internal static void SetGlobalOptionValue(DhcpServer server, int optionId, string className, string vendorName, IEnumerable<IDhcpServerOptionElement> values)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                SetOptionValue(server, scopeInfoPtr, optionId, className, vendorName, values);
+            }
+        }
+
+
+        internal static void DeleteGlobalOptionValue(DhcpServer server, int optionId)
+            => DeleteGlobalOptionValue(server, optionId, null, null);
+        internal static void DeleteGlobalVendorOptionValue(DhcpServer server, int optionId, string vendorName)
+            => DeleteGlobalOptionValue(server, optionId, null, vendorName);
+        internal static void DeleteGlobalUserOptionValue(DhcpServer server, int optionId, string className)
+            => DeleteGlobalOptionValue(server, optionId, className, null);
+
+        internal static void DeleteGlobalOptionValue(DhcpServer server, DhcpServerOptionValue optionValue)
+            => DeleteGlobalOptionValue(server, optionValue.OptionId, optionValue.ClassName, optionValue.VendorName);
+
+        internal static void DeleteGlobalOptionValue(DhcpServer server, int optionId, string className, string vendorName)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                RemoveOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
+            }
+        }
+
+        #endregion
+
+        #region Scope Option Values
+
+        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeOptionValues(DhcpServerScope scope)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Subnet(scope.Address.ToNativeAsNetwork());
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                foreach (var value in GetAllOptionValues(scope.Server, scopeInfoPtr))
+                    yield return value;
             }
         }
 
@@ -123,6 +195,7 @@ namespace Dhcp
             }
         }
 
+
         internal static DhcpServerOptionValue GetScopeDefaultOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId)
             => GetScopeOptionValue(server, scopeAddress, optionId, null, null);
         internal static DhcpServerOptionValue GetScopeDefaultOptionValue(DhcpServerScope scope, int optionId)
@@ -148,6 +221,7 @@ namespace Dhcp
                 return GetOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
             }
         }
+
 
         internal static void SetScopeDefaultOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId, IEnumerable<DhcpServerOptionElement> values)
             => SetScopeOptionValue(server, scopeAddress, optionId, null, null, values);
@@ -177,33 +251,6 @@ namespace Dhcp
             }
         }
 
-        internal static void SetScopeReservationDefaultOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, IEnumerable<DhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, null, values);
-        internal static void SetScopeReservationDefaultOptionValue(DhcpServerScopeReservation reservation, int optionId, IEnumerable<DhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(reservation, optionId, null, null, values);
-        internal static void SetScopeReservationVendorOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string vendorName, IEnumerable<DhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, vendorName, values);
-        internal static void SetScopeReservationVendorOptionValue(DhcpServerScopeReservation reservation, int optionId, string vendorName, IEnumerable<DhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(reservation, optionId, null, vendorName, values);
-        internal static void SetScopeReservationUserOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string className, IEnumerable<DhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, className, null, values);
-        internal static void SetScopeReservationUserOptionValue(DhcpServerScopeReservation reservation, int optionId, string className, IEnumerable<DhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(reservation, optionId, className, null, values);
-
-        internal static void SetScopeReservationOptionValue(DhcpServerScopeReservation reservation, DhcpServerOptionValue optionValue)
-            => SetScopeReservationOptionValue(reservation, optionValue.OptionId, optionValue.ClassName, optionValue.VendorName, optionValue.Values);
-        internal static void SetScopeReservationOptionValue(DhcpServerScopeReservation reservation, int optionId, string className, string vendorName, IEnumerable<IDhcpServerOptionElement> values)
-            => SetScopeReservationOptionValue(reservation.Server, reservation.Scope.Address, reservation.Address, optionId, className, vendorName, values);
-
-        internal static void SetScopeReservationOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string className, string vendorName, IEnumerable<IDhcpServerOptionElement> values)
-        {
-            var reservationInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(scopeAddress.ToNativeAsNetwork(), reservationAddress.ToNativeAsNetwork());
-
-            using (var reservationInfoPtr = BitHelper.StructureToPtr(reservationInfo))
-            {
-                SetOptionValue(server, reservationInfoPtr, optionId, className, vendorName, values);
-            }
-        }
 
         internal static void DeleteScopeOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, int optionId)
             => DeleteScopeOptionValue(server, scopeAddress, optionId, null, null);
@@ -233,6 +280,109 @@ namespace Dhcp
             }
         }
 
+        #endregion
+
+        #region Reservation Option Values
+
+        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeReservationOptionValues(DhcpServerScopeReservation reservation)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(reservation.Scope.Address.ToNativeAsNetwork(), reservation.Address.ToNativeAsNetwork());
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                foreach (var value in GetAllOptionValues(reservation.Server, scopeInfoPtr))
+                    yield return value;
+            }
+        }
+
+
+        internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationDefaultOptionValues(DhcpServerScopeReservation reservation)
+            => EnumScopeReservationOptionValues(reservation, null, null);
+
+        internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationVendorOptionValues(DhcpServerScopeReservation reservation, string vendorName)
+            => EnumScopeReservationOptionValues(reservation, null, vendorName);
+
+        internal static IEnumerable<DhcpServerOptionValue> EnumScopeReservationUserOptionValues(DhcpServerScopeReservation reservation, string className)
+            => EnumScopeReservationOptionValues(reservation, className, null);
+
+        private static IEnumerable<DhcpServerOptionValue> EnumScopeReservationOptionValues(DhcpServerScopeReservation reservation, string className, string vendorName)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(reservation.Scope.Address.ToNativeAsNetwork(), reservation.Address.ToNativeAsNetwork());
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                foreach (var value in EnumOptionValues(reservation.Server, scopeInfoPtr, className, vendorName))
+                    yield return value;
+            }
+        }
+
+
+        internal static DhcpServerOptionValue GetScopeReservationDefaultOptionValue(DhcpServerScopeReservation reservation, int optionId)
+            => GetScopeReservationDefaultOptionValue(reservation.Server, reservation.Scope.Address, reservation.Address, optionId);
+        internal static DhcpServerOptionValue GetScopeReservationDefaultOptionValue(DhcpServerScope scope, DhcpServerIpAddress reservationAddress, int optionId)
+            => GetScopeReservationDefaultOptionValue(scope.Server, scope.Address, reservationAddress, optionId);
+        internal static DhcpServerOptionValue GetScopeReservationDefaultOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId)
+            => GetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, null);
+
+        internal static DhcpServerOptionValue GetScopeReservationVendorOptionValue(DhcpServerScopeReservation reservation, int optionId, string vendorName)
+            => GetScopeReservationVendorOptionValue(reservation.Server, reservation.Scope.Address, reservation.Address, optionId, vendorName);
+        internal static DhcpServerOptionValue GetScopeReservationVendorOptionValue(DhcpServerScope scope, DhcpServerIpAddress reservationAddress, int optionId, string vendorName)
+            => GetScopeReservationVendorOptionValue(scope.Server, scope.Address, reservationAddress, optionId, vendorName);
+        internal static DhcpServerOptionValue GetScopeReservationVendorOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string vendorName)
+            => GetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, vendorName);
+
+        internal static DhcpServerOptionValue GetScopeReservationUserOptionValue(DhcpServerScopeReservation reservation, int optionId, string className)
+            => GetScopeReservationUserOptionValue(reservation.Server, reservation.Scope.Address, reservation.Address, optionId, className);
+        internal static DhcpServerOptionValue GetScopeReservationUserOptionValue(DhcpServerScope scope, DhcpServerIpAddress reservationAddress, int optionId, string className)
+            => GetScopeReservationUserOptionValue(scope.Server, scope.Address, reservationAddress, optionId, className);
+        internal static DhcpServerOptionValue GetScopeReservationUserOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string className)
+            => GetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, className, null);
+
+        internal static DhcpServerOptionValue GetScopeReservationOptionValue(DhcpServerScopeReservation reservation, int optionId, string className, string vendorName)
+            => GetScopeReservationOptionValue(reservation.Server, reservation.Scope.Address, reservation.Address, optionId, className, vendorName);
+        internal static DhcpServerOptionValue GetScopeReservationOptionValue(DhcpServerScope scope, DhcpServerIpAddress reservationAddress, int optionId, string className, string vendorName)
+            => GetScopeReservationOptionValue(scope.Server, scope.Address, reservationAddress, optionId, className, vendorName);
+
+        internal static DhcpServerOptionValue GetScopeReservationOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string className, string vendorName)
+        {
+            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(scopeAddress.ToNativeAsNetwork(), reservationAddress.ToNativeAsNetwork());
+
+            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
+            {
+                return GetOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
+            }
+        }
+
+
+        internal static void SetScopeReservationDefaultOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, IEnumerable<DhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, null, values);
+        internal static void SetScopeReservationDefaultOptionValue(DhcpServerScopeReservation reservation, int optionId, IEnumerable<DhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(reservation, optionId, null, null, values);
+        internal static void SetScopeReservationVendorOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string vendorName, IEnumerable<DhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, vendorName, values);
+        internal static void SetScopeReservationVendorOptionValue(DhcpServerScopeReservation reservation, int optionId, string vendorName, IEnumerable<DhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(reservation, optionId, null, vendorName, values);
+        internal static void SetScopeReservationUserOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string className, IEnumerable<DhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, className, null, values);
+        internal static void SetScopeReservationUserOptionValue(DhcpServerScopeReservation reservation, int optionId, string className, IEnumerable<DhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(reservation, optionId, className, null, values);
+
+        internal static void SetScopeReservationOptionValue(DhcpServerScopeReservation reservation, DhcpServerOptionValue optionValue)
+            => SetScopeReservationOptionValue(reservation, optionValue.OptionId, optionValue.ClassName, optionValue.VendorName, optionValue.Values);
+        internal static void SetScopeReservationOptionValue(DhcpServerScopeReservation reservation, int optionId, string className, string vendorName, IEnumerable<IDhcpServerOptionElement> values)
+            => SetScopeReservationOptionValue(reservation.Server, reservation.Scope.Address, reservation.Address, optionId, className, vendorName, values);
+
+        internal static void SetScopeReservationOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId, string className, string vendorName, IEnumerable<IDhcpServerOptionElement> values)
+        {
+            var reservationInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(scopeAddress.ToNativeAsNetwork(), reservationAddress.ToNativeAsNetwork());
+
+            using (var reservationInfoPtr = BitHelper.StructureToPtr(reservationInfo))
+            {
+                SetOptionValue(server, reservationInfoPtr, optionId, className, vendorName, values);
+            }
+        }
+
+
         internal static void DeleteScopeReservationOptionValue(DhcpServer server, DhcpServerIpAddress scopeAddress, DhcpServerIpAddress reservationAddress, int optionId)
             => DeleteScopeReservationOptionValue(server, scopeAddress, reservationAddress, optionId, null, null);
         internal static void DeleteScopeReservationOptionValue(DhcpServerScopeReservation reservation, int optionId)
@@ -261,38 +411,10 @@ namespace Dhcp
             }
         }
 
-        internal static IEnumerable<DhcpServerOptionValue> GetAllGlobalOptionValues(DhcpServer server)
-        {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
+        #endregion
 
-            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
-            {
-                foreach (var value in GetAllOptionValues(server, scopeInfoPtr))
-                    yield return value;
-            }
-        }
 
-        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeOptionValues(DhcpServerScope scope)
-        {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Subnet(scope.Address.ToNativeAsNetwork());
-
-            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
-            {
-                foreach (var value in GetAllOptionValues(scope.Server, scopeInfoPtr))
-                    yield return value;
-            }
-        }
-
-        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeReservationOptionValues(DhcpServerScopeReservation reservation)
-        {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(reservation.Scope.Address.ToNativeAsNetwork(), reservation.Address.ToNativeAsNetwork());
-
-            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
-            {
-                foreach (var value in GetAllOptionValues(reservation.Server, scopeInfoPtr))
-                    yield return value;
-            }
-        }
+        #region Get All Option Values
 
         private static IEnumerable<DhcpServerOptionValue> GetAllOptionValues(DhcpServer server, IntPtr scopeInfo)
         {
@@ -301,7 +423,7 @@ namespace Dhcp
                                                     ScopeInfo: scopeInfo,
                                                     Values: out var valuesPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetAllOptionValues), result);
 
             try
@@ -313,7 +435,7 @@ namespace Dhcp
                         foreach (var value in optionClass.OptionsArray.Values)
                         {
                             // Ignore OptionID 81 (Used for DNS Settings - has no matching Option)
-                            if (!(value.OptionID == 81 && optionClass.ClassName == null && optionClass.VendorName == null))
+                            if (!(value.OptionID == DhcpServerDnsSettings.optionId))
                                 yield return FromNative(server, in value, optionClass.ClassName, optionClass.VendorName);
                         }
                     }
@@ -325,44 +447,9 @@ namespace Dhcp
             }
         }
 
-        internal static IEnumerable<DhcpServerOptionValue> EnumGlobalDefaultOptionValues(DhcpServer server)
-            => EnumGlobalOptionValues(server, null, null);
+        #endregion
 
-        internal static IEnumerable<DhcpServerOptionValue> EnumGlobalVendorOptionValues(DhcpServer server, string vendorName)
-            => EnumGlobalOptionValues(server, null, vendorName);
-
-        internal static IEnumerable<DhcpServerOptionValue> EnumGlobalUserOptionValues(DhcpServer server, string className)
-            => EnumGlobalOptionValues(server, className, null);
-
-        private static IEnumerable<DhcpServerOptionValue> EnumGlobalOptionValues(DhcpServer server, string className, string vendorName)
-        {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
-
-            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
-            {
-                foreach (var value in EnumOptionValues(server, scopeInfoPtr, className, vendorName))
-                    yield return value;
-            }
-        }
-
-        internal static DhcpServerOptionValue GetGlobalDefaultOptionValue(DhcpServer server, int optionId)
-            => GetGlobalOptionValue(server, optionId, null, null);
-
-        internal static DhcpServerOptionValue GetGlobalVendorOptionValue(DhcpServer server, string vendorName, int optionId)
-            => GetGlobalOptionValue(server, optionId, null, vendorName);
-
-        internal static DhcpServerOptionValue GetGlobalUserOptionValue(DhcpServer server, string className, int optionId)
-            => GetGlobalOptionValue(server, optionId, className, null);
-
-        internal static DhcpServerOptionValue GetGlobalOptionValue(DhcpServer server, int optionId, string className, string vendorName)
-        {
-            var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
-
-            using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
-            {
-                return GetOptionValue(server, scopeInfoPtr, optionId, className, vendorName);
-            }
-        }
+        #region Enumerate Option Values
 
         private static IEnumerable<DhcpServerOptionValue> EnumOptionValues(DhcpServer server, IntPtr scopeInfo, string className, string vendorName)
         {
@@ -388,10 +475,10 @@ namespace Dhcp
                                                   OptionsRead: out var elementsRead,
                                                   OptionsTotal: out _);
 
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS || result == DhcpServerNativeErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumOptionValues), result);
 
             if (elementsRead == 0)
@@ -403,7 +490,7 @@ namespace Dhcp
                 {
                     foreach (var value in valueArray.Values)
                     {
-                        if (value.OptionID != 81)
+                        if (value.OptionID != DhcpServerDnsSettings.optionId)
                             yield return FromNative(server, in value, null, null);
                     }
                 }
@@ -428,10 +515,10 @@ namespace Dhcp
                                                     OptionsRead: out var elementsRead,
                                                     OptionsTotal: out _);
 
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS || result == DhcpErrors.EPT_S_NOT_REGISTERED)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS || result == DhcpServerNativeErrors.EPT_S_NOT_REGISTERED)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumOptionValuesV5), result);
 
             if (elementsRead == 0)
@@ -443,7 +530,7 @@ namespace Dhcp
                 {
                     foreach (var value in valueArray.Values)
                     {
-                        if (value.OptionID != 81)
+                        if (value.OptionID != DhcpServerDnsSettings.optionId)
                             yield return FromNative(server, in value, className, vendorName);
                     }
                 }
@@ -453,6 +540,10 @@ namespace Dhcp
                 Api.FreePointer(valueArrayPtr);
             }
         }
+
+        #endregion
+
+        #region Get Option Value
 
         private static DhcpServerOptionValue GetOptionValue(DhcpServer server, IntPtr scopeInfo, int optionId, string className, string vendorName)
         {
@@ -474,7 +565,7 @@ namespace Dhcp
                                                 ScopeInfo: scopeInfo,
                                                 OptionValue: out var valuePtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetOptionValue), result);
 
             try
@@ -500,7 +591,7 @@ namespace Dhcp
                                                   ScopeInfo: scopeInfo,
                                                   OptionValue: out var valuePtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetOptionValueV5), result);
 
             try
@@ -515,6 +606,10 @@ namespace Dhcp
                 Api.FreePointer(valuePtr);
             }
         }
+
+        #endregion
+
+        #region Set Option Value
 
         private static void SetOptionValue(DhcpServer server, IntPtr scopeInfo, int optionId, string className, string vendorName, IEnumerable<IDhcpServerOptionElement> values)
         {
@@ -540,7 +635,7 @@ namespace Dhcp
                                                     ScopeInfo: scopeInfo,
                                                     OptionValue: valueNativePtr);
 
-                    if (result != DhcpErrors.SUCCESS)
+                    if (result != DhcpServerNativeErrors.SUCCESS)
                         throw new DhcpServerException(nameof(Api.DhcpSetOptionValue), result);
                 }
             }
@@ -560,11 +655,15 @@ namespace Dhcp
                                                           ScopeInfo: scopeInfo,
                                                           OptionValue: valueNativePtr);
 
-                    if (result != DhcpErrors.SUCCESS)
+                    if (result != DhcpServerNativeErrors.SUCCESS)
                         throw new DhcpServerException(nameof(Api.DhcpSetOptionValueV5), result);
                 }
             }
         }
+
+        #endregion
+
+        #region Remove Option Value
 
         private static void RemoveOptionValue(DhcpServer server, IntPtr scopeInfo, int optionId, string className, string vendorName)
         {
@@ -585,7 +684,7 @@ namespace Dhcp
                                                    OptionID: optionId,
                                                    ScopeInfo: scopeInfo);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpRemoveOptionValue), result);
         }
 
@@ -598,9 +697,11 @@ namespace Dhcp
                                                      VendorName: vendorName,
                                                      ScopeInfo: scopeInfo);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpRemoveOptionValueV5), result);
         }
+
+        #endregion
 
         public override string ToString()
             => $"{VendorName ?? ClassName ?? Server.SpecificStrings.DefaultVendorClassName}: {OptionId} [{Option.Name}]: {string.Join("; ", Values)}";

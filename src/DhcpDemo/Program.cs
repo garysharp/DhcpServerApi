@@ -8,19 +8,19 @@ namespace DhcpDemo
     {
         static void Main(string[] args)
         {
-            // Discover DHCP Servers
-            try
-            {
-                foreach (var dhcpServer in DhcpServer.Servers.ToList())
-                {
-                    DumpDhcpInfo(dhcpServer);
-                    WriteLine();
-                }
-            }
-            catch (DhcpServerException ex) when (ex.ApiError == "DDS_NO_DS_AVAILABLE")
-            {
-                WriteLine("No DHCP Servers could be automatically discovered", ConsoleColor.Magenta);
-            }
+// Discover DHCP Servers
+try
+{
+    foreach (var dhcpServer in DhcpServer.Servers.ToList())
+    {
+        DumpDhcpInfo(dhcpServer);
+        WriteLine();
+    }
+}
+catch (DhcpServerException ex) when (ex.ApiErrorNative == DhcpServerNativeErrors.DDS_NO_DS_AVAILABLE)
+{
+    WriteLine("No DHCP Servers could be automatically discovered", ConsoleColor.Magenta);
+}
 
             // Directly Connect to DHCP Server
             var server = DhcpServer.Connect("localhost");
@@ -57,6 +57,7 @@ namespace DhcpDemo
             // DNS Settings
             WriteLine(" DNS Settings:", ConsoleColor.White);
             var dnsSettings = dhcpServer.DnsSettings;
+            WriteLine($"                      Setting Source: {dnsSettings.SettingSource}");
             WriteLine($"              Dynamic DNS Updates Enabled: {dnsSettings.DynamicDnsUpdatesEnabled}");
             WriteLine($"  Dynamic DNS Updates Only When Requested: {dnsSettings.DynamicDnsUpdatedOnlyWhenRequested}");
             WriteLine($"               Dynamic DNS Updates Always: {dnsSettings.DynamicDnsUpdatedAlways}");
@@ -140,7 +141,7 @@ namespace DhcpDemo
 
             // Scopes
             WriteLine(" Scopes:", ConsoleColor.White);
-            foreach (var scope in dhcpServer.Scopes.ToList())
+            foreach (var scope in dhcpServer.Scopes.GetAllScopes(preloadClients: true, preloadFailoverRelationships: true))
             {
                 WriteLine($"   {scope.Address}");
                 WriteLine($"            IP Range: {scope.IpRange}");
@@ -154,7 +155,7 @@ namespace DhcpDemo
                 WriteLine($"       Quarantine On: {scope.QuarantineOn}");
 
                 // Scope Relationship
-                var failoverRelationship = scope.GetFailoverRelationship();
+                var failoverRelationship = scope.FailoverRelationship;
                 Write("    Failover Relationship:", ConsoleColor.White);
                 if (failoverRelationship == null)
                 {
@@ -164,7 +165,7 @@ namespace DhcpDemo
                 {
                     WriteLine($" {failoverRelationship}");
                     WriteLine("      Failover Statistics:", ConsoleColor.White);
-                    var failoverStatistics = scope.GetFailoverStatistics();
+                    var failoverStatistics = scope.FailoverStatistics;
                     WriteLine($"            Addresses Total: {failoverStatistics.AddressesTotal}");
                     WriteLine($"             Addresses Free: {failoverStatistics.AddressesFree}");
                     WriteLine($"           Addresses In Use: {failoverStatistics.AddressesInUse}");

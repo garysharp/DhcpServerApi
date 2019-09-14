@@ -14,7 +14,7 @@ namespace Dhcp
         }
 
         public IEnumerator<IDhcpServerClient> GetEnumerator()
-            => DhcpServerClient.GetClients(Server).GetEnumerator();
+            => DhcpServerClient.GetClients(Server, scopeLookup: null).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();

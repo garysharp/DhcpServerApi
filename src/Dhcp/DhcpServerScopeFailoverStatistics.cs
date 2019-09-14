@@ -62,10 +62,10 @@ namespace Dhcp
                                                               ScopeId: scope.Address.ToNativeAsNetwork(),
                                                               Stats: out var statisticsPtr);
 
-            if (result == DhcpErrors.FO_SCOPE_NOT_IN_RELATIONSHIP)
+            if (result == DhcpServerNativeErrors.FO_SCOPE_NOT_IN_RELATIONSHIP)
                 return null;
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpV4FailoverGetScopeStatistics), result);
 
             try

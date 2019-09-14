@@ -18,12 +18,21 @@ namespace Dhcp
         /// Enumerates a list of scopes associated with the DHCP server
         /// </summary>
         public IEnumerator<IDhcpServerScope> GetEnumerator()
-            => DhcpServerScope.GetScopes(Server).GetEnumerator();
+            => DhcpServerScope.GetScopes(Server, preloadClients: false, preloadFailoverRelationships: false).GetEnumerator();
 
         /// <summary>
         /// Enumerates a list of scopes associated with the DHCP server
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Enumerates a list of all scopes associated with the DHCP server
+        /// </summary>
+        /// <param name="preloadClients">If true bulk-loads all scope clients</param>
+        /// <param name="preloadFailoverRelationships">If true bulk-loads all scope failover relationships</param>
+        /// <returns></returns>
+        public IEnumerable<IDhcpServerScope> GetAllScopes(bool preloadClients, bool preloadFailoverRelationships)
+            => DhcpServerScope.GetScopes(Server, preloadClients, preloadFailoverRelationships);
 
         /// <summary>
         /// Gets the DHCP scope with the associated scope address

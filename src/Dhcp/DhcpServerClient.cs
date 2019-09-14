@@ -111,10 +111,10 @@ namespace Dhcp
         {
             var result = Api.DhcpGetClientInfo(server.Address, searchInfo, out var clientPtr);
 
-            if (result == DhcpErrors.JET_ERROR)
+            if (result == DhcpServerNativeErrors.JET_ERROR)
                 return null;
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetClientInfo), result);
 
             try
@@ -134,10 +134,10 @@ namespace Dhcp
         {
             var result = Api.DhcpGetClientInfoVQ(server.Address, searchInfo, out var clientPtr);
 
-            if (result == DhcpErrors.JET_ERROR)
+            if (result == DhcpServerNativeErrors.JET_ERROR)
                 return null;
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpGetClientInfoVQ), result);
 
             try
@@ -153,19 +153,21 @@ namespace Dhcp
             }
         }
 
-        internal static IEnumerable<DhcpServerClient> GetClients(DhcpServer server)
+        internal static IEnumerable<DhcpServerClient> GetClients(DhcpServer server, Dictionary<DhcpServerIpAddress, DhcpServerScope> scopeLookup)
         {
             if (server.IsCompatible(DhcpServerVersions.Windows2008R2))
-                return GetClientsVQ(server);
+                return GetClientsVQ(server, scopeLookup);
             else if (server.IsCompatible(DhcpServerVersions.Windows2000))
-                return GetClientsV0(server);
+                return GetClientsV0(server, scopeLookup);
             else
                 throw new PlatformNotSupportedException($"DHCP Server v{server.VersionMajor}.{server.VersionMinor} does not support this feature");
         }
 
-        private static IEnumerable<DhcpServerClient> GetClientsV0(DhcpServer server)
+        private static IEnumerable<DhcpServerClient> GetClientsV0(DhcpServer server, Dictionary<DhcpServerIpAddress, DhcpServerScope> scopeLookup)
         {
-            var scopeLookup = server.Scopes.ToDictionary(s => s.Address);
+            if (scopeLookup == null)
+                scopeLookup = DhcpServerScope.GetScopes(server, preloadClients: false, preloadFailoverRelationships: false).ToDictionary(s => s.Address);
+
             var resultHandle = IntPtr.Zero;
             var result = Api.DhcpEnumSubnetClients(ServerIpAddress: server.Address,
                                                    SubnetAddress: (DHCP_IP_ADDRESS)0,
@@ -176,15 +178,15 @@ namespace Dhcp
                                                    ClientsTotal: out _);
 
             // shortcut if no subnet clients are returned
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
 
             try
             {
-                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+                while (result == DhcpServerNativeErrors.SUCCESS || result == DhcpServerNativeErrors.ERROR_MORE_DATA)
                 {
                     using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY>())
                     {
@@ -192,11 +194,11 @@ namespace Dhcp
                         {
                             var clientValue = client.Value;
                             var scope = scopeLookup.TryGetValue(clientValue.SubnetAddress, out var s) ? s : null;
-                            yield return FromNative(server, (DhcpServerScope)scope, in clientValue);
+                            yield return FromNative(server, scope, in clientValue);
                         }
                     }
 
-                    if (result == DhcpErrors.SUCCESS)
+                    if (result == DhcpServerNativeErrors.SUCCESS)
                         yield break; // Last results
 
                     Api.FreePointer(clientsPtr);
@@ -208,7 +210,7 @@ namespace Dhcp
                                                        ClientsRead: out _,
                                                        ClientsTotal: out _);
 
-                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+                    if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA && result != DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                         throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
                 }
             }
@@ -218,9 +220,11 @@ namespace Dhcp
             }
         }
 
-        private static IEnumerable<DhcpServerClient> GetClientsVQ(DhcpServer server)
+        private static IEnumerable<DhcpServerClient> GetClientsVQ(DhcpServer server, Dictionary<DhcpServerIpAddress, DhcpServerScope> scopeLookup)
         {
-            var scopeLookup = server.Scopes.ToDictionary(s => s.Address);
+            if (scopeLookup == null)
+                scopeLookup = DhcpServerScope.GetScopes(server, preloadClients: false, preloadFailoverRelationships: false).ToDictionary(s => s.Address);
+
             var resultHandle = IntPtr.Zero;
             var result = Api.DhcpEnumSubnetClientsVQ(ServerIpAddress: server.Address,
                                                      SubnetAddress: (DHCP_IP_ADDRESS)0,
@@ -231,15 +235,15 @@ namespace Dhcp
                                                      ClientsTotal: out _);
 
             // shortcut if no subnet clients are returned
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
 
             try
             {
-                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+                while (result == DhcpServerNativeErrors.SUCCESS || result == DhcpServerNativeErrors.ERROR_MORE_DATA)
                 {
                     using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_VQ>())
                     {
@@ -247,11 +251,11 @@ namespace Dhcp
                         {
                             var clientValue = client.Value;
                             var scope = scopeLookup.TryGetValue(clientValue.SubnetAddress, out var s) ? s : null;
-                            yield return FromNative(server, (DhcpServerScope)scope, in clientValue);
+                            yield return FromNative(server, scope, in clientValue);
                         }
                     }
 
-                    if (result == DhcpErrors.SUCCESS)
+                    if (result == DhcpServerNativeErrors.SUCCESS)
                         yield break; // Last results
 
                     Api.FreePointer(clientsPtr);
@@ -263,7 +267,7 @@ namespace Dhcp
                                                          ClientsRead: out _,
                                                          ClientsTotal: out _);
 
-                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+                    if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                         throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
                 }
             }
@@ -295,15 +299,15 @@ namespace Dhcp
                                                    ClientsTotal: out _);
 
             // shortcut if no subnet clients are returned
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
 
             try
             {
-                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+                while (result == DhcpServerNativeErrors.SUCCESS || result == DhcpServerNativeErrors.ERROR_MORE_DATA)
                 {
                     using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY>())
                     {
@@ -311,7 +315,7 @@ namespace Dhcp
                             yield return FromNative(scope.Server, scope, in client.Value);
                     }
 
-                    if (result == DhcpErrors.SUCCESS)
+                    if (result == DhcpServerNativeErrors.SUCCESS)
                         yield break; // Last results
 
                     Api.FreePointer(clientsPtr);
@@ -323,7 +327,7 @@ namespace Dhcp
                                                        ClientsRead: out _,
                                                        ClientsTotal: out _);
 
-                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA && result != DhcpErrors.ERROR_NO_MORE_ITEMS)
+                    if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA && result != DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                         throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClients), result);
                 }
             }
@@ -345,15 +349,15 @@ namespace Dhcp
                                                      ClientsTotal: out _);
 
             // shortcut if no subnet clients are returned
-            if (result == DhcpErrors.ERROR_NO_MORE_ITEMS)
+            if (result == DhcpServerNativeErrors.ERROR_NO_MORE_ITEMS)
                 yield break;
 
-            if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+            if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                 throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
 
             try
             {
-                while (result == DhcpErrors.SUCCESS || result == DhcpErrors.ERROR_MORE_DATA)
+                while (result == DhcpServerNativeErrors.SUCCESS || result == DhcpServerNativeErrors.ERROR_MORE_DATA)
                 {
                     using (var clients = clientsPtr.MarshalToStructure<DHCP_CLIENT_INFO_ARRAY_VQ>())
                     {
@@ -361,7 +365,7 @@ namespace Dhcp
                             yield return FromNative(scope.Server, scope, in client.Value);
                     }
 
-                    if (result == DhcpErrors.SUCCESS)
+                    if (result == DhcpServerNativeErrors.SUCCESS)
                         yield break; // Last results
 
                     Api.FreePointer(clientsPtr);
@@ -373,7 +377,7 @@ namespace Dhcp
                                                          ClientsRead: out _,
                                                          ClientsTotal: out _);
 
-                    if (result != DhcpErrors.SUCCESS && result != DhcpErrors.ERROR_MORE_DATA)
+                    if (result != DhcpServerNativeErrors.SUCCESS && result != DhcpServerNativeErrors.ERROR_MORE_DATA)
                         throw new DhcpServerException(nameof(Api.DhcpEnumSubnetClientsVQ), result);
                 }
             }
@@ -423,7 +427,7 @@ namespace Dhcp
                 {
                     var result = Api.DhcpCreateClientInfo(ServerIpAddress: scope.Server.Address, ClientInfo: clientInfoPtr);
 
-                    if (result != DhcpErrors.SUCCESS)
+                    if (result != DhcpServerNativeErrors.SUCCESS)
                         throw new DhcpServerException(nameof(Api.DhcpCreateClientInfo), result);
                 }
             }
@@ -453,7 +457,7 @@ namespace Dhcp
                 {
                     var result = Api.DhcpCreateClientInfo(ServerIpAddress: scope.Server.Address, ClientInfo: clientInfoPtr);
 
-                    if (result != DhcpErrors.SUCCESS)
+                    if (result != DhcpServerNativeErrors.SUCCESS)
                         throw new DhcpServerException(nameof(Api.DhcpCreateClientInfo), result);
                 }
             }
@@ -477,7 +481,7 @@ namespace Dhcp
                 var result = Api.DhcpSetClientInfo(ServerIpAddress: Server.Address,
                                                    ClientInfo: in infoNative);
 
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpSetClientInfo), result);
             }
         }
@@ -490,7 +494,7 @@ namespace Dhcp
             {
                 var result = Api.DhcpDeleteClientInfo(server.Address, searchInfoPtr);
 
-                if (result != DhcpErrors.SUCCESS)
+                if (result != DhcpServerNativeErrors.SUCCESS)
                     throw new DhcpServerException(nameof(Api.DhcpDeleteClientInfo), result);
             }
         }

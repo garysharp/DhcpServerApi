@@ -59,7 +59,7 @@ namespace Dhcp
             var result = Api.DhcpServerGetConfig(ServerIpAddress: server.Address,
                                                  ConfigInfo: out var configInfoPtr);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpServerGetConfig), result);
 
             try

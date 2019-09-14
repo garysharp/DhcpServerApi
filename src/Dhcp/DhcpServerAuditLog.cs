@@ -47,7 +47,7 @@ namespace Dhcp
                                                    MaxLogFilesSize: out var maxLogFilesSize,
                                                    MinSpaceOnDisk: out var minSpaceOnDisk);
 
-            if (result != DhcpErrors.SUCCESS)
+            if (result != DhcpServerNativeErrors.SUCCESS)
                 throw new DhcpServerException(nameof(Api.DhcpAuditLogGetParams), result);
 
             return new DhcpServerAuditLog(server, auditLogDir, diskCheckInterval, maxLogFilesSize, minSpaceOnDisk);
