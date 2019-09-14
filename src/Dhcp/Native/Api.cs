@@ -15,7 +15,7 @@ namespace Dhcp.Native
         /// <param name="CallbackData">Pointer to a data block containing the formatted structure for callback information. This field should be null.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true)]
-        public static extern DhcpErrors DhcpEnumServers(uint Flags, IntPtr IdInfo, out IntPtr Servers, IntPtr CallbackFn, IntPtr CallbackData);
+        public static extern DhcpServerNativeErrors DhcpEnumServers(uint Flags, IntPtr IdInfo, out IntPtr Servers, IntPtr CallbackFn, IntPtr CallbackData);
 
         /// <summary>
         /// The DhcpGetVersion function returns the major and minor version numbers of the DHCP server.
@@ -25,7 +25,7 @@ namespace Dhcp.Native
         /// <param name="MinorVersion">Specifies the minor version number of the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetVersion(string ServerIpAddress, out int MajorVersion, out int MinorVersion);
+        public static extern DhcpServerNativeErrors DhcpGetVersion(string ServerIpAddress, out int MajorVersion, out int MinorVersion);
 
         /// <summary>
         /// The DhcpServerGetConfig function returns the specific configuration settings of a DHCP server. Configuration information includes information on the JET database used to store subnet and client lease information, and the supported protocols.
@@ -34,7 +34,7 @@ namespace Dhcp.Native
         /// <param name="ConfigInfo">Pointer to a <see cref="DHCP_SERVER_CONFIG_INFO"/> structure that contains the specific configuration information for the DHCP server. Note: The memory for this parameter must be free using <see cref="DhcpRpcFreeMemory"/>.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpServerGetConfig(string ServerIpAddress, out IntPtr ConfigInfo);
+        public static extern DhcpServerNativeErrors DhcpServerGetConfig(string ServerIpAddress, out IntPtr ConfigInfo);
 
         /// <summary>
         /// The DhcpGetServerSpecificStrings function retrieves the names of the default vendor class and user class.
@@ -43,7 +43,7 @@ namespace Dhcp.Native
         /// <param name="ServerSpecificStrings">Pointer to a DHCP_SERVER_SPECIFIC_STRINGS structure that receives the information for the default vendor class and user class name strings. Note: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetServerSpecificStrings(string ServerIpAddress, out IntPtr ServerSpecificStrings);
+        public static extern DhcpServerNativeErrors DhcpGetServerSpecificStrings(string ServerIpAddress, out IntPtr ServerSpecificStrings);
 
         /// <summary>
         /// The DhcpGetServerBindingInfo function returns endpoint bindings set on the DHCP server.
@@ -56,7 +56,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>This function requires network byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetServerBindingInfo(string ServerIpAddress, uint Flags, out IntPtr BindElementsInfo);
+        public static extern DhcpServerNativeErrors DhcpGetServerBindingInfo(string ServerIpAddress, uint Flags, out IntPtr BindElementsInfo);
 
         /// <summary>
         /// The DhcpGetSubnetDelayOffer function obtains the delay period for DHCP OFFER messages after a DISCOVER message is received.
@@ -66,7 +66,7 @@ namespace Dhcp.Native
         /// <param name="TimeDelayInMilliseconds">Unsigned 16-bit integer value that receive the time to delay an OFFER message after receiving a DISCOVER message as configured on the DHCP server, in milliseconds.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out ushort TimeDelayInMilliseconds);
+        public static extern DhcpServerNativeErrors DhcpGetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out ushort TimeDelayInMilliseconds);
 
         /// <summary>
         /// The DhcpSetSubnetDelayOffer function sets the delay period for DHCP OFFER messages after a DISCOVER message is received, for a specific DHCP scope.
@@ -76,7 +76,7 @@ namespace Dhcp.Native
         /// <param name="TimeDelayInMilliseconds">Unsigned 16-bit integer value that specifies the time to delay an OFFER message after receiving a DISCOVER message, in milliseconds, and set for a particular scope. This value must be between 0 and 1000 (milliseconds). The default value is 0.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ushort TimeDelayInMilliseconds);
+        public static extern DhcpServerNativeErrors DhcpSetSubnetDelayOffer(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ushort TimeDelayInMilliseconds);
 
         /// <summary>
         /// The DhcpEnumOptions function returns an enumerated set of options stored on the DHCPv4 server.
@@ -91,7 +91,7 @@ namespace Dhcp.Native
         /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of remaining options stored on the DHCPv4 server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumOptions(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumOptions(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
 
         /// <summary>
         /// The DhcpEnumOptions function returns an enumerated set of options stored on the DHCPv4 server.
@@ -107,7 +107,7 @@ namespace Dhcp.Native
         /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of unenumerated option definitions on the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumOptionsV5(string ServerIpAddress, uint Flags, string ClassName, string VendorName, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumOptionsV5(string ServerIpAddress, uint Flags, string ClassName, string VendorName, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Options, out int OptionsRead, out int OptionsTotal);
 
         /// <summary>
         /// The DhcpEnumOptionValues function returns an enumerated list of option values (just the option data and the associated ID number) for a given scope.
@@ -123,7 +123,7 @@ namespace Dhcp.Native
         /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of remaining option values for this scope stored on the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumOptionValues(string ServerIpAddress, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumOptionValues(string ServerIpAddress, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
 
         /// <summary>
         /// The DhcpEnumOptionValuesV5 function returns an enumerated list of option values (just the option data and the associated ID number) for a specific scope within a given user or vendor class.
@@ -140,7 +140,7 @@ namespace Dhcp.Native
         /// <param name="OptionsTotal">Pointer to a DWORD value that specifies the total number of as-yet unenumerated option values for this scope stored on the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumOptionValuesV5(string ServerIpAddress, uint Flags, string ClassName, string VendorName, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumOptionValuesV5(string ServerIpAddress, uint Flags, string ClassName, string VendorName, IntPtr ScopeInfo, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr OptionValues, out int OptionsRead, out int OptionsTotal);
 
         /// <summary>
         /// The DhcpGetOptionValue function retrieves a DHCP option value (the option code and associated data) for a particular scope.
@@ -151,7 +151,7 @@ namespace Dhcp.Native
         /// <param name="OptionValue">DHCP_OPTION_VALUE structure that contains the returned option code and data. NOTE: The memory for this parameter must be free using DhcpRpcFreeMemory.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, out IntPtr OptionValue);
+        public static extern DhcpServerNativeErrors DhcpGetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, out IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpGetOptionValueV5 function retrieves a DHCP option value (the option code and associated data) for a particular scope. This function extends the functionality provided by DhcpGetOptionValue by allowing the caller to specify a class and/or vendor for the option.
@@ -165,7 +165,7 @@ namespace Dhcp.Native
         /// <param name="OptionValue">DHCP_OPTION_VALUE structure that contains the returned option code and data.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, out IntPtr OptionValue);
+        public static extern DhcpServerNativeErrors DhcpGetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, out IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpSetOptionValue function sets information for a specific option value on the DHCP server.
@@ -181,7 +181,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, IntPtr OptionValue);
+        public static extern DhcpServerNativeErrors DhcpSetOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo, IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpSetOptionValueV5 function sets information for a specific option value on the DHCP server. This function extends the functionality provided by DhcpSetOptionValue by allowing the caller to specify a class and/or vendor for the option.
@@ -195,7 +195,7 @@ namespace Dhcp.Native
         /// <param name="OptionValue">Pointer to a DHCP_OPTION_DATA structure that contains the data value corresponding to the DHCP option code specified by OptionID.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = false, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, IntPtr OptionValue);
+        public static extern DhcpServerNativeErrors DhcpSetOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo, IntPtr OptionValue);
 
         /// <summary>
         /// The DhcpRemoveOptionValue function removes the option value for a specific option on the DHCP4 server for the default user class and vendor class, for the specified scope.
@@ -205,7 +205,7 @@ namespace Dhcp.Native
         /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains information describing the specific scope (default, server, scope, or IPv4 reservation level) from which to remove the option value.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpRemoveOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo);
+        public static extern DhcpServerNativeErrors DhcpRemoveOptionValue(string ServerIpAddress, int OptionID, IntPtr ScopeInfo);
 
         /// <summary>
         /// The DhcpRemoveOptionValueV5 function removes an option value from a scope defined on the DHCP server.
@@ -218,7 +218,7 @@ namespace Dhcp.Native
         /// <param name="ScopeInfo">DHCP_OPTION_SCOPE_INFO structure that contains information describing the specific scope to remove the option value from.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpRemoveOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo);
+        public static extern DhcpServerNativeErrors DhcpRemoveOptionValueV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, IntPtr ScopeInfo);
 
         /// <summary>
         /// The DhcpGetClassInfo function returns the user or vendor class information configured on a specific DHCP server.
@@ -233,7 +233,7 @@ namespace Dhcp.Native
         /// <param name="FilledClassInfo">DHCP_CLASS_INFO structure returned after lookup that contains the complete class information.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO_Managed PartialClassInfo, out IntPtr FilledClassInfo);
+        public static extern DhcpServerNativeErrors DhcpGetClassInfo(string ServerIpAddress, uint ReservedMustBeZero, DHCP_CLASS_INFO_Managed PartialClassInfo, out IntPtr FilledClassInfo);
 
         /// <summary>
         /// The DhcpEnumClasses function enumerates the user or vendor classes configured for the DHCP server.
@@ -248,7 +248,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>A DHCP class is a specific category of client, defined either by the vendor or by a user. An example of a vendor-defined class would be all Windows 8 clients, with Microsoft as the vendor. A user-defined class consists of those clients with specific attributes selected by a user or administrator, such as all laptops or clients that support wireless connections.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumClasses(string ServerIpAddress, uint ReservedMustBeZero, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClassInfoArray, out int nRead, out int nTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumClasses(string ServerIpAddress, uint ReservedMustBeZero, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClassInfoArray, out int nRead, out int nTotal);
 
         /// <summary>
         /// The DhcpAddSubnetElement function adds an element describing a feature or aspect of the subnet to the subnet entry in the DHCP database.
@@ -258,7 +258,7 @@ namespace Dhcp.Native
         /// <param name="AddElementInfo">Pointer to a DHCP_SUBNET_ELEMENT_DATA structure that contains information about the subnet element corresponding to the IPv4 subnet specified in SubnetAddress.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAddSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_Managed AddElementInfo);
+        public static extern DhcpServerNativeErrors DhcpAddSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_Managed AddElementInfo);
 
         /// <summary>
         /// The DhcpAddSubnetElementV5 function adds an element describing a feature or aspect of the subnet to the subnet entry in the DHCP database. Windows 2000 and earlier:  This function is not available.
@@ -268,7 +268,7 @@ namespace Dhcp.Native
         /// <param name="AddElementInfo">Pointer to a <see cref="DHCP_SUBNET_ELEMENT_DATA_V5"/> structure that contains the element data to add to the subnet. The V5 structure adds support for BOOTP clients.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAddSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_V5_Managed AddElementInfo);
+        public static extern DhcpServerNativeErrors DhcpAddSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_V5_Managed AddElementInfo);
 
         /// <summary>
         /// The DhcpRemoveSubnetElement function removes an IPv4 subnet element from an IPv4 subnet defined on the DHCPv4 server.
@@ -282,7 +282,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpRemoveSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
+        public static extern DhcpServerNativeErrors DhcpRemoveSubnetElement(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
 
         /// <summary>
         /// The DhcpRemoveSubnetElement function removes an IPv4 subnet element from an IPv4 subnet defined on the DHCPv4 server.
@@ -296,7 +296,7 @@ namespace Dhcp.Native
         /// </remarks>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpRemoveSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_V5_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
+        public static extern DhcpServerNativeErrors DhcpRemoveSubnetElementV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_ELEMENT_DATA_V5_Managed RemoveElementInfo, DHCP_FORCE_FLAG ForceFlag);
 
         /// <summary>
         /// The DhcpCreateSubnet function creates a new subnet on the DHCP server.
@@ -306,7 +306,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo"><see cref="DHCP_SUBNET_INFO"/> structure that contains specific settings for the subnet, including the subnet mask and IP address of the subnet gateway.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_Managed SubnetInfo);
+        public static extern DhcpServerNativeErrors DhcpCreateSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpDeleteSubnet function deletes a subnet from the DHCP server.
@@ -316,7 +316,7 @@ namespace Dhcp.Native
         /// <param name="ForceFlag">DHCP_FORCE_FLAG enumeration value that indicates the type of delete operation to perform (full force, failover force, or no force).</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpDeleteSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_FORCE_FLAG ForceFlag);
+        public static extern DhcpServerNativeErrors DhcpDeleteSubnet(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_FORCE_FLAG ForceFlag);
 
         /// <summary>
         /// The DhcpEnumSubnets function returns an enumerated list of subnets defined on the DHCP server.
@@ -330,7 +330,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. If a call is made with the same ResumeHandle value and all items on the server have been enumerated, this method returns ERROR_NO_MORE_ITEMS with ElementsRead and ElementsTotal set to 0. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>When no longer needed, the resources consumed for the enumerated data, and all pointers containted within, should be released with DhcpRpcFreeMemory. This function requires host byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnets(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumInfo, out int ElementsRead, out int ElementsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnets(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumInfo, out int ElementsRead, out int ElementsTotal);
 
         /// <summary>
         /// The DhcpGetSubnetInfo function returns information on a specific subnet.
@@ -341,7 +341,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>This function uses host byte ordering for all DHCP_IP_ADDRESS values in the <see cref="DHCP_SUBNET_INFO"/> structure passed back to the caller in the SubnetInfo parameter. However, this function uses network byte order for the IpAddress member of the DHCP_HOST_INFO structure within the <see cref="DHCP_SUBNET_INFO"/> structure.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out IntPtr SubnetInfo);
+        public static extern DhcpServerNativeErrors DhcpGetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out IntPtr SubnetInfo);
 
         /// <summary>
         /// The DhcpGetSubnetInfoVQ function retrieves the information about a specific IPv4 subnet defined on the DHCP server.
@@ -350,7 +350,7 @@ namespace Dhcp.Native
         /// <param name="SubnetAddress">DHCP_IP_ADDRESS value that specifies the subnet ID.</param>
         /// <param name="SubnetInfo"><see cref="DHCP_SUBNET_INFO"/> structure that contains the returned information for the subnet matching the IPv4 address specified by SubnetAddress. Note: The memory for this parameter must be free using <see cref="DhcpRpcFreeMemory"/>.</param>        /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out IntPtr SubnetInfo);
+        public static extern DhcpServerNativeErrors DhcpGetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out IntPtr SubnetInfo);
 
         /// <summary>
         /// The DhcpSetSubnetInfo function sets information about a subnet defined on the DHCP server.
@@ -360,7 +360,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo">Pointer to a <see cref="DHCP_SUBNET_INFO"/> structure that contains the information about the subnet.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_Managed SubnetInfo);
+        public static extern DhcpServerNativeErrors DhcpSetSubnetInfo(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpSetSubnetInfo function sets information about a subnet defined on the DHCP server.
@@ -370,7 +370,7 @@ namespace Dhcp.Native
         /// <param name="SubnetInfo">Pointer to a <see cref="DHCP_SUBNET_INFO_VQ"/> structure that contains the information about the subnet.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_VQ_Managed SubnetInfo);
+        public static extern DhcpServerNativeErrors DhcpSetSubnetInfoVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, in DHCP_SUBNET_INFO_VQ_Managed SubnetInfo);
 
         /// <summary>
         /// The DhcpGetAllOptions function returns an array that contains all options defined on the DHCP server.
@@ -381,7 +381,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>There will be one option element in the array specified by OptionStruct for each vendor/class pair defined on the DHCP server.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetAllOptions(string ServerIpAddress, uint Flags, out IntPtr OptionStruct);
+        public static extern DhcpServerNativeErrors DhcpGetAllOptions(string ServerIpAddress, uint Flags, out IntPtr OptionStruct);
 
         /// <summary>
         /// The DhcpGetAllOptionValues function returns an array that contains all option values defined for a specific scope on the DHCP server.
@@ -393,7 +393,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>There will be one option value in the array specified by Values for each vendor/class pair defined on the DHCP server.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetAllOptionValues(string ServerIpAddress, uint Flags, IntPtr ScopeInfo, out IntPtr Values);
+        public static extern DhcpServerNativeErrors DhcpGetAllOptionValues(string ServerIpAddress, uint Flags, IntPtr ScopeInfo, out IntPtr Values);
 
         /// <summary>
         /// The DhcpGetOptionInfo function returns information on a specific DHCP option for the default user and vendor class.
@@ -404,7 +404,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.
         /// ERROR_DHCP_OPTION_NOT_PRESENT = The specified option definition could not be found in the DHCP server database.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetOptionInfo(string ServerIpAddress, int OptionID, out IntPtr OptionInfo);
+        public static extern DhcpServerNativeErrors DhcpGetOptionInfo(string ServerIpAddress, int OptionID, out IntPtr OptionInfo);
 
         /// <summary>
         /// The DhcpGetOptionInfoV5 function returns information on a specific DHCP option.
@@ -417,7 +417,7 @@ namespace Dhcp.Native
         /// <param name="OptionInfo">Pointer to a DHCP_OPTION structure that contains the returned information on the option specified by OptionID.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetOptionInfoV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, out IntPtr OptionInfo);
+        public static extern DhcpServerNativeErrors DhcpGetOptionInfoV5(string ServerIpAddress, uint Flags, int OptionID, string ClassName, string VendorName, out IntPtr OptionInfo);
 
         /// <summary>
         /// The DhcpEnumSubnetClients function returns an enumerated list of clients with served IP addresses in the specified subnet.
@@ -432,7 +432,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_MORE_DATA upon a successful call. The final call to this method with the last set of subnet clients returns ERROR_SUCCESS. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>This function requires host byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetClients(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnetClients(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
 
         /// <summary>
         /// The DhcpEnumSubnetClientsV4 function returns an enumerated list of client lease records with served IP addresses in the specified subnet. This function extends the functionality provided in DhcpEnumSubnetClients by returning a list of DHCP_CLIENT_INFO_V4 structures that contain the specific client type (DHCP and/or BOOTP).
@@ -447,7 +447,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>The caller of this function must free the memory for ClientInfo after the call completes. </remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetClientsV4(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnetClientsV4(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
 
         /// <summary>
         /// The DhcpEnumSubnetClientsV5 function returns an enumerated list of clients with served IP addresses in the specified subnet. This function extends the features provided in the DhcpEnumSubnetClients function by returning a list of DHCP_CLIENT_INFO_V5 structures that contain the specific client type (DHCP and/or BOOTP) and the IP address state.
@@ -462,7 +462,7 @@ namespace Dhcp.Native
         /// <returns>The DhcpEnumSubnetClientsV5 function returns ERROR_SUCCESS upon success. </returns>
         /// <remarks>The caller of this function must release the memory used by the DHCP_CLIENT_INFO_ARRAY_V5 structure returned in buffer pointed to by the ClientInfo parameter when the information is no longer needed.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetClientsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnetClientsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
 
         /// <summary>
         /// The DhcpEnumSubnetClientsVQ function retrieves all DHCP clients serviced from the specified IPv4 subnet.
@@ -477,7 +477,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>If SubnetAddress is set to zero (0), then all of the DHCP clients from all known IPv4 subnets. The caller of this function must free the data pointed to by ClientInfo.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetClientsVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnetClientsVQ(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr ClientInfo, out int ClientsRead, out int ClientsTotal);
 
         /// <summary>
         /// The DhcpEnumSubnetElementsV5 function returns an enumerated list of elements for a specific DHCP subnet.
@@ -495,7 +495,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes. Common errors include the following:</returns>
         /// <remarks>When no longer needed, the resources consumed for the enumerated data, and all pointers contained within, should be released with DhcpRpcFreeMemory.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetElements(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnetElements(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
 
         /// <summary>
         /// The DhcpEnumSubnetElementsV5 function returns an enumerated list of elements for a specific DHCP subnet.
@@ -513,7 +513,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes. Common errors include the following:</returns>
         /// <remarks>When no longer needed, the resources consumed for the enumerated data, and all pointers contained within, should be released with DhcpRpcFreeMemory.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpEnumSubnetElementsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
+        public static extern DhcpServerNativeErrors DhcpEnumSubnetElementsV5(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, DHCP_SUBNET_ELEMENT_TYPE EnumElementType, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr EnumElementInfo, out int ElementsRead, out int ElementsTotal);
 
         /// <summary>
         /// The DhcpGetClientInfo function returns information about a specific DHCP client.
@@ -524,7 +524,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>This function requires host byte ordering for all DHCP_IP_ADDRESS values in parameter structures.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetClientInfo(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
+        public static extern DhcpServerNativeErrors DhcpGetClientInfo(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
 
         /// <summary>
         /// The DhcpGetClientInfoVQ function retrieves DHCP client lease record information from the DHCP server database.
@@ -535,7 +535,7 @@ namespace Dhcp.Native
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         /// <remarks>The caller of this function must release the memory used by the DHCP_CLIENT_INFO_VQ structure returned in ClientInfo.</remarks>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpGetClientInfoVQ(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
+        public static extern DhcpServerNativeErrors DhcpGetClientInfoVQ(string ServerIpAddress, IntPtr SearchInfo, out IntPtr ClientInfo);
 
         /// <summary>
         /// The DhcpCreateClientInfo function creates a client information record on the DHCP server.
@@ -544,7 +544,7 @@ namespace Dhcp.Native
         /// <param name="ClientInfo">DHCP_CLIENT_INFO structure that contains information about the DHCP client, including the assigned IP address, subnet mask, and host.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpCreateClientInfo(string ServerIpAddress, IntPtr ClientInfo);
+        public static extern DhcpServerNativeErrors DhcpCreateClientInfo(string ServerIpAddress, IntPtr ClientInfo);
 
         /// <summary>
         /// The DhcpSetClientInfo function sets information on a client whose IP address lease is administrated by the DHCP server.
@@ -553,7 +553,7 @@ namespace Dhcp.Native
         /// <param name="ClientInfo">Pointer to a DHCP_CLIENT_INFO structure that contains the information on a client in a subnet served by the DHCP server.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpSetClientInfo(string ServerIpAddress, in DHCP_CLIENT_INFO_Managed ClientInfo);
+        public static extern DhcpServerNativeErrors DhcpSetClientInfo(string ServerIpAddress, in DHCP_CLIENT_INFO_Managed ClientInfo);
 
         /// <summary>
         /// The DhcpDeleteClientInfo function deletes a client information record from the DHCP server.
@@ -562,7 +562,7 @@ namespace Dhcp.Native
         /// <param name="ClientInfo">DHCP_SEARCH_INFO union structure that contains one of the following items used to search the DHCP client record database: the client IP address, the client MAC address, or the client network name. All records matching the value will be deleted; for example, if a client IP address of 192.1.1.10 is supplied, all records with this address in the ClientIpAddress field will be deleted.</param>
         /// <returns>This function returns ERROR_SUCCESS upon a successful call. Otherwise, it returns one of the DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpDeleteClientInfo(string ServerIpAddress, IntPtr ClientInfo);
+        public static extern DhcpServerNativeErrors DhcpDeleteClientInfo(string ServerIpAddress, IntPtr ClientInfo);
 
         /// <summary>
         /// The DhcpAuditLogGetParams function returns the audit log configuration settings from the DHCP server.
@@ -575,7 +575,7 @@ namespace Dhcp.Native
         /// <param name="MinSpaceOnDisk">Specifies the minimum required disk space, in bytes, for audit log storage.</param>
         /// <returns></returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpAuditLogGetParams(string ServerIpAddress, int Flags, [MarshalAs(UnmanagedType.LPWStr)] out string AuditLogDir, out int DiskCheckInterval, out int MaxLogFilesSize, out int MinSpaceOnDisk);
+        public static extern DhcpServerNativeErrors DhcpAuditLogGetParams(string ServerIpAddress, int Flags, [MarshalAs(UnmanagedType.LPWStr)] out string AuditLogDir, out int DiskCheckInterval, out int MaxLogFilesSize, out int MinSpaceOnDisk);
 
         /// <summary>
         /// The DhcpV4FailoverAddScopeToRelationship function adds a DHCPv4 scope to the specified failover relationship.
@@ -584,7 +584,7 @@ namespace Dhcp.Native
         /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains both the scope information to add and the failover relationship to modify.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverAddScopeToRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
 
         /// <summary>
         /// The DhcpV4FailoverCreateRelationship function creates a new DHCPv4 failover relationship between two servers.
@@ -593,7 +593,7 @@ namespace Dhcp.Native
         /// <param name="pRelationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the DHCPv4 failover relationship to create.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverCreateRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverCreateRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed pRelationship);
 
         /// <summary>
         /// The DhcpV4FailoverDeleteRelationship function deletes a DHCPv4 failover relationship between two servers.
@@ -602,7 +602,7 @@ namespace Dhcp.Native
         /// <param name="RelationshipName">Pointer to null-terminated Unicode string that represents the name of the relationship to delete.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverDeleteRelationship(string ServerIpAddress, string RelationshipName);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverDeleteRelationship(string ServerIpAddress, string RelationshipName);
 
         /// <summary>
         /// The DhcpV4FailoverDeleteScopeFromRelationship function deletes a DHCPv4 scope from the specified failover relationship.
@@ -611,7 +611,7 @@ namespace Dhcp.Native
         /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains the scopes to delete. The scopes are defined in the pScopes member of this structure.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverDeleteScopeFromRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverDeleteScopeFromRelationship(string ServerIpAddress, in DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
 
         /// <summary>
         /// The DhcpV4FailoverEnumRelationship function enumerates all failover relationships present on the server.
@@ -625,7 +625,7 @@ namespace Dhcp.Native
         /// <param name="RelationshipTotal">Pointer to a DWORD that specifies the number of failover relationships configured on the DHCP server that have not yet been enumerated.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverEnumRelationship(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Relationship, out int RelationshipRead, out int RelationshipTotal);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverEnumRelationship(string ServerIpAddress, ref IntPtr ResumeHandle, uint PreferredMaximum, out IntPtr Relationship, out int RelationshipRead, out int RelationshipTotal);
 
         /// <summary>
         /// The DhcpV4FailoverGetAddressStatus function returns the status of a IPv4 address.
@@ -640,7 +640,7 @@ namespace Dhcp.Native
         /// </param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverGetAddressStatus(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out int Status);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverGetAddressStatus(string ServerIpAddress, DHCP_IP_ADDRESS SubnetAddress, out int Status);
 
         /// <summary>
         /// The DhcpV4FailoverGetRelationship function retrieves relationship details for a specific relationship name.
@@ -650,7 +650,7 @@ namespace Dhcp.Native
         /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the retrieved failover relationship.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverGetRelationship(string ServerIpAddress, string RelationshipName, out IntPtr Relationship);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverGetRelationship(string ServerIpAddress, string RelationshipName, out IntPtr Relationship);
 
         /// <summary>
         /// The DhcpV4FailoverGetScopeRelationship function retrieves the failover relationship that is configured on a specified DHCPv4 scope.
@@ -660,7 +660,7 @@ namespace Dhcp.Native
         /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains information about the retrieved failover relationship which contains scopeId field in its pScopes member.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverGetScopeRelationship(string ServerIpAddress, DHCP_IP_ADDRESS ScopeId, out IntPtr Relationship);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverGetScopeRelationship(string ServerIpAddress, DHCP_IP_ADDRESS ScopeId, out IntPtr Relationship);
 
         /// <summary>
         /// The DhcpV4FailoverGetScopeStatistics function retrieves the address usage statistics of a specific scope that is part of a failover relationship.
@@ -670,7 +670,7 @@ namespace Dhcp.Native
         /// <param name="Stats">Pointer to a DHCP_FAILOVER_STATISTICS structure that contains the address usage information for scopeId.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverGetScopeStatistics(string ServerIpAddress, DHCP_IP_ADDRESS ScopeId, out IntPtr Stats);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverGetScopeStatistics(string ServerIpAddress, DHCP_IP_ADDRESS ScopeId, out IntPtr Stats);
 
         /// <summary>
         /// The DhcpV4FailoverGetSystemTime function returns the current time on the DHCP server.
@@ -680,7 +680,7 @@ namespace Dhcp.Native
         /// <param name="MaxAllowedDeltaTime">?</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverGetSystemTime(string ServerIpAddress, out int Time, out int MaxAllowedDeltaTime);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverGetSystemTime(string ServerIpAddress, out int Time, out int MaxAllowedDeltaTime);
 
         /// <summary>
         /// The DhcpV4FailoverSetRelationship function sets or modifies the parameters of a DHCPv4 server failover relationship.
@@ -690,7 +690,7 @@ namespace Dhcp.Native
         /// <param name="Relationship">Pointer to a DHCP_FAILOVER_RELATIONSHIP structure that contains update information about the fields in the DHCPv4 failover relationship.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverSetRelationship(string ServerIpAddress, DHCP_FAILOVER_RELATIONSHIP_SET_FLAGS Flags, in DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverSetRelationship(string ServerIpAddress, DHCP_FAILOVER_RELATIONSHIP_SET_FLAGS Flags, in DHCP_FAILOVER_RELATIONSHIP_Managed Relationship);
 
         /// <summary>
         /// The DhcpV4FailoverTriggerAddrAllocation function redistributes the free addresses between the primary server and the secondary server that are part of a failover relationship.
@@ -699,7 +699,7 @@ namespace Dhcp.Native
         /// <param name="FailRelName">Pointer to a null-terminated Unicode string that represents the name of the failover relationship for which free addresses are to be redistributed.</param>
         /// <returns>If the function succeeds, it returns ERROR_SUCCESS. If the function fails, it returns one of the following or an error code from DHCP Server Management API Error Codes.</returns>
         [DllImport("dhcpsapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern DhcpErrors DhcpV4FailoverTriggerAddrAllocation(string ServerIpAddress, string FailRelName);
+        public static extern DhcpServerNativeErrors DhcpV4FailoverTriggerAddrAllocation(string ServerIpAddress, string FailRelName);
 
         /// <summary>
         /// The DhcpRpcFreeMemory function frees a block of buffer space returned as a parameter.

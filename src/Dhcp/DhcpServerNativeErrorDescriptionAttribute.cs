@@ -3,11 +3,11 @@
 namespace Dhcp.Native
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-    internal class DhcpErrorDescriptionAttribute : Attribute
+    internal class DhcpServerNativeErrorDescriptionAttribute : Attribute
     {
         public string Description { get; }
 
-        public DhcpErrorDescriptionAttribute(string description)
+        public DhcpServerNativeErrorDescriptionAttribute(string description)
         {
             Description = description;
         }

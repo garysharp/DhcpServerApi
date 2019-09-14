@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using Dhcp.Native;
 
@@ -6,47 +8,59 @@ namespace Dhcp
 {
     public class DhcpServerException : Exception
     {
-        private readonly DhcpErrors error;
+        private readonly static Dictionary<DhcpServerNativeErrors, string> errorDescriptions = new Dictionary<DhcpServerNativeErrors, string>();
         private readonly string message;
-
-        internal DhcpServerException(string apiFunction, DhcpErrors error, string additionalMessage)
-        {
-            ApiFunction = apiFunction;
-            this.error = error;
-            ApiErrorMessage = BuildApiErrorMessage(error);
-            message = BuildMessage(apiFunction, additionalMessage, error, ApiErrorMessage);
-        }
-
-        internal DhcpServerException(string apiFunction, DhcpErrors error)
-            : this(apiFunction, error, null)
-        { }
 
         public string ApiFunction { get; }
 
-        public string ApiError => error.ToString();
+        [Obsolete("Use ApiErrorNative"), EditorBrowsable(EditorBrowsableState.Never)]
+        public string ApiError => ApiErrorNative.ToString();
 
-        internal DhcpErrors ApiErrorNative => error;
-        public uint ApiErrorId => (uint)error;
+        public DhcpServerNativeErrors ApiErrorNative { get; }
+        [Obsolete("Use ApiErrorNative"), EditorBrowsable(EditorBrowsableState.Never)]
+        public uint ApiErrorId => (uint)ApiErrorNative;
 
         public string ApiErrorMessage { get; }
 
         public override string Message => message;
 
-        private string BuildApiErrorMessage(DhcpErrors error)
+        internal DhcpServerException(string apiFunction, DhcpServerNativeErrors error, string additionalMessage)
         {
-            var errorType = typeof(DhcpErrors).GetMember(error.ToString());
-            if (errorType.Length != 0)
-            {
-                var errorAttribute = errorType[0].GetCustomAttributes(typeof(DhcpErrorDescriptionAttribute), false);
-
-                if (errorAttribute.Length != 0)
-                    return ((DhcpErrorDescriptionAttribute)errorAttribute[0]).Description;
-            }
-
-            return "Unknown Error";
+            ApiFunction = apiFunction;
+            ApiErrorNative = error;
+            ApiErrorMessage = BuildApiErrorMessage(error);
+            message = BuildMessage(apiFunction, additionalMessage, error, ApiErrorMessage);
         }
 
-        private string BuildMessage(string apiFunction, string additionalMessage, DhcpErrors error, string apiErrorMessage)
+        internal DhcpServerException(string apiFunction, DhcpServerNativeErrors error)
+            : this(apiFunction, error, null)
+        { }
+
+        private string BuildApiErrorMessage(DhcpServerNativeErrors nativeError)
+        {
+            // try cache
+            if (errorDescriptions.TryGetValue(nativeError, out var description))
+                return description;
+
+            // lookup via custom attribute
+            var errorType = typeof(DhcpServerNativeErrors).GetMember(nativeError.ToString());
+            if (errorType.Length != 0)
+            {
+                var errorAttribute = errorType[0].GetCustomAttributes(typeof(DhcpServerNativeErrorDescriptionAttribute), false);
+
+                if (errorAttribute.Length != 0)
+                {
+                    description = ((DhcpServerNativeErrorDescriptionAttribute)errorAttribute[0]).Description;
+                }
+            }
+
+            // add to cache
+            errorDescriptions[nativeError] = description ??= "Unknown Error";
+
+            return description;
+        }
+
+        private string BuildMessage(string apiFunction, string additionalMessage, DhcpServerNativeErrors error, string apiErrorMessage)
         {
             var builder = new StringBuilder();
 
