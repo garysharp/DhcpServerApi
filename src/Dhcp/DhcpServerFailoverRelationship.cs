@@ -32,6 +32,10 @@ namespace Dhcp
         public byte? HotStandbyAddressesReservedPercentage { get; }
 
         private readonly List<DhcpServerIpAddress> scopeAddresses;
+
+        public IEnumerable<DhcpServerIpAddress> ScopeAddresses
+            => scopeAddresses.AsReadOnly();
+
         public IEnumerable<IDhcpServerScope> Scopes
         {
             get

@@ -13,6 +13,7 @@ namespace Dhcp
         DhcpServerFailoverState PreviousState { get; }
         DhcpServerIpAddress PrimaryServerAddress { get; }
         string PrimaryServerName { get; }
+        IEnumerable<DhcpServerIpAddress> ScopeAddresses { get; }
         IEnumerable<IDhcpServerScope> Scopes { get; }
         DhcpServerIpAddress SecondaryServerAddress { get; }
         string SecondaryServerName { get; }
