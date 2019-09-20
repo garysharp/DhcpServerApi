@@ -97,13 +97,10 @@ namespace Dhcp
         /// </summary>
         public IDhcpServerScopeClientCollection Clients { get; }
 
-        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerFailoverRelationship failoverRelationship)
+        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address)
         {
             Server = server;
             Address = address;
-
-            this.failoverRelationship = failoverRelationship;
-            failoverRelationshipFetched = true;
 
             ExcludedIpRanges = new DhcpServerScopeExcludedIpRangeCollection(this);
             Options = new DhcpServerScopeOptionValueCollection(this);
@@ -111,9 +108,11 @@ namespace Dhcp
             Clients = new DhcpServerScopeClientCollection(this);
         }
 
-        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address)
-            : this(server, address, (DhcpServerFailoverRelationship)null)
+        private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, DhcpServerFailoverRelationship failoverRelationship)
+            : this(server, address)
         {
+            this.failoverRelationship = failoverRelationship;
+            failoverRelationshipFetched = true;
         }
 
         private DhcpServerScope(DhcpServer server, DhcpServerIpAddress address, SubnetInfo info)

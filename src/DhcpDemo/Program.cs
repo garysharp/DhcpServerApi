@@ -8,19 +8,19 @@ namespace DhcpDemo
     {
         static void Main(string[] args)
         {
-// Discover DHCP Servers
-try
-{
-    foreach (var dhcpServer in DhcpServer.Servers.ToList())
-    {
-        DumpDhcpInfo(dhcpServer);
-        WriteLine();
-    }
-}
-catch (DhcpServerException ex) when (ex.ApiErrorNative == DhcpServerNativeErrors.DDS_NO_DS_AVAILABLE)
-{
-    WriteLine("No DHCP Servers could be automatically discovered", ConsoleColor.Magenta);
-}
+            // Discover DHCP Servers
+            try
+            {
+                foreach (var dhcpServer in DhcpServer.Servers.ToList())
+                {
+                    DumpDhcpInfo(dhcpServer);
+                    WriteLine();
+                }
+            }
+            catch (DhcpServerException ex) when (ex.ApiErrorNative == DhcpServerNativeErrors.DDS_NO_DS_AVAILABLE)
+            {
+                WriteLine("No DHCP Servers could be automatically discovered", ConsoleColor.Magenta);
+            }
 
             // Directly Connect to DHCP Server
             var server = DhcpServer.Connect("localhost");
