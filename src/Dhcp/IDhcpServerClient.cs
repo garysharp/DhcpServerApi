@@ -7,7 +7,7 @@ namespace Dhcp
         DhcpServerClientAddressStates AddressState { get; }
         string Comment { get; set; }
         DhcpServerClientDnsStates DnsState { get; }
-        DhcpServerHardwareAddress HardwareAddress { get; }
+        DhcpServerHardwareAddress HardwareAddress { get; set; }
         DhcpServerIpAddress IpAddress { get; }
         bool LeaseExpired { get; }
         DateTime LeaseExpires { get; }

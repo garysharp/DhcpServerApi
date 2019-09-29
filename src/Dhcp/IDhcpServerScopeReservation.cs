@@ -6,7 +6,7 @@
         DhcpServerClientTypes AllowedClientTypes { get; }
         IDhcpServerClient Client { get; }
         IDhcpServerDnsSettings DnsSettings { get; }
-        DhcpServerHardwareAddress HardwareAddress { get; }
+        DhcpServerHardwareAddress HardwareAddress { get; set; }
         IDhcpServerScopeReservationOptionValueCollection Options { get; }
         IDhcpServerScope Scope { get; }
         IDhcpServer Server { get; }

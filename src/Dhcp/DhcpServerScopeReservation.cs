@@ -6,6 +6,7 @@ namespace Dhcp
 {
     public class DhcpServerScopeReservation : IDhcpServerScopeReservation
     {
+        private readonly DhcpServerHardwareAddress hardwareAddress;
         private DhcpServerClient client;
         private DhcpServerDnsSettings dnsSettings;
 
@@ -15,7 +16,12 @@ namespace Dhcp
         IDhcpServerScope IDhcpServerScopeReservation.Scope => Scope;
 
         public DhcpServerIpAddress Address { get; }
-        public DhcpServerHardwareAddress HardwareAddress { get; }
+        public DhcpServerHardwareAddress HardwareAddress
+        {
+            get => client?.HardwareAddress ?? hardwareAddress;
+            set => Client.HardwareAddress = value;
+        }
+
 
         public DhcpServerClientTypes AllowedClientTypes { get; }
         public IDhcpServerClient Client => client ??= DhcpServerClient.GetClient(Server, Scope, Address);
@@ -27,7 +33,7 @@ namespace Dhcp
         {
             Scope = scope;
             Address = address;
-            HardwareAddress = hardwareAddress;
+            this.hardwareAddress = hardwareAddress;
             AllowedClientTypes = allowedClientTypes;
 
             Options = new DhcpServerScopeReservationOptionValueCollection(this);

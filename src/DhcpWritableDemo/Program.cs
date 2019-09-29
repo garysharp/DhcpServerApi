@@ -81,6 +81,9 @@ namespace DhcpWritableDemo
             var clientReservation = client.ConvertToReservation();
             Console.WriteLine($"Client Reservation: {clientReservation}");
 
+            // change reservation hardware address (this effectively changes the Client hardware address)
+            clientReservation.HardwareAddress = "ABBCCDDEEFFA";
+
             // set different dns name server option for reservation
             var reservationOption6Value = option6.CreateOptionIpAddressValue("192.168.128.11", "192.168.128.12");
             clientReservation.Options.AddOrSetOptionValue(reservationOption6Value);

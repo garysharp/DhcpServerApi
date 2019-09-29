@@ -16,7 +16,11 @@ namespace Dhcp
         private ClientInfo info;
 
         public DhcpServerIpMask SubnetMask => info.SubnetMask;
-        public DhcpServerHardwareAddress HardwareAddress => info.HardwareAddress;
+        public DhcpServerHardwareAddress HardwareAddress
+        {
+            get => info.HardwareAddress;
+            set => SetHardwareAddress(value);
+        }
 
         public string Name
         {
@@ -88,6 +92,15 @@ namespace Dhcp
             if (!comment.Equals(info.Comment, StringComparison.Ordinal))
             {
                 var proposedInfo = info.UpdateComment(comment);
+                SetInfo(proposedInfo);
+            }
+        }
+
+        private void SetHardwareAddress(DhcpServerHardwareAddress hardwareAddress)
+        {
+            if (!hardwareAddress.Equals(info.HardwareAddress))
+            {
+                var proposedInfo = info.UpdateHardwareAddress(hardwareAddress);
                 SetInfo(proposedInfo);
             }
         }
@@ -602,6 +615,8 @@ namespace Dhcp
                 => new ClientInfo(Address, SubnetMask, HardwareAddress, name, Comment, LeaseExpiresUtc, OwnerHost, Type, AddressState, NameProtectionState, DnsState, QuarantineStatus, ProbationEnds, QuarantineCapable);
             public ClientInfo UpdateComment(string comment)
                 => new ClientInfo(Address, SubnetMask, HardwareAddress, Name, comment, LeaseExpiresUtc, OwnerHost, Type, AddressState, NameProtectionState, DnsState, QuarantineStatus, ProbationEnds, QuarantineCapable);
+            public ClientInfo UpdateHardwareAddress(DhcpServerHardwareAddress hardwareAddress)
+                => new ClientInfo(Address, SubnetMask, hardwareAddress, Name, Comment, LeaseExpiresUtc, OwnerHost, Type, AddressState, NameProtectionState, DnsState, QuarantineStatus, ProbationEnds, QuarantineCapable);
 
             public DHCP_CLIENT_INFO_Managed ToNativeV0()
                 => new DHCP_CLIENT_INFO_Managed(Address, SubnetMask.ToNativeAsNetwork(), HardwareAddress.ToNativeBinaryData(), Name, Comment, LeaseExpiresUtc, OwnerHost.ToNative());
