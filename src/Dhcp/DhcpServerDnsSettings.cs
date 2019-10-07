@@ -25,7 +25,7 @@ namespace Dhcp
                 if (value)
                     flags |= Constants.DNS_FLAG_ENABLED;
                 else
-                    flags ^= Constants.DNS_FLAG_ENABLED;
+                    flags &= ~Constants.DNS_FLAG_ENABLED;
             }
         }
 
@@ -38,7 +38,7 @@ namespace Dhcp
             set
             {
                 if (value)
-                    flags ^= Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
+                    flags &= ~Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
                 else
                     flags |= Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
             }
@@ -55,7 +55,7 @@ namespace Dhcp
                 if (value)
                     flags |= Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
                 else
-                    flags ^= Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
+                    flags &= ~Constants.DNS_FLAG_UPDATE_BOTH_ALWAYS;
             }
         }
 
@@ -70,7 +70,7 @@ namespace Dhcp
                 if (value)
                     flags |= Constants.DNS_FLAG_CLEANUP_EXPIRED;
                 else
-                    flags ^= Constants.DNS_FLAG_CLEANUP_EXPIRED;
+                    flags &= ~Constants.DNS_FLAG_CLEANUP_EXPIRED;
             }
         }
 
@@ -85,7 +85,7 @@ namespace Dhcp
                 if (value)
                     flags |= Constants.DNS_FLAG_UPDATE_DOWNLEVEL;
                 else
-                    flags ^= Constants.DNS_FLAG_UPDATE_DOWNLEVEL;
+                    flags &= ~Constants.DNS_FLAG_UPDATE_DOWNLEVEL;
             }
         }
 
@@ -100,7 +100,7 @@ namespace Dhcp
                 if (value)
                     flags |= Constants.DNS_FLAG_DISABLE_PTR_UPDATE;
                 else
-                    flags ^= Constants.DNS_FLAG_DISABLE_PTR_UPDATE;
+                    flags &= ~Constants.DNS_FLAG_DISABLE_PTR_UPDATE;
             }
         }
 
