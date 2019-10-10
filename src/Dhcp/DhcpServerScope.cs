@@ -43,7 +43,7 @@ namespace Dhcp
         
         public DhcpServerIpRange IpRange
         {
-            get => (ipRange ??= GetIpRange()).Value;
+            get => ipRange ??= GetIpRange();
             set => SetIpRange(value);
         }
 
@@ -362,8 +362,8 @@ namespace Dhcp
                 destinationScope.ExcludedIpRanges.AddExcludedIpRange(range);
 
             // replicate option values
-            var destOptions = destinationScope.Options.ToDictionary(o => o.OptionId);
-            var srcOptions = Options.ToDictionary(o => o.OptionId);
+            var destOptions = ((DhcpServerScopeOptionValueCollection)destinationScope.Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.OptionId);
+            var srcOptions = ((DhcpServerScopeOptionValueCollection)Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.OptionId);
             // remove option values
             foreach (var optionId in destOptions.Keys.Except(srcOptions.Keys))
                 destinationScope.Options.RemoveOptionValue(optionId);
@@ -401,16 +401,24 @@ namespace Dhcp
             {
                 var srcReservation = srcReservations[address];
                 var destReservation = destinationScope.Reservations.AddReservation(srcReservation.Address, srcReservation.HardwareAddress, srcReservation.AllowedClientTypes);
-                foreach (var optionValue in srcReservation.Options.ToList())
+                foreach (var optionValue in ((DhcpServerScopeReservationOptionValueCollection)srcReservation.Options).GetOptionValues(includeDnsSettingsOption: true).ToList())
                     destReservation.Options.AddOrSetOptionValue(optionValue);
             }
+            // update reservation client info
+            foreach (var srcReservation in srcReservations.Values)
+            {
+                var srcClient = (DhcpServerClient)srcReservation.Client;
+                // write client info to destination server (DhcpSetClientInfo allows for update/add)
+                srcClient.Info.SetInfo(destinationScope.Server);
+            }
+
             // update reservation options
             foreach (var address in srcReservations.Keys.Intersect(destReservations.Keys))
             {
                 var srcRes = srcReservations[address];
-                var srcResOptions = srcRes.Options.ToDictionary(o => o.OptionId);
+                var srcResOptions = ((DhcpServerScopeReservationOptionValueCollection)srcRes.Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.OptionId);
                 var destRes = destReservations[address];
-                var destResOptions = destRes.Options.ToDictionary(o => o.OptionId);
+                var destResOptions = ((DhcpServerScopeReservationOptionValueCollection)destRes.Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.OptionId);
 
                 // remove option values
                 foreach (var optionId in destResOptions.Keys.Except(srcResOptions.Keys))

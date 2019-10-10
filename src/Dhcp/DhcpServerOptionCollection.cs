@@ -81,7 +81,13 @@ namespace Dhcp
         /// Enumerates a list of all Global Option Values, including vendor/user class options, associated with the DHCP Server
         /// </summary>
         public IEnumerable<IDhcpServerOptionValue> GetOptionValues()
-            => DhcpServerOptionValue.GetAllGlobalOptionValues(Server);
+            => DhcpServerOptionValue.GetAllGlobalOptionValues(Server, includeDnsSettingsOption: false);
+
+        /// <summary>
+        /// Enumerates a list of all Global Option Values, including vendor/user class options, associated with the DHCP Server
+        /// </summary>
+        internal IEnumerable<IDhcpServerOptionValue> GetOptionValues(bool includeDnsSettingsOption)
+            => DhcpServerOptionValue.GetAllGlobalOptionValues(Server, includeDnsSettingsOption);
 
         /// <summary>
         /// Enumerates a list of Global Option Values associated with the DHCP Server

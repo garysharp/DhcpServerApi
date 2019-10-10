@@ -57,13 +57,13 @@ namespace Dhcp
 
         #region Global Option Values
 
-        internal static IEnumerable<DhcpServerOptionValue> GetAllGlobalOptionValues(DhcpServer server)
+        internal static IEnumerable<DhcpServerOptionValue> GetAllGlobalOptionValues(DhcpServer server, bool includeDnsSettingsOption)
         {
             var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Global(IntPtr.Zero);
 
             using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
             {
-                foreach (var value in GetAllOptionValues(server, scopeInfoPtr))
+                foreach (var value in GetAllOptionValues(server, scopeInfoPtr, includeDnsSettingsOption))
                     yield return value;
             }
         }
@@ -155,13 +155,13 @@ namespace Dhcp
 
         #region Scope Option Values
 
-        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeOptionValues(DhcpServerScope scope)
+        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeOptionValues(DhcpServerScope scope, bool includeDnsSettingsOption)
         {
             var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Subnet(scope.Address.ToNativeAsNetwork());
 
             using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
             {
-                foreach (var value in GetAllOptionValues(scope.Server, scopeInfoPtr))
+                foreach (var value in GetAllOptionValues(scope.Server, scopeInfoPtr, includeDnsSettingsOption))
                     yield return value;
             }
         }
@@ -284,13 +284,13 @@ namespace Dhcp
 
         #region Reservation Option Values
 
-        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeReservationOptionValues(DhcpServerScopeReservation reservation)
+        internal static IEnumerable<DhcpServerOptionValue> GetAllScopeReservationOptionValues(DhcpServerScopeReservation reservation, bool includeDnsSettingsOption)
         {
             var scopeInfo = new DHCP_OPTION_SCOPE_INFO_Managed_Reserved(reservation.Scope.Address.ToNativeAsNetwork(), reservation.Address.ToNativeAsNetwork());
 
             using (var scopeInfoPtr = BitHelper.StructureToPtr(scopeInfo))
             {
-                foreach (var value in GetAllOptionValues(reservation.Server, scopeInfoPtr))
+                foreach (var value in GetAllOptionValues(reservation.Server, scopeInfoPtr, includeDnsSettingsOption))
                     yield return value;
             }
         }
@@ -416,7 +416,7 @@ namespace Dhcp
 
         #region Get All Option Values
 
-        private static IEnumerable<DhcpServerOptionValue> GetAllOptionValues(DhcpServer server, IntPtr scopeInfo)
+        private static IEnumerable<DhcpServerOptionValue> GetAllOptionValues(DhcpServer server, IntPtr scopeInfo, bool includeDnsSettingsOption)
         {
             var result = Api.DhcpGetAllOptionValues(ServerIpAddress: server.Address,
                                                     Flags: 0,
@@ -435,7 +435,7 @@ namespace Dhcp
                         foreach (var value in optionClass.OptionsArray.Values)
                         {
                             // Ignore OptionID 81 (Used for DNS Settings - has no matching Option)
-                            if (!(value.OptionID == DhcpServerDnsSettings.optionId))
+                            if (includeDnsSettingsOption || value.OptionID != DhcpServerDnsSettings.optionId)
                                 yield return FromNative(server, in value, optionClass.ClassName, optionClass.VendorName);
                         }
                     }

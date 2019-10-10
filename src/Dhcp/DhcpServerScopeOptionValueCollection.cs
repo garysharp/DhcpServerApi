@@ -20,13 +20,25 @@ namespace Dhcp
         /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
         /// </summary>
         public IEnumerator<IDhcpServerOptionValue> GetEnumerator()
-            => DhcpServerOptionValue.GetAllScopeOptionValues(Scope).GetEnumerator();
+            => DhcpServerOptionValue.GetAllScopeOptionValues(Scope, includeDnsSettingsOption: false).GetEnumerator();
 
         /// <summary>
         /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
+
+        /// <summary>
+        /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
+        /// </summary>
+        public IEnumerable<IDhcpServerOptionValue> GetOptionValues()
+            => DhcpServerOptionValue.GetAllScopeOptionValues(Scope, includeDnsSettingsOption: false);
+
+        /// <summary>
+        /// Enumerates a list of All Option Values, including vendor/user class option values, associated with the DHCP Scope
+        /// </summary>
+        internal IEnumerable<IDhcpServerOptionValue> GetOptionValues(bool includeDnsSettingsOption)
+            => DhcpServerOptionValue.GetAllScopeOptionValues(Scope, includeDnsSettingsOption);
 
         /// <summary>
         /// Enumerates a list of Default Option Values associated with the DHCP Scope

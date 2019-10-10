@@ -13,6 +13,7 @@ namespace Dhcp
         IDhcpServerOptionValue GetDefaultOptionValue(int optionId);
         IEnumerable<IDhcpServerOptionValue> GetDefaultOptionValues();
         IDhcpServerOptionValue GetOptionValue(IDhcpServerOption option);
+        IEnumerable<IDhcpServerOptionValue> GetOptionValues();
         IDhcpServerOptionValue GetUserOptionValue(string className, DhcpServerOptionIds optionId);
         IDhcpServerOptionValue GetUserOptionValue(string className, int optionId);
         IEnumerable<IDhcpServerOptionValue> GetUserOptionValues(string className);
