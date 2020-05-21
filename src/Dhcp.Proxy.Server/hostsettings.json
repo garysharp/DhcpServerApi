@@ -1,0 +1,14 @@
+﻿{
+  "transport": "namedPipes",
+  "protocol": "protocolBuffers",
+
+  // list of servers this proxy can be used to manage
+  "allowedServers": [
+    "localhost"
+  ],
+
+  // configuration options for Named Pipes Transport
+  "namedPipes": {
+    "name": "dhcpserverproxy"
+  }
+}

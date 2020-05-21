@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <ProjectGuid>{F6E12107-BBAB-4B7F-8A24-B25B9FCCFD69}</ProjectGuid>
+    <AssemblyName>DhcpServerApi.Proxy.Server</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <Authors>Gary Sharp</Authors>
+    <Version>1.0.10</Version>
+    <Copyright>Gary Sharp 2020</Copyright>
+    <Product>Dhcp Server API Proxy</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dhcp\Dhcp.csproj" />
+    <ProjectReference Include="..\Dhcp.Proxy\Dhcp.Proxy.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="3.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="hostsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

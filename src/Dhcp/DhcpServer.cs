@@ -164,5 +164,24 @@ namespace Dhcp
 
         public override string ToString() => $"{Name} ({Address})";
 
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // no unmanaged resources captured
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose() => Dispose(true);
+        #endregion
+
     }
 }

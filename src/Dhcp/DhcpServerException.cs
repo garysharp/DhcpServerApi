@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Text;
 using Dhcp.Native;
@@ -8,7 +8,7 @@ namespace Dhcp
 {
     public class DhcpServerException : Exception
     {
-        private readonly static Dictionary<DhcpServerNativeErrors, string> errorDescriptions = new Dictionary<DhcpServerNativeErrors, string>();
+        private readonly static ConcurrentDictionary<DhcpServerNativeErrors, string> errorDescriptions = new ConcurrentDictionary<DhcpServerNativeErrors, string>();
         private readonly string message;
 
         public string ApiFunction { get; }
@@ -22,14 +22,17 @@ namespace Dhcp
 
         public string ApiErrorMessage { get; }
 
+        public string Description { get; }
+
         public override string Message => message;
 
-        internal DhcpServerException(string apiFunction, DhcpServerNativeErrors error, string additionalMessage)
+        public DhcpServerException(string apiFunction, DhcpServerNativeErrors apiErrorNative, string description)
         {
             ApiFunction = apiFunction;
-            ApiErrorNative = error;
-            ApiErrorMessage = BuildApiErrorMessage(error);
-            message = BuildMessage(apiFunction, additionalMessage, error, ApiErrorMessage);
+            ApiErrorNative = apiErrorNative;
+            Description = description;
+            ApiErrorMessage = BuildApiErrorMessage(apiErrorNative);
+            message = BuildMessage(apiFunction, description, apiErrorNative, ApiErrorMessage);
         }
 
         internal DhcpServerException(string apiFunction, DhcpServerNativeErrors error)
@@ -55,7 +58,7 @@ namespace Dhcp
             }
 
             // add to cache
-            errorDescriptions[nativeError] = description ??= "Unknown Error";
+            errorDescriptions.TryAdd(nativeError, description ??= "Unknown Error");
 
             return description;
         }

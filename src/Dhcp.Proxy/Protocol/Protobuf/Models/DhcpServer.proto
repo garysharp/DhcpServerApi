@@ -1,0 +1,31 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Dhcp.Proxy.Protocol.Protobuf.Models";
+
+import "google/protobuf/wrappers.proto";
+
+message GetProxyVersionResponse {
+	int32 version = 1;
+}
+
+message GetRemoteServerNamesResponse {
+	repeated google.protobuf.StringValue serverName = 1;
+}
+
+message ConnectRequest {
+	google.protobuf.StringValue hostNameOrAddress = 1;
+}
+
+message ConnectResponse {
+	uint32 address = 1;
+	google.protobuf.StringValue name = 2;
+	int32 versionMajor = 3;
+	int32 versionMinor = 4;
+}
+
+message GetAuditLogResponse {
+	google.protobuf.StringValue auditLogDirectory = 1;
+	int32 diskCheckInterval = 2;
+    int32 maxLogFilesSize = 3;
+    int32 minSpaceOnDisk = 4;
+}

@@ -1,4 +1,7 @@
 ﻿using Dhcp;
+using Dhcp.Proxy.Client;
+using Dhcp.Proxy.Protocol.Protobuf;
+using Dhcp.Proxy.Transport.NamedPipe;
 using System;
 using System.Linq;
 
@@ -7,6 +10,19 @@ namespace DhcpDemo
     class Program
     {
         static void Main(string[] args)
+        {
+            // Connects directly to the DHCP Server
+            //DemoDirect();
+
+            // Connects to the DHCP Server via proxy infrastructure
+            //DemoProxy();
+
+            WriteLine();
+            WriteLine("<Press any key to continue>", ConsoleColor.Yellow);
+            Console.ReadKey(true);
+        }
+
+        static void DemoDirect()
         {
             // Discover DHCP Servers
             try
@@ -23,12 +39,37 @@ namespace DhcpDemo
             }
 
             // Directly Connect to DHCP Server
-            var server = DhcpServer.Connect("localhost");
-            DumpDhcpInfo(server);
+            using (var server = DhcpServer.Connect("localhost"))
+            {
+                DumpDhcpInfo(server);
+            }
+        }
 
-            WriteLine();
-            WriteLine("<Press any key to continue>", ConsoleColor.Yellow);
-            Console.ReadKey(true);
+        static void DemoProxy()
+        {
+            // establish the transport-level connection (using Named Pipes here)
+            using (var proxyTransport = new NamedPipeClientTransport("."))
+            {
+                // establish the protocol to communicate with (Protocol Buffers here)
+                using (var proxyProtocol = new ProxyProtobufClient(proxyTransport))
+                {
+                    // we have access to the server via Protocol Buffers over Named Pipes
+
+                    // determine the proxy version
+                    Console.WriteLine($"Proxy Version: {proxyProtocol.GetProxyVersion()}");
+
+                    // discover DHCP Servers available through the proxy
+                    var remoteServers = proxyProtocol.GetRemoteServerNames();
+                    foreach (var server in remoteServers)
+                        Console.WriteLine($"Remote Server: {server}");
+
+                    // connect to the first remote server
+                    using (var proxyServer = new DhcpServerProxyClient(proxyProtocol, remoteServers.First()))
+                    {
+                        DumpDhcpInfo(proxyServer);
+                    }
+                }
+            }
         }
 
         static void DumpDhcpInfo(IDhcpServer dhcpServer)

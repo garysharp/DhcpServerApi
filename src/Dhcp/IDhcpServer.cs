@@ -1,6 +1,8 @@
-﻿namespace Dhcp
+﻿using System;
+
+namespace Dhcp
 {
-    public interface IDhcpServer
+    public interface IDhcpServer : IDisposable
     {
         DhcpServerIpAddress Address { get; }
         IDhcpServerAuditLog AuditLog { get; }
