@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Text;
 using Dhcp.Native;
@@ -8,7 +8,7 @@ namespace Dhcp
 {
     public class DhcpServerException : Exception
     {
-        private readonly static Dictionary<DhcpServerNativeErrors, string> errorDescriptions = new Dictionary<DhcpServerNativeErrors, string>();
+        private readonly static ConcurrentDictionary<DhcpServerNativeErrors, string> errorDescriptions = new ConcurrentDictionary<DhcpServerNativeErrors, string>();
         private readonly string message;
 
         public string ApiFunction { get; }
@@ -55,7 +55,7 @@ namespace Dhcp
             }
 
             // add to cache
-            errorDescriptions[nativeError] = description ??= "Unknown Error";
+            errorDescriptions.TryAdd(nativeError, description ??= "Unknown Error");
 
             return description;
         }
