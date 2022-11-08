@@ -362,11 +362,11 @@ namespace Dhcp
                 destinationScope.ExcludedIpRanges.AddExcludedIpRange(range);
 
             // replicate option values
-            var destOptions = ((DhcpServerScopeOptionValueCollection)destinationScope.Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.OptionId);
-            var srcOptions = ((DhcpServerScopeOptionValueCollection)Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.OptionId);
+            var destOptions = ((DhcpServerScopeOptionValueCollection)destinationScope.Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.VendorName);
+            var srcOptions = ((DhcpServerScopeOptionValueCollection)Options).GetOptionValues(includeDnsSettingsOption: true).ToDictionary(o => o.VendorName);
             // remove option values
             foreach (var optionId in destOptions.Keys.Except(srcOptions.Keys))
-                destinationScope.Options.RemoveOptionValue(optionId);
+                destinationScope.Options.RemoveOptionValue(destOptions[optionId].OptionId);
             // add option values
             foreach (var optionId in srcOptions.Keys.Except(destOptions.Keys))
                 destinationScope.Options.AddOrSetOptionValue(srcOptions[optionId]);
